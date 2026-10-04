@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c53bebe99e8ab434c9557499467bba1b, type: 3}
+  m_Name: Quest_ClearSlimes
+  m_EditorClassIdentifier: Game.Core::Game.Core.Quest.QuestDefinition
+  id: quest.clear_slimes
+  title: "D\u1ECDn b\u1EBFn t\xE0u"
+  description: "H\u1EA1 3 Nh\u1EDBt Xanh \u1EDF B\u1EBFn T\xE0u Ch\xECm."
+  objectiveType: 0
+  targetId: enemy.slime
+  requiredCount: 3
+  experienceReward: 150
+  itemReward: {fileID: 11400000, guid: ed645eb8dcb162d40beda14fa499044f, type: 2}
+  itemRewardCount: 1
+  requiresSpecificTime: 0
+  requiredTimeOfDay: 5
+  repeatable: 1

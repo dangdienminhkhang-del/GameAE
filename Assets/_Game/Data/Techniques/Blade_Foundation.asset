@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d20dbffa92e71934887d8022ee5d6e57, type: 3}
+  m_Name: Blade_Foundation
+  m_EditorClassIdentifier: Game.Core::Game.Core.Skills.WeaponTechniqueDefinition
+  id: technique.blade_foundation
+  displayName: Blade Foundation
+  weaponDiscipline: 1
+  inputSlot: 1
+  masteryRequired: 0
+  cooldownSeconds: 2.5
+  windUpSeconds: 0.1
+  recoverySeconds: 0.25
+  totalMultiplier: 1.3
+  activeWindows:
+  - startTimeOffset: 0
+    duration: 0.12
+    hitMultiplier: 0.6
+    movementPolicy: 0
+    moveDistance: 0
+  - startTimeOffset: 0.15
+    duration: 0.12
+    hitMultiplier: 0.7
+    movementPolicy: 1
+    moveDistance: 0.4
+  hitboxRadius: 0.9
+  hitboxOffset: {x: 0.6, y: 0}
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  criticalChanceOverride: -1
+  criticalDamageOverride: -1

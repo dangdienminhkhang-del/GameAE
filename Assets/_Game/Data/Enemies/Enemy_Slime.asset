@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9e6bb7e6066b524fa95a4a2c4d53fbf, type: 3}
+  m_Name: Enemy_Slime
+  m_EditorClassIdentifier: Game.PvE::Game.PvE.Enemy.EnemyDefinition
+  id: enemy.slime
+  displayName: Slime Xanh
+  sprite: {fileID: 21300000, guid: d2e792d5690f4e64aadbf127ce7a6323, type: 3}
+  maxHealth: 30
+  attack: 5
+  defense: 1
+  moveSpeed: 1.6
+  detectionRange: 6
+  attackRange: 1.1
+  attackCooldownSeconds: 1.4
+  hurtSeconds: 0.25
+  deathSeconds: 0.6
+  experienceReward: 10
+  drops:
+  - item: {fileID: 11400000, guid: ed645eb8dcb162d40beda14fa499044f, type: 2}
+    chance: 0.7
+    minCount: 1
+    maxCount: 2

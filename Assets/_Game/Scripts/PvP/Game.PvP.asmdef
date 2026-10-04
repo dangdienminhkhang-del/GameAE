@@ -1,0 +1,17 @@
+{
+    "name": "Game.PvP",
+    "rootNamespace": "Game.PvP",
+    "references": [
+        "Game.Core",
+        "Game.Services"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

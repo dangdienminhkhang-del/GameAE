@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f4219f40d50cb44f8c4ef96bafe2c06, type: 3}
+  m_Name: NPC_Keeper
+  m_EditorClassIdentifier: Game.Core::Game.Core.NPC.NPCDefinition
+  id: npc.keeper
+  displayName: "B\xE0 Qu\u1EA3n Tr\u1EE5"
+  dialogueLines: []
+  questOfferLine: "B\u1EBFn t\xE0u \u0111\u1EA7y nh\u1EDBt. Gi\xFAp ta d\u1ECDn 3
+    con."
+  questInProgressLine: "Ch\u01B0a xong \u0111\xE2u, c\u1EA9n th\u1EADn k\u1EBBo ch\u1EBFt."
+  questCompletedLine: "T\u1ED1t l\u1EAFm. C\u1EA7m l\u1EA5y b\xECnh m\xE1u n\xE0y."
+  offeredQuest: {fileID: 11400000, guid: 055c3e3750eaddb43b857cc6c05bb3d4, type: 2}
+  onlyAtSpecificTime: 0
+  activeTimeOfDay: 5

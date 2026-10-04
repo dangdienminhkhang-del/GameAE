@@ -1,0 +1,41 @@
+{
+    "name": "Game.Services",
+    "rootNamespace": "Game.Services",
+    "references": [
+        "Game.Core",
+        "Unity.Services.Core",
+        "Unity.Services.Authentication",
+        "Unity.Services.CloudSave",
+        "Unity.Services.CloudCode"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.services.core",
+            "expression": "1.0.0",
+            "define": "UGS_CORE_PRESENT"
+        },
+        {
+            "name": "com.unity.services.authentication",
+            "expression": "1.0.0",
+            "define": "UGS_AUTH_PRESENT"
+        },
+        {
+            "name": "com.unity.services.cloudsave",
+            "expression": "1.0.0",
+            "define": "UGS_CLOUDSAVE_PRESENT"
+        },
+        {
+            "name": "com.unity.services.cloudcode",
+            "expression": "1.0.0",
+            "define": "UGS_CLOUDCODE_PRESENT"
+        }
+    ],
+    "noEngineReferences": false
+}

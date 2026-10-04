@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6a9e08921f770944b9bd2f622cdfa98, type: 3}
+  m_Name: TimeConfig_Default
+  m_EditorClassIdentifier: Game.Core::Game.Core.Time.TimeConfig
+  realSecondsPerGameDay: 1200
+  startHour: 8
+  dayNightCycleEnabled: 1
+  nightColor: {r: 0.25, g: 0.3, b: 0.55, a: 1}
+  dawnColor: {r: 0.85, g: 0.6, b: 0.5, a: 1}
+  dayColor: {r: 1, g: 1, b: 1, a: 1}
+  eveningColor: {r: 0.8, g: 0.55, b: 0.45, a: 1}

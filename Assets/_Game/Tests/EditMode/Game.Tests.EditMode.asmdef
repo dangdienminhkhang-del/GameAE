@@ -1,0 +1,27 @@
+{
+    "name": "Game.Tests.EditMode",
+    "rootNamespace": "Game.Tests.EditMode",
+    "references": [
+        "Game.Core",
+        "Game.Services",
+        "Game.PvE",
+        "Game.PvP",
+        "Game.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

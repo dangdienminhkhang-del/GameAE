@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1ca34c19991d5b4ba5b770878961e38, type: 3}
+  m_Name: TechniqueDatabase
+  m_EditorClassIdentifier: Game.Core::Game.Core.Skills.TechniqueDatabase
+  techniques:
+  - {fileID: 11400000, guid: b3bb5848aeb29734abd4a2248b40a68a, type: 2}
+  - {fileID: 11400000, guid: 7c3a82f673656bc4380ae4a125f7aa1f, type: 2}
