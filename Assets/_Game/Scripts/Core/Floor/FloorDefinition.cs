@@ -30,8 +30,7 @@ namespace Game.Core.Floor
         public int recommendedLevelMin = 1;
         public int recommendedLevelMax = 5;
 
-        [Tooltip("Tham chiếu FloorScaling: hệ số EXP và Power riêng tầng (docs/07 §6). " +
-                 "Nếu null thì dùng giá trị mặc định của FloorScaling.")]
+        [Tooltip("CHƯA DÙNG ở Mốc 1: EnemyController luôn lấy hệ số tầng từ FloorScaling. Để 0.")]
         public FloorScalingOverride scalingOverride;
 
         [Tooltip("Item tier ID dùng để roll drop (docs/07 §7, ví dụ 'tier.common').")]

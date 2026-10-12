@@ -67,6 +67,7 @@ namespace Game.Core.Skills
         public bool IsDefinitionValid(out string error)
         {
             if (string.IsNullOrWhiteSpace(id)) { error = "Id không được trống."; return false; }
+            if (id == "technique.undefined")   { error = $"Id '{id}' chưa được đặt — thay bằng ID thực (vd: technique.blade_foundation)."; return false; }
             if (weaponDiscipline == WeaponDiscipline.None) { error = $"{id}: WeaponDiscipline chưa gán."; return false; }
             if (inputSlot == TechniqueInputSlot.None) { error = $"{id}: InputSlot chưa gán."; return false; }
             if (masteryRequired < 0 || masteryRequired > 100) { error = $"{id}: masteryRequired ngoài 0-100."; return false; }

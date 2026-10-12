@@ -15,16 +15,16 @@ MonoBehaviour:
   id: enemy.slime
   displayName: Slime Xanh
   sprite: {fileID: 21300000, guid: d2e792d5690f4e64aadbf127ce7a6323, type: 3}
-  maxHealth: 30
-  attack: 5
-  defense: 1
+  maxHealth: 50
+  attack: 11
+  defense: 0
   moveSpeed: 1.6
   detectionRange: 6
   attackRange: 1.1
   attackCooldownSeconds: 1.4
   hurtSeconds: 0.25
   deathSeconds: 0.6
-  experienceReward: 10
+  experienceReward: 12
   drops:
   - item: {fileID: 11400000, guid: ed645eb8dcb162d40beda14fa499044f, type: 2}
     chance: 0.7

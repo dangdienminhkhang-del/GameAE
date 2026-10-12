@@ -14,19 +14,34 @@ namespace Game.Core.Items
 
         public IReadOnlyList<ItemDefinition> Items => items;
 
+        // OnEnable: ScriptableObject được nạp hoặc re-enable (Enter Play Mode không domain-reload).
+        // OnValidate: Inspector thay đổi nội dung → cache có thể cũ.
+        // Cả hai reset cache để EnsureLookup xây lại lần sau.
+        private void OnEnable()  => ResetCache();
+        private void OnValidate() => ResetCache();
+
+        private void ResetCache()
+        {
+            _built  = false;
+            _lookup = null;
+        }
+
         public ItemDefinition Find(string itemId)
         {
             if (string.IsNullOrEmpty(itemId)) return null;
             EnsureLookup();
+            // _lookup luôn không-null sau EnsureLookup
             return _lookup.TryGetValue(itemId, out ItemDefinition definition) ? definition : null;
         }
 
         private void EnsureLookup()
         {
-            if (_built) return;
-            _built = true;
+            // Kiểm tra cả _built VÀ _lookup để chịu trạng thái lệch
+            // (Enter Play Mode / DisableDomainReload: _built=true nhưng _lookup=null)
+            if (_built && _lookup != null) return;
 
-            _lookup = new Dictionary<string, ItemDefinition>();
+            // Xây vào biến cục bộ, chỉ gán field khi xong để tránh state không nhất quán nếu có exception
+            var map = new Dictionary<string, ItemDefinition>();
             for (int i = 0; i < items.Count; i++)
             {
                 ItemDefinition item = items[i];
@@ -37,13 +52,16 @@ namespace Game.Core.Items
                     Debug.LogError($"[ItemDatabase] '{item.name}' thiếu id — bỏ qua (docs/06: lỗi phải rõ ràng)", item);
                     continue;
                 }
-                if (_lookup.ContainsKey(item.Id))
+                if (map.ContainsKey(item.Id))
                 {
                     Debug.LogError($"[ItemDatabase] id trùng '{item.Id}' ở '{item.name}' — asset sau bị bỏ", item);
                     continue;
                 }
-                _lookup[item.Id] = item;
+                map[item.Id] = item;
             }
+
+            _lookup = map;
+            _built  = true;
         }
 
         /// <summary>Tổng chỉ số của tất cả trang bị đang mặc.</summary>

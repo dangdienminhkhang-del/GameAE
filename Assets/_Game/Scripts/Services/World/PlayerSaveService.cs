@@ -4,7 +4,7 @@ using Game.Core.World;
 
 namespace Game.Services.World
 {
-    public class PlayerSaveService : ISaveService
+    public class PlayerSaveService : ISaveService, IAuthoritativeSaveService
     {
         private readonly Dictionary<string, object> _cache = new Dictionary<string, object>();
 
@@ -26,6 +26,13 @@ namespace Game.Services.World
 
         public virtual async Task SaveAsync<T>(string key, T value)
         {
+            await Task.CompletedTask;
+            _cache[key] = value;
+        }
+
+        public virtual async Task SaveAuthoritativeAsync<T>(string key, T value)
+        {
+            // Bộ nhớ trong tiến trình là nguồn duy nhất → ghi xong là xác nhận (không có cloud để chờ).
             await Task.CompletedTask;
             _cache[key] = value;
         }

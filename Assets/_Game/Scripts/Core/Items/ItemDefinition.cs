@@ -52,6 +52,12 @@ namespace Game.Core.Items
         [SerializeField] private int maxStack = 99;
         [SerializeField] private int sellValue = 1;
 
+        [Header("Tiêu hao (chỉ có nghĩa với ItemType.Consumable)")]
+        [Tooltip("Số máu hồi mỗi lần dùng. 0 = không dùng được để hồi máu.")]
+        [SerializeField] private double healAmount;
+        [Tooltip("Thời gian chờ giữa 2 lần dùng cùng loại vật phẩm này (giây).")]
+        [SerializeField] private float useCooldownSeconds;
+
         public string Id => id;
         public string DisplayName => displayName;
         public ItemType Type => type;
@@ -62,6 +68,8 @@ namespace Game.Core.Items
         public bool Stackable => stackable;
         public int MaxStack => maxStack < 1 ? 1 : maxStack;
         public int SellValue => sellValue;
+        public double HealAmount => healAmount < 0.0 ? 0.0 : healAmount;
+        public float UseCooldownSeconds => useCooldownSeconds < 0f ? 0f : useCooldownSeconds;
 
         private void Reset()
         {
@@ -73,6 +81,8 @@ namespace Game.Core.Items
             maxStack = 99;
             sellValue = 1;
             equipmentSlot = EquipmentSlot.None;
+            healAmount = 0.0;
+            useCooldownSeconds = 0f;
         }
     }
 }

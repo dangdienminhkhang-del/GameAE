@@ -27,8 +27,12 @@ namespace Game.PvE.NPC
 
         private bool _playerInRange;
         private bool _isAvailable;
+        private bool _hasPhaseRestriction;
+        private bool _lastTimeAuthoritative;
         private TimeOfDay _phase = TimeOfDay.Morning;
         private ITimeService _time;
+        private float _resolveTimeTimer; // = 0f → gọi ngay frame đầu
+        private Collider2D _interactionCollider;
 
         public NPCDefinition Definition => definition;
         public bool IsAvailable => _isAvailable;
@@ -36,12 +40,13 @@ namespace Game.PvE.NPC
         private void Awake()
         {
             if (spriteRenderer == null) TryGetComponent(out spriteRenderer);
+            TryGetComponent(out _interactionCollider);
             if (questLog == null) questLog = FindAnyObjectByType<PlayerQuestLog>();
+            _hasPhaseRestriction = definition != null && HasPhaseRestriction();
         }
 
         private void OnEnable()
         {
-            GameEvents.OnTimeChanged          += HandleTimeChanged;
             GameEvents.OnTimePhaseChanged     += HandlePhaseChanged;
             GameEvents.OnQuestAcceptRequested += HandleAcceptRequested;
             GameEvents.OnQuestTurnInRequested += HandleTurnInRequested;
@@ -50,7 +55,6 @@ namespace Game.PvE.NPC
 
         private void OnDisable()
         {
-            GameEvents.OnTimeChanged          -= HandleTimeChanged;
             GameEvents.OnTimePhaseChanged     -= HandlePhaseChanged;
             GameEvents.OnQuestAcceptRequested -= HandleAcceptRequested;
             GameEvents.OnQuestTurnInRequested -= HandleTurnInRequested;
@@ -71,13 +75,6 @@ namespace Game.PvE.NPC
             ApplyAvailability();
         }
 
-        private void HandleTimeChanged(object sender, TimeChangedArgs args)
-        {
-            _phase = args.Phase;
-            ResolveTimeService();
-            ApplyAvailability();
-        }
-
         private void ResolveTimeService()
         {
             if (_time != null) return;
@@ -92,10 +89,11 @@ namespace Game.PvE.NPC
 
             // Không truy cập OnlyAtSpecificTime: contract NPCDefinition chỉ công khai
             // IsAvailableAt. Nếu definition giới hạn bất kỳ phase nào, phải chờ giờ trusted.
-            bool hasPhaseRestriction = HasPhaseRestriction();
-            _isAvailable = !hasPhaseRestriction ||
+            _isAvailable = !_hasPhaseRestriction ||
                            (_time != null && _time.IsAuthoritative && definition.IsAvailableAt(_phase));
+            if (!_isAvailable) _playerInRange = false;
             if (spriteRenderer != null) spriteRenderer.enabled = _isAvailable;
+            if (_interactionCollider != null) _interactionCollider.enabled = _isAvailable;
         }
 
         private bool HasPhaseRestriction()
@@ -125,6 +123,22 @@ namespace Game.PvE.NPC
 
         private void Update()
         {
+            if (_time == null)
+            {
+                _resolveTimeTimer -= Time.deltaTime;
+                if (_resolveTimeTimer <= 0f)
+                {
+                    ResolveTimeService();
+                    _resolveTimeTimer = 1f;
+                }
+            }
+            bool timeAuthoritative = _time != null && _time.IsAuthoritative;
+            if (timeAuthoritative != _lastTimeAuthoritative)
+            {
+                _lastTimeAuthoritative = timeAuthoritative;
+                ApplyAvailability();
+            }
+
             if (!_playerInRange || definition == null || !_isAvailable) return;
 
             Keyboard keyboard = Keyboard.current;
@@ -149,15 +163,19 @@ namespace Game.PvE.NPC
             bool completed = questLog != null && definition.OfferedQuest != null
                 && questLog.IsCompleted(definition.OfferedQuest)
                 && !(definition.OfferedQuest.Repeatable);
-            bool canAccept = questLog != null && definition.OfferedQuest != null
-                && !questLog.IsActive(definition.OfferedQuest)
-                && !questLog.IsReadyToTurnIn(definition.OfferedQuest)
-                && (!questLog.IsCompleted(definition.OfferedQuest) || definition.OfferedQuest.Repeatable);
+            QuestAcceptResult acceptResult = questLog != null && definition.OfferedQuest != null
+                ? questLog.CheckAccept(definition.OfferedQuest)
+                : QuestAcceptResult.Locked;
+            bool canAccept = acceptResult == QuestAcceptResult.Ok;
+            bool acceptBlockedByRule = acceptResult == QuestAcceptResult.Locked ||
+                                       acceptResult == QuestAcceptResult.WrongTime ||
+                                       acceptResult == QuestAcceptResult.TimeUnavailable;
 
             string line;
             if (completed)       line = definition.QuestCompletedLine;
             else if (readyToTurnIn) line = "Ngươi đã hoàn thành rồi — hãy giao nhiệm vụ đi.";
             else if (inProgress) line = definition.QuestInProgressLine;
+            else if (acceptBlockedByRule) line = PlayerQuestLog.AcceptFailureMessage(acceptResult);
             else if (definition.OfferedQuest != null) line = definition.QuestOfferLine;
             else line = definition.DialogueLines.Count > 0 ? definition.DialogueLines[0] : "...";
 
@@ -177,11 +195,13 @@ namespace Game.PvE.NPC
             if (args == null || args.Npc != definition) return;
             if (!_isAvailable || questLog == null || definition.OfferedQuest == null) return;
 
-            bool accepted = questLog.TryAccept(definition.OfferedQuest);
+            QuestAcceptResult result = questLog.CheckAccept(definition.OfferedQuest);
+            bool accepted = result == QuestAcceptResult.Ok && questLog.TryAccept(definition.OfferedQuest);
             GameEvents.RaiseNpcDialogue(this, new NpcDialogueArgs
             {
                 Npc              = definition,
-                Line             = accepted ? "Hãy đi đi. Ta chờ tin tốt." : "Ngươi đã nhận việc này rồi.",
+                Line             = accepted ? "Hãy đi đi. Ta chờ tin tốt." :
+                    (result == QuestAcceptResult.Ok ? "Mục tiêu Thu thập phải là vật phẩm xếp chồng." : PlayerQuestLog.AcceptFailureMessage(result)),
                 ShowAcceptButton  = false,
                 ShowTurnInButton  = false
             });

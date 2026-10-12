@@ -1,4 +1,4 @@
-# CHARACTER COMBAT DESIGN
+﻿# CHARACTER COMBAT DESIGN
 ## Game2D Balance and Weapon Technique Specification
 
 > Nguồn số liệu và acceptance criteria cho level, equipment, mastery và combat. Quy tắc gameplay nằm ở `12_ORIGINAL_GAMEPLAY_BIBLE.md`.
@@ -12,17 +12,19 @@
 MaxHealth(level) = 100 + (level - 1) × 15
 Attack(level)    = 10  + (level - 1) × 2
 Defense(level)   = 5   + (level - 1) × 1
-EXPNext(level)   = round(100 × level ^ 1.5)
+EXPNext(level)   = 100 + 20 × (level - 1)
 ```
 
 | Level | MaxHealth | Attack | Defense | EXP tới level sau |
 |---:|---:|---:|---:|---:|
 | 1 | 100 | 10 | 5 | 100 |
-| 2 | 115 | 12 | 6 | 283 |
-| 3 | 130 | 14 | 7 | 520 |
-| 4 | 145 | 16 | 8 | 800 |
-| 5 | 160 | 18 | 9 | 1,118 |
-| 10 | 235 | 28 | 14 | 3,162 |
+| 2 | 115 | 12 | 6 | 120 |
+| 3 | 130 | 14 | 7 | 140 |
+| 4 | 145 | 16 | 8 | 160 |
+| 5 | 160 | 18 | 9 | 180 |
+| 10 | 235 | 28 | 14 | 280 |
+
+EXP cần để lên level kế tăng đều 20 EXP mỗi level (chốt ở Task B2). EXP dư sau khi lên level được giữ lại cho level kế. Save cũ có EXP ≥ EXPNext theo công thức mới thì lên level tiếp bằng EXP dư khi nạp save — không mất tiến độ, không clamp EXP.
 
 Khi lên level, `CurrentHealth` tăng đúng phần MaxHealth vừa tăng, không hồi đầy. Ví dụ 60/100 lên level 2 thành 75/115.
 
@@ -115,7 +117,7 @@ rawDamage   = attackerAttack × abilityMultiplier
 finalDamage = max(1, round(rawDamage - defenderDefense × defenseWeight))
 ```
 
-Mốc 1 dùng `defenseWeight = 1.0`. PvP RuleSet có thể dùng giá trị khác, nhưng không thay trực tiếp dữ liệu PvE. Không đổi `defenseWeight` đơn lẻ — điều chỉnh đường cong thuộc Task B (07 §5.1, §6, §9).
+PvE dùng `defenseWeight = 0.3` (CombatBalanceConfig, nạp qua PvEBootstrap.Awake). PvP RuleSet có thể dùng giá trị khác. Đường cong PvE đã chốt ở Task B2 (07 §5.1, §6, §9); không đổi `defenseWeight` đơn lẻ mà không chạy lại sandbox ở §9.
 
 ### 4.3. Ví dụ data shape
 
@@ -158,35 +160,86 @@ PvP dùng profile riêng trong `PvPRuleSet` sau; không sửa definition PvE t�
 
 Không balance bằng HP lớn đơn thuần. Nếu boss quá lâu, giảm armor/health hoặc tạo thêm punish window trước khi tăng player multiplier.
 
-### 5.1. Mục tiêu phía người chơi (số tạm — Task B chốt bằng sandbox)
+### 5.1. Mục tiêu phía người chơi (đã chốt ở Task B2, kiểm bằng sandbox)
 
-| Tình huống | Target tạm |
+| Tình huống | Target |
 |---|---|
 | Quái thường hạ player đứng im | 10–20 đòn |
-| Elite hạ player | 5–10 đòn |
+| Elite hạ player | 5–10 đòn (chưa có dữ liệu Elite để đo) |
 | Số quái mỗi level | 8–15 quái |
 
-Đây là số khởi điểm cho Task B (Integrator); chốt bằng sandbox trước nghiệm thu Wave 2A và trước Phase 11.
+Đã chốt ở Task B2 bằng `BalanceSandboxTests`: với EXPNext (§1) và hệ số tầng (§6), Slime và Bat thật ở Tầng 1–10, đầu và cuối dải recommended level (5N − 4 và 5N), `defenseWeight = 0.3`, đều nằm trong khoảng mục tiêu: 3–5 đòn thường để hạ quái (§5), 10–20 đòn để quái hạ player đứng im, 8–15 quái mỗi level, và damage không chạm clamp 1. Kết quả chi tiết ở §9.
 
-Lưu ý: với EXPNext (§1) và EXP quái Floor 1 = 10 (§6), lên level 5 cần khoảng 170 quái, mâu thuẫn mục tiêu 8–15 quái/level. Task B phải chỉnh EXP quái hoặc EXPNext, không chỉ chỉnh defenseWeight.
+### 5.2. Boss Floor 1: ba pha, vùng đánh, field data và mô hình ước lượng (Task P8-4)
+
+Chu kỳ boss theo `12` §7.2: **Observe → Punish Window → Pressure Window**, rồi lặp lại. Sau mỗi `pressureEveryNAttacks` đòn thường thì lượt đánh kế là Pressure; vào Pressure thì bộ đếm đòn thường về 0.
+
+| Pha | Boss làm gì | Người chơi làm gì | Màu telegraph |
+|---|---|---|---|
+| Observe | Đuổi theo; vào tầm thì telegraph đòn thường `attackWindupSeconds` | Đọc pattern, đặt vị trí; lùi ra ngoài vùng đánh trước lúc đòn rơi thì đòn trượt | Vàng/cam |
+| Punish Window | Khựng `punishWindowSeconds` sau đòn thường | Phản công | Xanh nhạt |
+| Pressure Window | Telegraph `pressureWindupSeconds` (hướng lao khóa khi telegraph kết thúc) → lao `pressureDashDistance` trong `pressureDashSeconds` → recovery `pressureRecoverySeconds` (Punish Window dài) | Né khỏi hành lang lao, rồi phản công trong recovery | Tím đậm |
+
+Quy tắc trúng đòn (`BossHitRules` và `BossDashHitGate`: thuần hình học, test ở `BossHitRulesTests`):
+
+- Đòn thường kiểm vùng đánh TẠI THỜI ĐIỂM đánh: mục tiêu phải còn trong `attackHitRadius` quanh boss. Người chơi lùi ra hoặc né trong lúc telegraph thì trượt. Đòn trượt vẫn tính vào bộ đếm Pressure. `attackHitRadius` (1.8) lớn hơn `attackRange` (1.6) để người chơi đứng yên từ lúc bắt đầu telegraph vẫn dính đòn.
+- Đòn lao: hành lang là đoạn từ điểm xuất phát tới vị trí hiện tại của boss, rộng `pressureHitRadius`. Gây `pressureDamageMultiplier` × damage đòn thường (đã trừ giáp, làm tròn như `DamageCalculator`, không dưới 1) đúng MỘT lần mỗi lần lao.
+- Boss bắt đầu telegraph Pressure khi mục tiêu cách không quá `pressureDashDistance + pressureHitRadius` (tầm với của một cú lao); xa hơn thì tiếp tục đuổi.
+- Mọi damage lên người chơi mang `sourceId = BossDefinition.Id` để permadeath ghi đúng lý do Boss (`09` §1.3).
+- Enrage giữ nguyên (HP ≤ `enrageHpThreshold`: Attack ×1.2, cooldown ×0.7, tốc độ ×1.25) và KHÔNG được mô hình hóa ở sandbox.
+
+Field data mới của `BossDefinition` (không magic number; asset cũ thiếu field vẫn mở được và dùng mặc định; `OnValidate` đặt lại về mặc định nếu giá trị ≤ 0):
+
+| Field | Mặc định = giá trị `Boss_Floor01` | Ý nghĩa |
+|---|---:|---|
+| `attackHitRadius` | 1.8 | Bán kính vùng đánh thường quanh boss |
+| `pressureEveryNAttacks` | 2 | Số đòn thường giữa hai lần Pressure |
+| `pressureWindupSeconds` | 0.9 | Telegraph Pressure (giây) |
+| `pressureDashDistance` | 4.0 | Quãng lao (đơn vị Unity) |
+| `pressureDashSeconds` | 0.35 | Thời gian lao hết quãng |
+| `pressureHitRadius` | 1.4 | Bán kính hành lang lao |
+| `pressureDamageMultiplier` | 1.3 | Hệ số nhân lên damage đòn thường |
+| `pressureRecoverySeconds` | 1.6 | Recovery sau lao = Punish Window dài |
+
+Số boss trong `Boss_Floor01.asset` (chỉ chỉnh số boss; không đổi `CombatBalanceConfig`, công thức damage hay chỉ số người chơi): `maxHealth` 250 → **1500**, `attack` 18 → **28**, `defense` 4 → 4 (giữ). Các thời lượng giữ nguyên: `attackWindupSeconds` 0.8, `punishWindowSeconds` 1.2, `attackCooldownSeconds` 2.0, `enrageHpThreshold` 0.35. Đây là số khởi điểm tính tay; sandbox (§9) xác nhận nằm trong khoảng nên không chỉnh thêm. Khoảng cho phép khi chỉnh: `maxHealth` 1200–2000, `attack` 23–36. Với `attack` 28, Lv 5 hạ boss ≤ 150 giây tương ứng `maxHealth` ≲ 1570 (HP 1200 → 114.5s; HP 2000 → 190.8s, vượt) — nên số hiện tại còn dư khoảng 7 giây, không rộng.
+
+HP boss lớn hơn nhiều so với quái thường, nhưng thời gian hạ boss do cửa sổ phản công quyết định chứ không chỉ do HP: mỗi chu kỳ 11.35 giây người chơi chỉ có 10 đòn (≈ 0.88 đòn/giây, trong khi cooldown cho phép ≈ 2.2 đòn/giây).
+
+**Giả định của mô hình** (`BossBalanceModel`, thuần số học, đọc asset thật; mọi giả định dưới đây là hằng có tên hoặc suy ra từ definition):
+
+- Người chơi chỉ đánh trong Punish Window (sau đòn thường) và Recovery (sau lao); trong Observe/Telegraph/lao thì tiếp cận hoặc né, không gây damage. Trong mỗi window: vung đầu tiên ngay khi window mở, rồi mỗi `cooldownSeconds` của `Attack_PlayerBasic` (0.45s) một lần.
+- Chỉ `PlayerHitEfficiency` = 70% số đòn thực sự trúng boss (né, lệch hướng, thao tác cảm ứng).
+- Mỗi chu kỳ mất `ApproachSecondsPerCycle` = 1.5s để tiếp cận/đổi vị trí, nhưng không ngắn hơn phần cooldown của boss còn lại sau Punish.
+- Độ dài chu kỳ lấy từ definition: đòn thường = Observe + `attackWindupSeconds` + `punishWindowSeconds`; Pressure = Observe + `pressureWindupSeconds` + `pressureDashSeconds` + `pressureRecoverySeconds`; chu kỳ lặp = `pressureEveryNAttacks` đòn thường + 1 Pressure.
+- Chỉ dùng đòn thường của người chơi, không chí mạng, không Technique; không mô hình người chơi chết, hồi máu hay Enrage. Dùng Technique hoặc chí mạng sẽ hạ boss nhanh hơn ước lượng.
+
+**Sandbox chỉ là ước lượng để định số ban đầu. Bắt buộc thử lại trên điện thoại (Device PvE) và ghi thời gian hạ boss lần đầu bằng đồng hồ thật; số đo thật thắng sandbox.** Nếu trên điện thoại vượt 150 giây thì giảm `maxHealth` (khoảng 10% mỗi lần) trước khi đụng tới chỉ số người chơi.
 
 ## 6. Floor Scaling
 
 ```text
-enemyPowerMultiplier(floor) = 1.15 ^ (floor - 1)
-expMultiplier(floor)        = 1.20 ^ (floor - 1)
+enemyPowerMultiplier(floor) = 1 + 0.6  × (floor - 1)
+expMultiplier(floor)        = 1 + 0.75 × (floor - 1)
 ```
 
-| Floor | Enemy power | EXP | Base enemy HP/ATK/EXP (30/5/10) |
+Hệ số tăng đều (tuyến tính), không tăng theo lũy thừa — chốt ở Task B2. Trong code là hai hằng `FloorScaling.EnemyPowerIncreasePerFloor = 0.6` và `FloorScaling.ExpIncreasePerFloor = 0.75`. Ví dụ: Tầng 2 = 1.6 / 1.75; Tầng 5 = 3.4 / 4.0; Tầng 10 = 6.4 / 7.75 (sức mạnh / EXP).
+
+| Floor | Enemy power | EXP | HP / ATK / DEF / EXP thực tế |
 |---:|---:|---:|---|
-| 1 | 1.00 | 1.00 | 30 / 5 / 10 |
-| 2 | 1.15 | 1.20 | 35 / 6 / 12 |
-| 5 | 1.75 | 2.07 | 53 / 9 / 21 |
-| 10 | 3.52 | 5.16 | 106 / 18 / 52 |
+| 1 (Slime) | 1.00 | 1.00 | 50 / 11 / 0 / 12 |
+| 1 (Bat) | 1.00 | 1.00 | 40 / 12 / 0 / 14 |
+| 2 (Slime) | 1.60 | 1.75 | 80 / 18 / 0 / 21 |
+| 2 (Bat) | 1.60 | 1.75 | 64 / 19 / 0 / 25 |
+| 5 (Slime) | 3.40 | 4.00 | 170 / 37 / 0 / 48 |
+| 5 (Bat) | 3.40 | 4.00 | 136 / 41 / 0 / 56 |
+| 10 (Slime) | 6.40 | 7.75 | 320 / 70 / 0 / 93 |
+| 10 (Bat) | 6.40 | 7.75 | 256 / 77 / 0 / 109 |
 
-Definition owns `enemyPowerMultiplier`, `expMultiplier`, `itemTierId`. Core only applies values; it does not recognize floor numbers.
+Số thực tế = số gốc trong EnemyDefinition × hệ số tầng (Defense cũng nhân hệ số; hiện cả hai loại quái có Defense gốc 0). `EnemyController` làm tròn HP, ATK, DEF và EXP về số nguyên bằng `Math.Round(..., MidpointRounding.AwayFromZero)` (ví dụ 11 × 1.6 = 17.6 → 18; 14 × 1.75 = 24.5 → 25). Làm tròn để tránh sai số số thực kiểu 50 × 1.6f = 80.0000012 khiến quái Tầng 2 sống dư một đòn.
 
-`1.15^n`/`1.20^n` chỉ là giá trị khởi điểm; số thật nằm trong `FloorDefinition`. Task B (Integrator) chốt đường cong bằng sandbox trước nghiệm thu Wave 2A và trước Phase 11.
+Definition owns `enemyPowerMultiplier`, `expMultiplier`, `itemTierId`. Core only applies values; it does not recognize floor numbers. Hiện trạng code: khi chạy game `EnemyController.SetFloor` lấy hệ số từ hàm `FloorScaling` (qua `FloorSpawnRegistrar` → `EnemySpawner`); `scalingOverride` trong `FloorDefinition` để 0 nghĩa là dùng hàm, và `EnemyController` chưa đọc giá trị ghi đè ở đó (muốn ghi đè theo tầng bằng data thì phải nối thêm code và test).
+
+Đường cong đã chốt ở Task B2 và được `BalanceSandboxTests` kiểm cho Tầng 1–10 (xem §9). Muốn đổi hệ số thì đổi hằng ở `FloorScaling`, cập nhật bảng này và chạy lại sandbox.
 
 ## 7. Item Availability
 
@@ -213,13 +266,45 @@ First clear chỉ cấp bonus riêng cho người thỏa điều kiện; main bo
 |---|---|
 | Unit damage | Min damage, defense, multiplier, multi-hit total. |
 | Unit mastery | Unlock threshold, per-enemy cap, save/load. |
-| Unit curve | Chạy Floor 1–10 ở đầu và cuối dải recommended level; fail khi damage chạm clamp 1. |
+| Unit curve | Chạy Floor 1–10 ở đầu và cuối dải recommended level (5N − 4 và 5N) với Slime/Bat thật (qua `EnemyController`); fail khi damage chạm clamp 1. |
 | Unit curve | Số quái cần để lên mỗi level trong dải recommended level nằm trong 8–15. |
+| Unit curve | 3–5 đòn thường để hạ quái; 10–20 đòn để quái hạ player đứng im (`defenseWeight` 0.3). |
+| Unit rounding | `EnemyController` làm tròn HP/ATK/DEF/EXP về số nguyên (Slime Tầng 2 = 80 / 18; EXP Bat Tầng 2 = 25). |
+| Asset | `FloorDefinition` floor.01/floor.02 khớp hàm `FloorScaling` và dải level 5N − 4 … 5N; scene `PvE_Gameplay` nạp `CombatBalanceConfig` có `defenseWeight` 0.3. |
 | Sandbox | TTK enemy/elite/boss ở recommended level. |
+| Unit boss | Luật trúng đòn của Boss (`BossHitRulesTests`): trong vùng đánh → trúng; lùi ra ngoài vùng trước lúc đánh → trượt; đứng ngoài hành lang lao → trượt, trong → trúng; mỗi lần lao chỉ một lần damage. |
+| Sandbox boss | `BossBalanceSandboxTests` với `Boss_Floor01.asset`, `CombatBalanceConfig` (0.3), `CharacterStats` Lv 5/Lv 4 và `Attack_PlayerBasic` thật: hạ boss lần đầu Lv 5 ∈ [90,150]s, Lv 4 ≤ 190s; boss hạ người đứng yên Lv 5 trong 5–8 đòn thường, Lv 4 ≥ 4 đòn; damage không chạm clamp 1. Chỉ là ước lượng (§5.2). |
+| Device PvE (boss) | Đo thời gian hạ boss lần đầu bằng đồng hồ trên điện thoại (mục tiêu 90–150s); lùi ra khỏi vùng đánh trong lúc telegraph thì không dính đòn; đọc được telegraph Pressure (màu tím) và né được hành lang lao. Chưa có số đo. |
 | Device PvE | Touch input, cooldown feedback, recovery đọc được. |
 | Device PvP | Hai thiết bị thấy cùng HP/match result. |
 
 Mỗi change balance ghi: version config, target tested, equipment, level/mastery, số lần thử và kết quả. Không dùng cảm giác chủ quan làm evidence duy nhất.
+
+Kết quả sandbox khi chốt Task B2 (Slime và Bat thật, Tầng 1–10 × hai đầu mút dải level = 20 ca mỗi loại quái, `defenseWeight` 0.3):
+
+| Quái | Đòn thường hạ quái (3–5) | Đòn quái hạ player đứng im (10–20) | Quái mỗi level (8–15) |
+|---|---:|---:|---:|
+| Slime | 3–5 | 10–20 | 9–15 |
+| Bat | 3–4 | 10–18 | 8–13 |
+
+Một số ca nằm sát mép: Slime Tầng 1 Lv 5 = 20 đòn và 15 quái (đúng mức tối đa); Bat Tầng 1 Lv 1 = 8 quái (đúng mức tối thiểu). Đổi số gốc, EXP hay hệ số tầng thì phải chạy lại sandbox.
+
+Kết quả sandbox Boss Floor 1 (Task P8-4, `BossBalanceSandboxTests`; `Boss_Floor01` HP 1500 / ATK 28 / DEF 4, `defenseWeight` 0.3, `Attack_PlayerBasic` ×1.0 mỗi 0.45s, hiệu suất trúng 70%, tiếp cận 1.5s/chu kỳ):
+
+| Chỉ số | Lv 5 (chuẩn) | Lv 4 (cận) | Mục tiêu |
+|---|---:|---:|---|
+| MaxHealth người chơi | 160 | 145 | — |
+| Đòn thường người → boss | 17 | 15 | không chạm clamp 1 |
+| Đòn thường boss → người | 25 | 26 | không chạm clamp 1 |
+| Đòn lao boss → người (×1.3) | 33 | 34 | không chạm clamp 1; không one-shot |
+| Đòn thường hạ người đứng yên | 7 | 6 | Lv 5: 5–8; Lv 4: ≥ 4 |
+| Đòn lao hạ người đứng yên | 5 | 5 | > 1 |
+| Đòn người chơi mỗi Punish / mỗi Recovery | 3 / 4 | 3 / 4 | — |
+| Chu kỳ (2 đòn thường + 1 Pressure) | 11.35s | 11.35s | — |
+| Damage kỳ vọng mỗi chu kỳ | 119.0 | 105.0 | — |
+| **Thời gian hạ boss lần đầu** | **143.1s** | **162.1s** | Lv 5: 90–150s; Lv 4: ≤ 190s |
+
+Đây là ước lượng theo mô hình ở §5.2, chưa phải số đo thật. Phải đo lại trên điện thoại; đổi số boss, `Attack_PlayerBasic`, `defenseWeight` hay chỉ số người chơi thì phải chạy lại sandbox.
 
 ## 10. Không được làm
 

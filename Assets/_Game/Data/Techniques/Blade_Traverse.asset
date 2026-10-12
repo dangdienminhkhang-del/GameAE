@@ -17,10 +17,10 @@ MonoBehaviour:
   weaponDiscipline: 1
   inputSlot: 2
   masteryRequired: 25
-  cooldownSeconds: 3.5
+  cooldownSeconds: 4.5
   windUpSeconds: 0.08
-  recoverySeconds: 0.3
-  totalMultiplier: 1.8
+  recoverySeconds: 0.38
+  totalMultiplier: 1.2
   activeWindows:
   - startTimeOffset: 0
     duration: 0.1
@@ -29,18 +29,18 @@ MonoBehaviour:
     moveDistance: 1.8
   - startTimeOffset: 0.12
     duration: 0.1
-    hitMultiplier: 0.6
+    hitMultiplier: 0.35
     movementPolicy: 0
     moveDistance: 0
   - startTimeOffset: 0.26
     duration: 0.12
-    hitMultiplier: 0.7
+    hitMultiplier: 0.35
     movementPolicy: 0
     moveDistance: 0
   hitboxRadius: 1
   hitboxOffset: {x: 0.6, y: 0}
   targetLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   criticalChanceOverride: -1
   criticalDamageOverride: -1

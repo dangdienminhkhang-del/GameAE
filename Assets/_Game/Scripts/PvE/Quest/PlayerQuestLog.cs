@@ -38,6 +38,12 @@ namespace Game.PvE.Quest
         private bool _saveWriterRunning;
         private Task _saveWriterTask;
         private ITimeService _time;
+        private bool _loaded;
+        private bool _saveLocked;
+        // Thưởng chỉ được cấp SAU KHI lần lưu chứa trạng thái Completed thành công (chống double-reward).
+        private readonly QuestRewardLedger _rewards = new QuestRewardLedger();
+        private bool _destroyed;
+        private readonly CancellationTokenSource _loadRetryCancellation = new CancellationTokenSource();
 
         public QuestLog Log => _log;
         public IReadOnlyList<QuestDefinition> KnownQuests => knownQuests;
@@ -55,6 +61,8 @@ namespace Game.PvE.Quest
         {
             GameEvents.OnEnemyDefeated  += HandleEnemyDefeated;
             GameEvents.OnItemAcquiredWithPayload += HandleItemAcquiredWithPayload;
+            GameEvents.OnPlayerDied += HandlePlayerDied;
+            GameEvents.OnPlayerDeathRecorded += HandleDeathRecorded;
             // Fallback cho OnItemAcquired cũ (không có payload) — không dùng để advance nữa
         }
 
@@ -62,21 +70,41 @@ namespace Game.PvE.Quest
         {
             GameEvents.OnEnemyDefeated  -= HandleEnemyDefeated;
             GameEvents.OnItemAcquiredWithPayload -= HandleItemAcquiredWithPayload;
+            GameEvents.OnPlayerDied -= HandlePlayerDied;
+            GameEvents.OnPlayerDeathRecorded -= HandleDeathRecorded;
         }
 
         private async void Start()
         {
-            await LoadAsync();
+            await LoadWithRetryAsync();
         }
 
         private void OnApplicationPause(bool paused)
         {
-            if (paused) EnqueueSave();
+            if (paused && CanSave()) EnqueueSave();
         }
 
         private void OnApplicationQuit()
         {
-            EnqueueSave();
+            if (CanSave()) EnqueueSave();
+        }
+
+        private void OnDestroy()
+        {
+            _destroyed = true;
+            _rewards.Clear();
+            _loadRetryCancellation.Cancel();
+        }
+
+        private void HandlePlayerDied(object sender, Game.Core.Combat.DamageInfo lastHit) => LockSaving();
+        private void HandleDeathRecorded(object sender, Game.Core.Character.DeathInfo death) => LockSaving();
+
+        private void LockSaving()
+        {
+            _saveLocked = true;
+            _dirty = false;
+            _rewards.Clear(); // đã chết / khóa lưu → bỏ thưởng đang chờ
+            _loadRetryCancellation.Cancel();
         }
 
         // ── Public query ───────────────────────────────────────────────────
@@ -93,6 +121,13 @@ namespace Game.PvE.Quest
         public bool IsCompleted(QuestDefinition quest) =>
             quest != null && _log.IsCompleted(quest.Id);
 
+        public QuestAcceptResult CheckAccept(QuestDefinition quest)
+        {
+            ITimeService time = ResolveTimeService();
+            TimeOfDay phase = time != null ? time.CurrentPhase : TimeOfDay.Morning;
+            return QuestRules.CanAccept(quest, _log, phase, time != null && time.IsAuthoritative);
+        }
+
         // ── Accept ─────────────────────────────────────────────────────────
 
         /// <summary>
@@ -103,10 +138,7 @@ namespace Game.PvE.Quest
         {
             if (quest == null) return false;
 
-            ITimeService time = ResolveTimeService();
-            TimeOfDay phase = time != null ? time.CurrentPhase : TimeOfDay.Morning;
-            bool timeAuthoritative = time != null && time.IsAuthoritative;
-            QuestAcceptResult result = QuestRules.CanAccept(quest, _log, phase, timeAuthoritative);
+            QuestAcceptResult result = CheckAccept(quest);
             if (result != QuestAcceptResult.Ok)
             {
                 Publish(quest, AcceptFailureMessage(result));
@@ -134,8 +166,9 @@ namespace Game.PvE.Quest
         // ── Turn-in ────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Player nói chuyện NPC có quest đang ReadyToTurnIn → cấp thưởng + đánh dấu Completed.
-        /// Trả true nếu thành công. UI chỉ gọi sau khi NPC xác nhận intent.
+        /// Player nói chuyện NPC có quest đang ReadyToTurnIn → đánh dấu Completed NGAY trong bộ nhớ
+        /// (UI thấy ngay), còn thưởng chỉ được cấp SAU KHI lần lưu chứa Completed thành công.
+        /// Trả true nếu turn-in được ghi nhận. UI chỉ gọi sau khi NPC xác nhận intent.
         /// </summary>
         public bool TryTurnIn(QuestDefinition quest, PlayerInventory inventory = null)
         {
@@ -165,7 +198,9 @@ namespace Game.PvE.Quest
             bool ok = _log.TurnIn(quest.Id);
             if (!ok) return false;
 
-            GrantReward(quest);
+            // Chưa cấp thưởng ở đây: nếu app bị đóng giữa lúc item/EXP đã lưu mà quest chưa lưu,
+            // lần mở sau quest vẫn ReadyToTurnIn và người chơi nhận thưởng lần hai.
+            _rewards.Enqueue(quest);
             Publish(quest, "Hoàn thành nhiệm vụ!");
             EnqueueSave();
             return true;
@@ -274,7 +309,7 @@ namespace Game.PvE.Quest
                    playerInventory.Database.Find(quest.TargetId).Stackable;
         }
 
-        private static string AcceptFailureMessage(QuestAcceptResult result)
+        public static string AcceptFailureMessage(QuestAcceptResult result)
         {
             switch (result)
             {
@@ -307,7 +342,7 @@ namespace Game.PvE.Quest
 
         private void EnqueueSave()
         {
-            if (_save == null) return;
+            if (!CanSave()) return;
             _dirty = true;
             if (_saveWriterRunning) return;
 
@@ -315,25 +350,41 @@ namespace Game.PvE.Quest
             _saveWriterTask = RunSaveWriterAsync();
         }
 
+        private bool CanSave() => _loaded && _save != null && !_saveLocked && !_destroyed;
+
         private async Task RunSaveWriterAsync()
         {
             await _saveLock.WaitAsync();
             try
             {
-                while (_dirty)
+                while (_dirty && _loaded && _save != null && !_saveLocked && !_destroyed)
                 {
                     _dirty = false;
                     QuestData snapshot = BuildSnapshot();
+                    // Thưởng đang chờ lúc này đã nằm trong snapshot vừa chụp.
+                    _rewards.BeginSave();
                     try
                     {
                         await _save.SaveAsync(SaveKeys.Quests, snapshot);
                     }
                     catch (Exception ex)
                     {
+                        // Lưu lỗi: thưởng quay lại hàng chờ, không cấp, không mất.
+                        _rewards.RollbackSave();
                         Debug.LogError($"[PlayerQuestLog] Save thất bại, sẽ thử lại: {ex.Message}", this);
                         _dirty = true;
-                        await Task.Delay(TimeSpan.FromSeconds(5));
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(5), _loadRetryCancellation.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            return;
+                        }
+                        continue;
                     }
+
+                    GrantCommittedRewards();
                 }
             }
             finally
@@ -341,6 +392,28 @@ namespace Game.PvE.Quest
                 _saveLock.Release();
                 _saveWriterRunning = false;
                 if (_dirty) EnqueueSave();
+            }
+        }
+
+        /// <summary>Lần lưu vừa thành công: cấp thưởng của các quest nằm trong snapshot đó (đúng một lần).</summary>
+        private void GrantCommittedRewards()
+        {
+            IReadOnlyList<QuestDefinition> committed = _rewards.CommitSave();
+            if (committed.Count == 0) return;
+
+            // Đã chết / khóa lưu / bị hủy trong lúc lưu: không cấp thưởng.
+            if (_saveLocked || _destroyed) return;
+
+            for (int i = 0; i < committed.Count; i++)
+            {
+                try
+                {
+                    GrantReward(committed[i]);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[PlayerQuestLog] Cấp thưởng '{committed[i]?.Id}' thất bại: {ex.Message}", this);
+                }
             }
         }
 
@@ -365,28 +438,55 @@ namespace Game.PvE.Quest
             return _saveWriterTask ?? Task.CompletedTask;
         }
 
-        public async Task LoadAsync()
+        private async Task LoadWithRetryAsync()
         {
-            if (_save == null) return;
-
-            QuestData data = await _save.LoadAsync<QuestData>(SaveKeys.Quests);
-            if (data == null || data.quests == null) return;
-
-            var states = new List<QuestState>();
-            foreach (QuestEntryData entry in data.quests)
+            while (!_loaded && !_saveLocked && !_destroyed)
             {
-                if (entry == null || string.IsNullOrEmpty(entry.questId)) continue;
-                var status = (QuestStatus)entry.status;
-                // Migration: Completed cũ (trước Wave 1A) có progress đủ nhưng chưa qua turn-in
-                // → giữ Completed (đã nhận thưởng rồi). Chỉ ReadyToTurnIn mới chưa nhận thưởng.
-                states.Add(new QuestState(entry.questId, status, entry.progress));
+                if (await LoadAsync()) return;
+
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5), _loadRetryCancellation.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
             }
-            _log.LoadFrom(states);
+        }
 
-            for (int i = 0; i < knownQuests.Count; i++)
+        public async Task<bool> LoadAsync()
+        {
+            if (_save == null || _saveLocked || _destroyed) return false;
+
+            try
             {
-                if (knownQuests[i] != null && _log.Get(knownQuests[i].Id) != null)
-                    Publish(knownQuests[i], null);
+                QuestData data = await _save.LoadAsync<QuestData>(SaveKeys.Quests);
+                if (_saveLocked || _destroyed) return false;
+
+                var states = new List<QuestState>();
+                if (data != null && data.quests != null)
+                {
+                    foreach (QuestEntryData entry in data.quests)
+                    {
+                        if (entry == null || string.IsNullOrEmpty(entry.questId)) continue;
+                        states.Add(new QuestState(entry.questId, (QuestStatus)entry.status, entry.progress));
+                    }
+                }
+                _log.LoadFrom(states);
+                _loaded = true;
+
+                for (int i = 0; i < knownQuests.Count; i++)
+                {
+                    if (knownQuests[i] != null && _log.Get(knownQuests[i].Id) != null)
+                        Publish(knownQuests[i], null);
+                }
+                return true;
+            }
+            catch (Exception error)
+            {
+                Debug.LogError($"[PlayerQuestLog] Nạp quest thất bại, sẽ thử lại: {error.Message}", this);
+                return false;
             }
         }
 
@@ -400,6 +500,7 @@ namespace Game.PvE.Quest
                     states.Add(new QuestState(entry.questId, (QuestStatus)entry.status, entry.progress));
             }
             _log.LoadFrom(states);
+            _loaded = true;
         }
     }
 }

@@ -99,12 +99,26 @@ namespace Game.Tests.EditMode
         {
             var log = new QuestLog();
             log.Accept("q1");
-            log.AddProgress("q1", 1, 1);
+            log.AddProgress("q1", 1, 1); // → ReadyToTurnIn
+            log.TurnIn("q1");             // → Completed
 
+            log.Accept("q1"); // không được hạ về Active
+
+            Assert.IsTrue(log.IsCompleted("q1"), "Completed phải giữ nguyên");
+            Assert.IsFalse(log.IsActive("q1"), "không được Active lại");
+        }
+
+        [Test]
+        public void Accept_ReadyToTurnIn_DoesNotRevertToActive()
+        {
+            var log = new QuestLog();
             log.Accept("q1");
+            log.AddProgress("q1", 1, 1); // → ReadyToTurnIn
 
-            Assert.IsTrue(log.IsCompleted("q1"));
-            Assert.IsFalse(log.IsActive("q1"));
+            log.Accept("q1"); // không được hạ về Active
+
+            Assert.IsTrue(log.IsReadyToTurnIn("q1"), "ReadyToTurnIn phải giữ nguyên");
+            Assert.IsFalse(log.IsActive("q1"), "không được revert về Active");
         }
 
         [Test]
@@ -209,6 +223,48 @@ namespace Game.Tests.EditMode
             Assert.IsTrue(QuestRules.CanAdvance(quest, log, QuestObjectiveType.Collect, quest.TargetId,
                 TimeOfDay.Morning, timeAuthoritative: true));
             Object.DestroyImmediate(quest);
+        }
+
+        [Test]
+        public void CanAdvance_TimeGatedQuest_RequiresAuthoritativeMatchingPhase()
+        {
+            QuestDefinition quest = CreateQuest();
+            SetField(quest, "requiresSpecificTime", true);
+            SetField(quest, "requiredTimeOfDay", TimeOfDay.Night);
+            var log = new QuestLog();
+            log.Accept(quest.Id);
+
+            Assert.IsFalse(QuestRules.CanAdvance(quest, log, QuestObjectiveType.Kill, quest.TargetId,
+                TimeOfDay.Night, timeAuthoritative: false));
+            Assert.IsFalse(QuestRules.CanAdvance(quest, log, QuestObjectiveType.Kill, quest.TargetId,
+                TimeOfDay.Morning, timeAuthoritative: true));
+            Assert.IsTrue(QuestRules.CanAdvance(quest, log, QuestObjectiveType.Kill, quest.TargetId,
+                TimeOfDay.Night, timeAuthoritative: true));
+            Object.DestroyImmediate(quest);
+        }
+
+        [Test]
+        public void CanAccept_CompletedQuest_OnlyRepeatableReturnsOk()
+        {
+            QuestDefinition repeatable = CreateQuest();
+            SetField(repeatable, "repeatable", true);
+            var repeatableLog = new QuestLog();
+            repeatableLog.Accept(repeatable.Id);
+            repeatableLog.AddProgress(repeatable.Id, 1);
+            repeatableLog.TurnIn(repeatable.Id);
+            Assert.AreEqual(QuestAcceptResult.Ok,
+                QuestRules.CanAccept(repeatable, repeatableLog, TimeOfDay.Morning, timeAuthoritative: true));
+
+            QuestDefinition oneTime = CreateQuest();
+            var oneTimeLog = new QuestLog();
+            oneTimeLog.Accept(oneTime.Id);
+            oneTimeLog.AddProgress(oneTime.Id, 1);
+            oneTimeLog.TurnIn(oneTime.Id);
+            Assert.AreEqual(QuestAcceptResult.AlreadyCompleted,
+                QuestRules.CanAccept(oneTime, oneTimeLog, TimeOfDay.Morning, timeAuthoritative: true));
+
+            Object.DestroyImmediate(repeatable);
+            Object.DestroyImmediate(oneTime);
         }
 
         [Test]

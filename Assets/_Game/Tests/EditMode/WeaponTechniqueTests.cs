@@ -5,6 +5,7 @@ using Game.Core.Skills;
 using Game.Core.Stats;
 using Game.PvE.Skills;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace Game.Tests.EditMode
@@ -260,18 +261,38 @@ namespace Game.Tests.EditMode
         [Test]
         public void WeaponDefinitionValidator_CatchesMalformedData()
         {
-            // Không có windows
+            // "bad" được tạo bằng CreateInstance → Reset() gán ApplyAuthoringDefaults()
+            // → có 1 window mặc định + id = "technique.undefined" → phải invalid
             var bad = ScriptableObject.CreateInstance<WeaponTechniqueDefinition>();
-            Assert.IsFalse(bad.IsDefinitionValid(out string err1));
+            Assert.IsFalse(bad.IsDefinitionValid(out string err1),
+                "id='technique.undefined' phải invalid");
             Assert.IsNotNull(err1);
             Assert.IsNotEmpty(err1);
 
+            // Technique không có windows (ép activeWindows = rỗng qua helper)
+            var noWindows = ScriptableObject.CreateInstance<WeaponTechniqueDefinition>();
+            SetPrivateField(noWindows, "id", "technique.test_no_windows");
+            SetPrivateField(noWindows, "activeWindows", new List<TechniqueHitWindow>());
+            Assert.IsFalse(noWindows.IsDefinitionValid(out string err2),
+                "không có window phải invalid");
+            Assert.IsNotEmpty(err2);
+
             // Tổng hit vượt totalMultiplier
             var badSum = WeaponTechniqueDefinition.CreateDefault(
-                "technique.bad", WeaponDiscipline.Blade, TechniqueInputSlot.Core, totalMult: 0.5);
+                "technique.bad_sum", WeaponDiscipline.Blade, TechniqueInputSlot.Core, totalMult: 0.5);
             // Mặc định 1 window 1.0 multiplier. Tổng 1.0 > 0.5 → lỗi.
-            Assert.IsFalse(badSum.IsDefinitionValid(out string err2));
-            StringAssert.Contains("tổng hitMultiplier", err2);
+            Assert.IsFalse(badSum.IsDefinitionValid(out string err3));
+            StringAssert.Contains("tổng hitMultiplier", err3);
+        }
+
+        [Test]
+        public void WeaponDefinitionValidator_RejectsUndefinedId()
+        {
+            var def = ScriptableObject.CreateInstance<WeaponTechniqueDefinition>();
+            // Reset() → id = "technique.undefined"
+            Assert.IsFalse(def.IsDefinitionValid(out string error),
+                "id='technique.undefined' phải invalid (chưa được đặt)");
+            StringAssert.Contains("technique.undefined", error);
         }
 
         [Test]
@@ -369,13 +390,41 @@ namespace Game.Tests.EditMode
     [TestFixture]
     public class Wave2ABalanceTests
     {
+        private const string FoundationPath = "Assets/_Game/Data/Techniques/Blade_Foundation.asset";
+        private const string TraversePath = "Assets/_Game/Data/Techniques/Blade_Traverse.asset";
+        private const string DodgePath = "Assets/_Game/Data/Techniques/DodgeDefinition.asset";
+
+        private static WeaponTechniqueDefinition LoadFoundation() => LoadRequired<WeaponTechniqueDefinition>(FoundationPath);
+        private static WeaponTechniqueDefinition LoadTraverse() => LoadRequired<WeaponTechniqueDefinition>(TraversePath);
+        private static DodgeDefinition LoadDodge() => LoadRequired<DodgeDefinition>(DodgePath);
+
+        private static T LoadRequired<T>(string path) where T : UnityEngine.Object
+        {
+            T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            Assert.IsNotNull(asset, $"Thiếu asset balance: {path}");
+            return asset;
+        }
+
+        [Test]
+        public void TechniqueAssets_HaveTargetLayersAndValidDefinitions()
+        {
+            AssertTechniqueAssetIsValid(LoadFoundation(), FoundationPath);
+            AssertTechniqueAssetIsValid(LoadTraverse(), TraversePath);
+        }
+
+        private static void AssertTechniqueAssetIsValid(WeaponTechniqueDefinition definition, string path)
+        {
+            Assert.AreNotEqual(0, definition.TargetLayers.value, $"{path}: TargetLayers phải khác Nothing.");
+            Assert.IsTrue(definition.IsDefinitionValid(out string error), $"{path}: {error}");
+        }
+
         // ── Core Technique (Blade Foundation) ────────────────────────────
 
         [Test]
         public void BladeFoundation_Cooldown_InCoreRange_2to3s()
         {
             // Core slot: cooldown 2–3s (docs/07 §4.1)
-            var def = MakeCore(cooldown: 2.5f, totalMult: 1.25, windows: new[] { (0.0, 0.6), (0.15, 0.65) });
+            var def = LoadFoundation();
             Assert.GreaterOrEqual(def.CooldownSeconds, 2f, "Core cooldown >= 2s");
             Assert.LessOrEqual(def.CooldownSeconds, 3f, "Core cooldown <= 3s");
         }
@@ -384,7 +433,7 @@ namespace Game.Tests.EditMode
         public void BladeFoundation_TotalMultiplier_InCoreRange_115to135()
         {
             // Core: totalMultiplier 1.15–1.35 (docs/07 §4.2)
-            var def = MakeCore(cooldown: 2.5f, totalMult: 1.25, windows: new[] { (0.0, 0.6), (0.15, 0.65) });
+            var def = LoadFoundation();
             Assert.GreaterOrEqual(def.TotalMultiplier, 1.15, "Core mult >= 1.15");
             Assert.LessOrEqual(def.TotalMultiplier, 1.35, "Core mult <= 1.35");
         }
@@ -393,7 +442,7 @@ namespace Game.Tests.EditMode
         public void BladeFoundation_Recovery_InCoreRange_020to035s()
         {
             // Core recovery 0.20–0.35s (docs/07 §4.1)
-            var def = MakeCore(cooldown: 2.5f, totalMult: 1.25, windows: new[] { (0.0, 0.6), (0.15, 0.65) });
+            var def = LoadFoundation();
             Assert.GreaterOrEqual(def.RecoverySeconds, 0.20f, "Core recovery >= 0.20s");
             Assert.LessOrEqual(def.RecoverySeconds, 0.35f, "Core recovery <= 0.35s");
         }
@@ -404,8 +453,7 @@ namespace Game.Tests.EditMode
         public void BladeTraverse_Cooldown_InTraverseRange_4to6s()
         {
             // Traverse cooldown 4–6s (docs/07 §4.1)
-            var def = MakeTraverse(cooldown: 4.5f, recovery: 0.38f, totalMult: 1.20,
-                windows: new[] { (0.0, 0.5), (0.12, 0.35), (0.26, 0.35) });
+            var def = LoadTraverse();
             Assert.GreaterOrEqual(def.CooldownSeconds, 4f, "Traverse cooldown >= 4s");
             Assert.LessOrEqual(def.CooldownSeconds, 6f, "Traverse cooldown <= 6s");
         }
@@ -414,8 +462,7 @@ namespace Game.Tests.EditMode
         public void BladeTraverse_TotalMultiplier_InTraverseRange_100to125()
         {
             // Traverse: totalMultiplier 1.00–1.25 (docs/07 §4.2)
-            var def = MakeTraverse(cooldown: 4.5f, recovery: 0.38f, totalMult: 1.20,
-                windows: new[] { (0.0, 0.5), (0.12, 0.35), (0.26, 0.35) });
+            var def = LoadTraverse();
             Assert.GreaterOrEqual(def.TotalMultiplier, 1.00, "Traverse mult >= 1.00");
             Assert.LessOrEqual(def.TotalMultiplier, 1.25, "Traverse mult <= 1.25");
         }
@@ -424,8 +471,7 @@ namespace Game.Tests.EditMode
         public void BladeTraverse_Recovery_InTraverseRange_030to050s()
         {
             // Traverse recovery 0.30–0.50s (docs/07 §4.1)
-            var def = MakeTraverse(cooldown: 4.5f, recovery: 0.38f, totalMult: 1.20,
-                windows: new[] { (0.0, 0.5), (0.12, 0.35), (0.26, 0.35) });
+            var def = LoadTraverse();
             Assert.GreaterOrEqual(def.RecoverySeconds, 0.30f, "Traverse recovery >= 0.30s");
             Assert.LessOrEqual(def.RecoverySeconds, 0.50f, "Traverse recovery <= 0.50s");
         }
@@ -433,8 +479,7 @@ namespace Game.Tests.EditMode
         [Test]
         public void BladeTraverse_SumHitMultipliers_NotExceedTotalMultiplier()
         {
-            var def = MakeTraverse(cooldown: 4.5f, recovery: 0.38f, totalMult: 1.20,
-                windows: new[] { (0.0, 0.5), (0.12, 0.35), (0.26, 0.35) });
+            var def = LoadTraverse();
             double sum = def.SumHitMultipliers();
             Assert.LessOrEqual(sum, def.TotalMultiplier + 0.0001,
                 "Tổng hitMultiplier không được vượt totalMultiplier");
@@ -446,7 +491,7 @@ namespace Game.Tests.EditMode
         public void DodgeDefinition_Balance_MatchesDocs07_44()
         {
             // docs/07 §4.4: duration 0.18, cooldown 1.2, recovery 0.20, no i-frames
-            var def = DodgeDefinition.CreateDefault();
+            var def = LoadDodge();
             Assert.AreEqual(0.18f, def.DodgeDurationSeconds, 0.01f, "Dodge duration ~0.18s");
             Assert.AreEqual(1.2f,  def.CooldownSeconds,      0.01f, "Dodge cooldown ~1.2s");
             Assert.AreEqual(0.20f, def.RecoverySeconds,      0.01f, "Dodge recovery ~0.20s");
@@ -456,61 +501,10 @@ namespace Game.Tests.EditMode
         public void DodgeDefinition_DashDistance_ReasonableRange()
         {
             // Dodge dash distance hợp lý: 1–3 unit
-            var def = DodgeDefinition.CreateDefault();
+            var def = LoadDodge();
             Assert.GreaterOrEqual(def.DashDistance, 1f, "Dodge distance >= 1u");
             Assert.LessOrEqual(def.DashDistance, 3f, "Dodge distance <= 3u");
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────
-
-        private static WeaponTechniqueDefinition MakeCore(
-            float cooldown, double totalMult, (double hitMult, double ignore)[] windows)
-        {
-            var def = ScriptableObject.CreateInstance<WeaponTechniqueDefinition>();
-            SetField(def, "id",              "technique.blade_foundation");
-            SetField(def, "weaponDiscipline", WeaponDiscipline.Blade);
-            SetField(def, "inputSlot",        TechniqueInputSlot.Core);
-            SetField(def, "masteryRequired",  0);
-            SetField(def, "cooldownSeconds",  cooldown);
-            SetField(def, "windUpSeconds",    0.10f);
-            SetField(def, "recoverySeconds",  0.25f);
-            SetField(def, "totalMultiplier",  totalMult);
-            var wins = new System.Collections.Generic.List<TechniqueHitWindow>();
-            for (int i = 0; i < windows.Length; i++)
-                wins.Add(new TechniqueHitWindow((i * 0.15f), 0.12f, windows[i].hitMult, MovementPolicy.None));
-            SetField(def, "activeWindows", wins);
-            return def;
-        }
-
-        private static WeaponTechniqueDefinition MakeTraverse(
-            float cooldown, float recovery, double totalMult, (double hitMult, double ignore)[] windows)
-        {
-            var def = ScriptableObject.CreateInstance<WeaponTechniqueDefinition>();
-            SetField(def, "id",              "technique.blade_traverse");
-            SetField(def, "weaponDiscipline", WeaponDiscipline.Blade);
-            SetField(def, "inputSlot",        TechniqueInputSlot.Traverse);
-            SetField(def, "masteryRequired",  25);
-            SetField(def, "cooldownSeconds",  cooldown);
-            SetField(def, "windUpSeconds",    0.08f);
-            SetField(def, "recoverySeconds",  recovery);
-            SetField(def, "totalMultiplier",  totalMult);
-            var wins = new System.Collections.Generic.List<TechniqueHitWindow>();
-            for (int i = 0; i < windows.Length; i++)
-            {
-                var policy = i == 0 ? MovementPolicy.Dash : MovementPolicy.None;
-                wins.Add(new TechniqueHitWindow(i * 0.14f, 0.10f, windows[i].hitMult, policy, i == 0 ? 1.8f : 0f));
-            }
-            SetField(def, "activeWindows", wins);
-            return def;
-        }
-
-        private static void SetField(object obj, string name, object value)
-        {
-            var f = obj.GetType().GetField(name,
-                System.Reflection.BindingFlags.Instance |
-                System.Reflection.BindingFlags.Public |
-                System.Reflection.BindingFlags.NonPublic);
-            f?.SetValue(obj, value);
-        }
     }
 }

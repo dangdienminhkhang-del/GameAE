@@ -36,6 +36,6 @@ MonoBehaviour:
   hitboxOffset: {x: 0.6, y: 0}
   targetLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   criticalChanceOverride: -1
   criticalDamageOverride: -1

@@ -54,7 +54,7 @@ namespace Game.UI.Controls
             for (int i = 0; i < npcs.Length; i++)
             {
                 NPCInteractable npc = npcs[i];
-                if (npc == null || !npc.gameObject.activeInHierarchy) continue;
+                if (npc == null || !npc.gameObject.activeInHierarchy || !npc.IsAvailable) continue;
 
                 float distance = Vector2.Distance(origin, npc.transform.position);
                 if (distance <= interactRange && distance < bestDistance)

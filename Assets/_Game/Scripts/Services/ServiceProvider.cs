@@ -80,12 +80,13 @@ namespace Game.Services
 
         public static IWorldStateService CreateWorldStateService()
         {
+            var serverFunctions = CreateServerFunctionService();
             return BackendType switch
             {
-                "UGS" => new World.WorldStateService(),
-                "Spring" => new World.WorldStateService(),
-                "Hybrid" => new World.WorldStateService(),
-                _ => new World.WorldStateService()
+                "UGS" => new World.WorldStateService(serverFunctions),
+                "Spring" => new World.WorldStateService(serverFunctions),
+                "Hybrid" => new World.WorldStateService(serverFunctions),
+                _ => new World.WorldStateService(serverFunctions)
             };
         }
 

@@ -78,6 +78,7 @@ namespace Game.PvE.Dodge
             {
                 var hits = new RaycastHit2D[4];
                 var filter = new ContactFilter2D { useTriggers = false };
+                filter.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
                 int hitCount = _rb.Cast(_dodgeDir, filter, hits, wantDist);
                 if (hitCount > 0 && hits[0].collider != null)
                     _dodgeSafeDistance = UnityEngine.Mathf.Max(0f, hits[0].distance - 0.05f);

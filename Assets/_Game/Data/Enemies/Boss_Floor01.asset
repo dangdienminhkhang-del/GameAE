@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd47508d3d6bcf4d954746f8926c9af, type: 3}
+  m_Name: Boss_Floor01
+  m_EditorClassIdentifier: Game.PvE::Game.PvE.Boss.BossDefinition
+  id: boss.floor_01
+  displayName: "C\u1ED7 M\xE1y K\xE9o Neo"
+  floorId: floor.01
+  sprite: {fileID: 21300000, guid: d0fd346617649d348b9f01bbd155f698, type: 3}
+  maxHealth: 1500
+  attack: 28
+  defense: 4
+  moveSpeed: 1.8
+  detectionRange: 10
+  attackRange: 1.6
+  attackWindupSeconds: 0.8
+  punishWindowSeconds: 1.2
+  attackCooldownSeconds: 2
+  enrageHpThreshold: 0.35
+  attackHitRadius: 1.8
+  pressureEveryNAttacks: 2
+  pressureWindupSeconds: 0.9
+  pressureDashDistance: 4
+  pressureDashSeconds: 0.35
+  pressureHitRadius: 1.4
+  pressureDamageMultiplier: 1.3
+  pressureRecoverySeconds: 1.6
+  experienceReward: 150
+  firstClearRewardItem: {fileID: 11400000, guid: a88a1e6f48e817c48b53fa524ebbd66c, type: 2}
+  firstClearRewardQuantity: 1
+  drops:
+  - item: {fileID: 11400000, guid: ed645eb8dcb162d40beda14fa499044f, type: 2}
+    chance: 1
+    minCount: 2
+    maxCount: 3
+  rareDrops:
+  - item: {fileID: 11400000, guid: 0991e85c4d863c14f8997f120c0b973c, type: 2}
+    chance: 0.35
+    minCount: 1
+    maxCount: 1
+  rematchRareMultiplier: 0.05

@@ -12,6 +12,7 @@ namespace Game.Core.World
         public const string Equipment = "equipment";
         public const string Death = "death";
         public const string Quests = "quests";
+        public const string RewardClaims = "rewardClaims";
 
         /// <summary>
         /// Mọi key của MỘT nhân vật. Reset tài khoản Guest phải xóa hết để nhân vật mới
@@ -19,7 +20,7 @@ namespace Game.Core.World
         /// </summary>
         public static readonly string[] All =
         {
-            Profile, Progress, Inventory, Equipment, Death, Quests
+            Profile, Progress, Inventory, Equipment, Death, Quests, RewardClaims
         };
     }
 
@@ -47,6 +48,11 @@ namespace Game.Core.World
         public string accountType = "Guest";
         public bool isLinked = false;
         public string linkedProvider = null;
+        /// <summary>
+        /// HP hiện tại khi lưu. 0 = chưa có dữ liệu (lần đầu, hoặc save cũ chưa có field này)
+        /// → HealthComponent sẽ dùng MaxHealth mặc định thay thế.
+        /// </summary>
+        public double currentHp = 0;
     }
 
     [Serializable]
@@ -86,5 +92,42 @@ namespace Game.Core.World
     {
         public int personalHighestFloor = 1;
         public string currentFloorId = "floor.01";
+    }
+
+    /// <summary>Một claim thưởng một lần (docs/03 §5 — Wave 3).</summary>
+    [Serializable]
+    public class RewardClaimEntry
+    {
+        public string type; // "FirstClear"
+        public string bossId;
+        public long claimedAtUnixSeconds;
+    }
+
+    /// <summary>Bản ghi danh sách các phần thưởng đã nhận (docs/03 §5).</summary>
+    [Serializable]
+    public class RewardClaimsData
+    {
+        public int schemaVersion = 1;
+        public List<RewardClaimEntry> claims = new List<RewardClaimEntry>();
+
+        public bool HasClaim(string type, string bossId)
+        {
+            if (claims == null) return false;
+            return claims.Exists(c => c != null && c.type == type && c.bossId == bossId);
+        }
+
+        public void AddClaim(string type, string bossId, long timestamp)
+        {
+            if (claims == null) claims = new List<RewardClaimEntry>();
+            if (!HasClaim(type, bossId))
+            {
+                claims.Add(new RewardClaimEntry
+                {
+                    type = type,
+                    bossId = bossId,
+                    claimedAtUnixSeconds = timestamp
+                });
+            }
+        }
     }
 }

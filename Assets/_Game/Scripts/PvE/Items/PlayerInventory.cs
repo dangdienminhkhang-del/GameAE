@@ -34,6 +34,10 @@ namespace Game.PvE.Items
         private CharacterStats _stats;
         private int _instanceCounter;
 
+        // ── Dùng vật phẩm tiêu hao (docs/07 §2) ──
+        private readonly ConsumableUseClock _useClock = new ConsumableUseClock();
+        private HealthComponent _health;
+
         // ── Trạng thái tự động lưu ──
         private bool _loaded;      // chỉ được lưu SAU khi nạp xong, khỏi ghi dữ liệu mặc định đè save thật
         private bool _loading;     // đang nạp: các thay đổi do LoadFrom/SetProgress sinh ra không tính là "cần lưu"
@@ -45,6 +49,8 @@ namespace Game.PvE.Items
         public Inventory Inventory => _inventory;
         public Equipment Equipment => _equipment;
         public ItemDatabase Database => database;
+        /// <summary>Mốc thời gian giao chiến / lần dùng gần nhất (UI không cần đụng, test dùng để giả lập thời gian).</summary>
+        public ConsumableUseClock UseClock => _useClock;
         public event Action Changed;
 
         private void Awake()
@@ -61,6 +67,9 @@ namespace Game.PvE.Items
             GameEvents.OnExperienceChanged += HandleExperienceChanged;
             GameEvents.OnPlayerDied += HandlePlayerDied;
             GameEvents.OnPlayerDeathRecorded += HandleDeathRecorded;
+            GameEvents.OnHealthChanged += HandleHealthChangedForCombat;
+            GameEvents.OnEnemyDefeated += HandleEnemyDefeated;
+            GameEvents.OnHitResolved += HandleHitResolved;
         }
 
         private void OnDisable()
@@ -70,6 +79,9 @@ namespace Game.PvE.Items
             GameEvents.OnExperienceChanged -= HandleExperienceChanged;
             GameEvents.OnPlayerDied -= HandlePlayerDied;
             GameEvents.OnPlayerDeathRecorded -= HandleDeathRecorded;
+            GameEvents.OnHealthChanged -= HandleHealthChangedForCombat;
+            GameEvents.OnEnemyDefeated -= HandleEnemyDefeated;
+            GameEvents.OnHitResolved -= HandleHitResolved;
         }
 
         private async void Start()
@@ -93,12 +105,27 @@ namespace Game.PvE.Items
 
         private void HandleChanged()
         {
-            ApplyEquipmentStats();
-            Changed?.Invoke();
-            RequestSave(); // nhặt / mặc / tháo đồ
+            try
+            {
+                ApplyEquipmentStats();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e, this);
+            }
+
+            try
+            {
+                Changed?.Invoke();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e, this);
+            }
+
+            RequestSave();
         }
 
-        /// <summary>Lên level / nhận EXP → lưu (profile).</summary>
         private void HandleExperienceChanged(object sender, ExperienceChangedArgs args)
         {
             RequestSave();
@@ -113,12 +140,39 @@ namespace Game.PvE.Items
             _dirty = false;
         }
 
-        // ── Tự động lưu (docs/03 §12) ───────────────────────────────
+        /// <summary>Hạ được quái → tính là vừa giao chiến (docs/07 §2): chặn dùng bình trong vài giây.</summary>
+        private void HandleEnemyDefeated(object sender, EventArgs e)
+        {
+            _useClock.MarkCombat(UnityEngine.Time.time);
+        }
 
         /// <summary>
-        /// Đánh dấu "cần lưu" — sẽ ghi sau <c>saveDelaySeconds</c> (gom nhiều thay đổi, tránh ghi mỗi lần giết quái).
-        /// Bỏ qua nếu chưa nạp xong, đang nạp, hoặc đã chết.
+        /// Player đánh trúng quái (chưa chết cũng tính) → đang giao chiến, chặn dùng bình trong vài giây.
+        /// Chỉ tính hit mà nguồn là chỉ số của CHÍNH player này.
         /// </summary>
+        private void HandleHitResolved(object sender, HitResolvedArgs args)
+        {
+            if (args == null || args.Source == null) return;
+            CharacterStats own = ResolveStats();
+            if (own == null || !ReferenceEquals(args.Source, own)) return;
+
+            _useClock.MarkCombat(UnityEngine.Time.time);
+        }
+
+        private void HandleHealthChangedForCombat(object sender, HealthChangedArgs args)
+        {
+            // Chỉ nghe máu của CHÍNH player: máu của quái đổi không được đánh dấu giao chiến và không kích hoạt lưu.
+            HealthComponent own = ResolveHealth();
+            if (own == null || !ReferenceEquals(sender, own)) return;
+
+            if (args != null && args.Delta < 0.0)
+                _useClock.MarkCombat(UnityEngine.Time.time);
+            // HP thay đổi → lưu lại để khi vào lại game HP đúng
+            RequestSave();
+        }
+
+        // ── Tự động lưu (docs/03 §12) ───────────────────────────────
+
         public void RequestSave()
         {
             if (!_loaded || _loading || _saveLocked) return;
@@ -135,7 +189,6 @@ namespace Game.PvE.Items
             }
         }
 
-        /// <summary>Ghi ngay nếu đang có thay đổi chưa lưu (pause / thoát app / đổi scene).</summary>
         public void FlushNow()
         {
             if (!_dirty || !_loaded || _saveLocked) return;
@@ -152,7 +205,6 @@ namespace Game.PvE.Items
             }
             catch (Exception error)
             {
-                // Không nuốt lỗi: đánh dấu lại để thử ghi sau, tránh mất tiến trình mà không ai biết.
                 Debug.LogError($"[Save] Lưu Player Data thất bại, sẽ thử lại: {error}");
                 _dirty = true;
                 _saveDueAt = UnityEngine.Time.unscaledTime + SaveRetrySeconds;
@@ -180,7 +232,6 @@ namespace Game.PvE.Items
 
         // ── Nhặt / thêm đồ ────────────────────────────────────────
 
-        /// <summary>Nhặt item: trả về SỐ LƯỢNG ĐÃ NHẬN THẬT (0 = không nhận được gì).</summary>
         public int TryAddItem(ItemDefinition definition, int quantity = 1)
         {
             if (definition == null || quantity <= 0) return 0;
@@ -214,9 +265,47 @@ namespace Game.PvE.Items
             return $"inst_{DateTime.UtcNow.Ticks}_{_instanceCounter}";
         }
 
+        // ── Dùng vật phẩm tiêu hao ──────────────────────────────────
+
+        /// <summary>Hỏi trạng thái có dùng được không mà không thực sự dùng.</summary>
+        public ConsumableUseResult GetConsumableUseState(string itemId)
+        {
+            ItemDefinition definition = database != null ? database.Find(itemId) : null;
+            HealthComponent health = ResolveHealth();
+            float now = UnityEngine.Time.time;
+
+            return ConsumableRules.CanUse(
+                definition,
+                health != null ? health.CurrentHealth : 0.0,
+                health != null ? health.MaxHealth : 0.0,
+                _useClock.SecondsSinceCombat(now),
+                _useClock.SecondsSinceUse(itemId, now),
+                _inventory.GetStack(itemId));
+        }
+
+        /// <summary>
+        /// Dùng 1 vật phẩm tiêu hao: kiểm luật → ghi mốc dùng → hồi máu → trừ 1 trong túi.
+        /// </summary>
+        public ConsumableUseResult TryUseConsumable(string itemId)
+        {
+            ConsumableUseResult state = GetConsumableUseState(itemId);
+            if (state != ConsumableUseResult.Ok) return state;
+
+            ItemDefinition definition = database.Find(itemId);
+            HealthComponent health = ResolveHealth();
+            double heal = ConsumableRules.ComputeHeal(definition, health.CurrentHealth, health.MaxHealth);
+
+            _useClock.MarkUsed(itemId, UnityEngine.Time.time);
+            health.Heal(heal);
+            if (!_inventory.RemoveStack(itemId, 1))
+            {
+                Debug.LogError($"[Inventory] Dùng '{itemId}' nhưng không trừ được 1 trong túi.", this);
+            }
+            return ConsumableUseResult.Ok;
+        }
+
         // ── Trang bị ──────────────────────────────────────────────
 
-        /// <summary>Mặc instance theo slot của definition. Instance cũ trong slot vẫn nằm trong kho.</summary>
         public bool Equip(string instanceId)
         {
             ItemInstance instance = _inventory.FindInstance(instanceId);
@@ -239,7 +328,6 @@ namespace Game.PvE.Items
             return _equipment.IsEquipped(instanceId);
         }
 
-        /// <summary>Cộng chỉ số trang bị vào CharacterStats rồi báo HUD.</summary>
         public void ApplyEquipmentStats()
         {
             CharacterStats stats = ResolveStats();
@@ -256,7 +344,12 @@ namespace Game.PvE.Items
             return _stats;
         }
 
-        /// <summary>Tổng chỉ số cộng thêm hiện tại (để UI hiển thị).</summary>
+        private HealthComponent ResolveHealth()
+        {
+            if (_health == null) TryGetComponent(out _health);
+            return _health;
+        }
+
         public ItemStats CurrentEquipmentBonus()
         {
             return database != null ? database.SumEquipment(_equipment, _inventory) : default;
@@ -268,12 +361,18 @@ namespace Game.PvE.Items
         {
             if (_save == null || _saveLocked) return;
 
-            // Chụp snapshot cả 3 nhóm TRƯỚC khi await: dữ liệu nhất quán tại một thời điểm, và bản ghi local
-            // (đồng bộ) không phụ thuộc vào việc cloud trả lời kịp khi app bị pause/đóng.
             InventoryData inventoryData = ToInventoryData();
             EquipmentData equipmentData = ToEquipmentData();
+
+            // Lưu HP hiện tại vào ProfileData để restore khi vào lại game
+            HealthComponent health = ResolveHealth();
             ProfileData profileData = playerProgress != null
-                ? new ProfileData { level = playerProgress.Level, exp = playerProgress.CurrentExp }
+                ? new ProfileData
+                {
+                    level     = playerProgress.Level,
+                    exp       = playerProgress.CurrentExp,
+                    currentHp = health != null ? health.CurrentHealth : 0.0
+                }
                 : null;
 
             await _save.SaveAsync(SaveKeys.Inventory, inventoryData);
@@ -289,13 +388,23 @@ namespace Game.PvE.Items
             try
             {
                 var profile = await _save.LoadAsync<ProfileData>(SaveKeys.Profile);
-                if (profile != null && playerProgress != null) playerProgress.SetProgress(profile.level, profile.exp);
+                if (profile != null && playerProgress != null)
+                    playerProgress.SetProgress(profile.level, profile.exp);
 
                 var inventoryData = await _save.LoadAsync<InventoryData>(SaveKeys.Inventory);
                 var equipmentData = await _save.LoadAsync<EquipmentData>(SaveKeys.Equipment);
                 ApplyLoadedData(inventoryData, equipmentData);
 
-                _loaded = true; // chỉ bật khi nạp THÀNH CÔNG — sau đó mới tự động lưu
+                // Restore HP sau khi equipment stats đã áp dụng (MaxHealth đã đúng)
+                // currentHp == 0 → save cũ chưa có field → dùng MaxHealth mặc định
+                if (profile != null && profile.currentHp > 0.0)
+                {
+                    HealthComponent health = ResolveHealth();
+                    if (health != null)
+                        health.SetCurrentHealth(profile.currentHp);
+                }
+
+                _loaded = true;
             }
             finally
             {
@@ -350,11 +459,11 @@ namespace Game.PvE.Items
             {
                 data.instances.Add(new InstanceEntry
                 {
-                    instanceId = instance.instanceId,
-                    itemId = instance.itemId,
-                    upgradeLevel = instance.upgradeLevel,
-                    rolledAttack = instance.rolledStats.attack,
-                    rolledDefense = instance.rolledStats.defense,
+                    instanceId      = instance.instanceId,
+                    itemId          = instance.itemId,
+                    upgradeLevel    = instance.upgradeLevel,
+                    rolledAttack    = instance.rolledStats.attack,
+                    rolledDefense   = instance.rolledStats.defense,
                     rolledMaxHealth = instance.rolledStats.maxHealth
                 });
             }
@@ -366,7 +475,7 @@ namespace Game.PvE.Items
             return new EquipmentData
             {
                 weapon = _equipment.GetInstanceId(EquipmentSlot.Weapon),
-                armor = _equipment.GetInstanceId(EquipmentSlot.Armor)
+                armor  = _equipment.GetInstanceId(EquipmentSlot.Armor)
             };
         }
     }

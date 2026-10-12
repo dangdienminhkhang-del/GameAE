@@ -64,10 +64,21 @@ namespace Game.Core.Stats
             Recompute();
         }
 
+        /// <summary>EXP cần để lên level 2 (tức EXPNext của level 1) — docs/07 §1.</summary>
+        public const int ExpToLevelTwo = 100;
+
+        /// <summary>Mỗi level sau đó cần thêm bấy nhiêu EXP so với level liền trước — docs/07 §1.</summary>
+        public const int ExpIncreasePerLevel = 20;
+
+        /// <summary>
+        /// EXP cần để từ level hiện tại lên level kế (docs/07 §1, chốt ở Task B2):
+        ///   EXPNext(level) = 100 + 20 × (level − 1)   →  L1=100, L2=120, L5=180, L10=280.
+        /// Level nhỏ hơn 1 được coi là level 1.
+        /// </summary>
         public static int ExpRequiredForNextLevel(int currentLevel)
         {
-            // Làm tròn (không floor) để khớp đúng bảng số liệu ở docs/07 §1 (vd: level 2 = 283, không phải 282).
-            return UnityEngine.Mathf.RoundToInt(100f * UnityEngine.Mathf.Pow(currentLevel, 1.5f));
+            int safeLevel = Mathf.Max(1, currentLevel);
+            return ExpToLevelTwo + ExpIncreasePerLevel * (safeLevel - 1);
         }
 
         private void Recompute()

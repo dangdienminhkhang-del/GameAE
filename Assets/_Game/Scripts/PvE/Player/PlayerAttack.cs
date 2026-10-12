@@ -94,7 +94,8 @@ namespace Game.PvE.Player
                 double defense = AttackExecutor.ResolveDefense(target);
                 DamageInfo damage = AttackExecutor.ResolveDamage(
                     stats, defense, attackDefinition, UnityEngine.Random.value, gameObject.name);
-                target.TakeDamage(damage);
+                // ApplyHit = TakeDamage + phát GameEvents.OnHitResolved (túi đồ dùng để chặn uống thuốc khi đang đánh).
+                AttackExecutor.ApplyHit(target, damage);
 
                 if (logHits)
                 {

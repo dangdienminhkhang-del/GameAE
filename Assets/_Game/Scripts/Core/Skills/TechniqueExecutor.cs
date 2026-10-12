@@ -70,7 +70,8 @@ namespace Game.Core.Skills
                     defenderDefense,
                     window.hitMultiplier,
                     isCrit,
-                    criticalDamage);
+                    criticalDamage,
+                    Game.Core.Combat.CombatBalance.DefenseWeight);
 
                 results.Add(new DamageInfo(finalDamage)
                 {

@@ -46,7 +46,7 @@ namespace Game.Core.Skills
         /// <summary>Đọc MasterySaveData từ nguồn lưu. Caller bootstrap (PvEBootstrap hoặc MasteryService cài đặt) gọi khi vào gameplay.</summary>
         Task LoadAsync();
 
-        /// <summary>Lưu MasterySaveData xuống nguồn lưu (ISaveService). Gọi sau khi đổi và khi exit scene.</summary>
-        Task SaveAsync();
+        /// <summary>Lưu MasterySaveData xuống nguồn lưu; true chỉ khi write đã thành công.</summary>
+        Task<bool> SaveAsync();
     }
 }

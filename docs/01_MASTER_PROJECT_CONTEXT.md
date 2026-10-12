@@ -105,10 +105,11 @@ Game chỉ dùng những ý tưởng thiết kế phổ biến của thể loạ
 | `13_TWO_AGENT_IMPLEMENTATION_PLAN.md` | Ownership/dependency/handoff AI | Giao việc song song |
 
 ## 8. Trạng thái hiện tại
-
-- Code baseline đã có implementation từ Phase 0 đến 6.5.
+- Phase 6 đã DONE.
+- Phase 7 (Floor Framework) và Phase 7.5 (Blade Techniques + Dodge) đã DONE.
+- Code baseline đã có implementation từ Phase 0 đến 7.5.
 - Đăng nhập ẩn danh và Cloud Save Player Data đã được kiểm thử với backend thật theo `AGENTS.md`.
-- Phase tiếp theo theo roadmap là Floor Framework. Tuy vậy, trước khi đóng evidence Mốc 1, các gap Phase 6 trong `13` Wave 1A và Wave 2B phải được xác minh: quest turn-in/touch/save ordering và world time hai tài khoản.
+- Phase tiếp theo theo roadmap là Phase 8: Boss and Shared World State. 
 - Không tự ghi `DONE` trong roadmap chỉ vì code compile. Mỗi phase cần test, Unity Editor wiring và APK evidence.
 
 ## 9. Death và account tóm tắt

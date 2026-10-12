@@ -1,14 +1,10 @@
 using System.Collections.Generic;
+using Game.Core.Events;
 
 namespace Game.Core.Combat
 {
-    /// <summary>
-    /// Ghép (attacker stats + AttackDefinition + target) thành DamageInfo rồi áp lên IDamageable.
-    /// Thuần logic, không biết PvE/PvP — test được không cần scene.
-    /// </summary>
     public static class AttackExecutor
     {
-        /// <summary>criticalRoll là [0,1) — truyền vào để test tất định, gameplay truyền Random.value.</summary>
         public static DamageInfo ResolveDamage(
             ICombatStats attacker,
             double defenderDefense,
@@ -22,7 +18,7 @@ namespace Game.Core.Combat
             bool isCritical = criticalRoll < criticalChance;
 
             double attackValue = attacker != null ? attacker.Attack : 0.0;
-            double amount = DamageCalculator.Calculate(attackValue, defenderDefense, multiplier, isCritical, criticalDamage);
+            double amount = DamageCalculator.Calculate(attackValue, defenderDefense, multiplier, isCritical, criticalDamage, CombatBalance.DefenseWeight);
 
             return new DamageInfo(amount)
             {
@@ -50,13 +46,11 @@ namespace Game.Core.Combat
             return attacker != null ? attacker.CriticalDamage : 1.0;
         }
 
-        /// <summary>Mục tiêu không có chỉ số (ví dụ bia) coi như DEF = 0.</summary>
         public static double ResolveDefense(IDamageable target)
         {
             return target is ICombatStats stats ? stats.Defense : 0.0;
         }
 
-        /// <summary>Áp cùng một DamageInfo lên nhiều mục tiêu (đòn diện rộng). Trả về số mục tiêu trúng.</summary>
         public static int ApplyDamage(IReadOnlyList<IDamageable> targets, DamageInfo damage)
         {
             if (targets == null || damage == null) return 0;
@@ -66,10 +60,32 @@ namespace Game.Core.Combat
             {
                 IDamageable target = targets[i];
                 if (target == null || target.IsDead) continue;
-                target.TakeDamage(damage);
+                ApplyHit(target, damage);
                 hits++;
             }
             return hits;
+        }
+
+        /// <summary>
+        /// Áp 1 hit lên 1 mục tiêu rồi phát GameEvents.OnHitResolved đúng một lần.
+        /// Chỉ phát khi mục tiêu còn sống trước hit VÀ damage thật sự áp (máu giảm hoặc chết):
+        /// mục tiêu đã chết, hoặc từ chối damage (Safe Zone...) thì không phát. Trả true nếu đã phát.
+        /// </summary>
+        public static bool ApplyHit(IDamageable target, DamageInfo damage)
+        {
+            if (target == null || damage == null || target.IsDead) return false;
+
+            double before = target.CurrentHealth;
+            target.TakeDamage(damage);
+            if (!target.IsDead && target.CurrentHealth >= before) return false;
+
+            GameEvents.RaiseHitResolved(damage.Source, new HitResolvedArgs
+            {
+                Source = damage.Source,
+                Target = target,
+                Damage = damage
+            });
+            return true;
         }
 
         private static double Clamp01(double value)

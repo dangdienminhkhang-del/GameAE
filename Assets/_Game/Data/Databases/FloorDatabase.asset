@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Core::Game.Core.Floor.FloorDatabase
   floors:
   - {fileID: 11400000, guid: caf99ad996ef88f4097e61dcb047a039, type: 2}
+  - {fileID: 11400000, guid: b6f455a8fe154e8449286fccf6c45c5b, type: 2}

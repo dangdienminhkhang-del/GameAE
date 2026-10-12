@@ -78,7 +78,8 @@ namespace Game.Core.Quest
         public void Accept(string questId)
         {
             QuestState state = GetOrCreate(questId);
-            if (state.IsCompleted) return;
+            // Không hạ về Active nếu đã Completed hoặc đang ReadyToTurnIn
+            if (state.IsCompleted || state.IsReadyToTurnIn) return;
             state.status = QuestStatus.Active;
         }
 

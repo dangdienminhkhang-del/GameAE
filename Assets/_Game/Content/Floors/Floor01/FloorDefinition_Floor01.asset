@@ -25,6 +25,6 @@ MonoBehaviour:
   spawnEnemyIds: []
   npcIds: []
   questIds: []
-  bossId: 
+  bossId: boss.floor_01
   safeZoneConfigIds: []
   requiredBossDefeatedId: 

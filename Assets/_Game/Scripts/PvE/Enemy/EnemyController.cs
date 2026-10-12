@@ -54,9 +54,28 @@ namespace Game.PvE.Enemy
         public Transform Target => _target;
         public bool IsDead => _health <= 0.0;
         public double CurrentHealth => _health;
-        public double MaxHealth => definition != null ? definition.MaxHealth * _floorPower : 1.0;
-        public double Attack => definition != null ? definition.Attack * _floorPower : 0.0;
-        public double Defense => definition != null ? definition.Defense * _floorPower : 0.0;
+        public double MaxHealth => definition != null ? ScaleStat(definition.MaxHealth, _floorPower) : 1.0;
+        public double Attack => definition != null ? ScaleStat(definition.Attack, _floorPower) : 0.0;
+        public double Defense => definition != null ? ScaleStat(definition.Defense, _floorPower) : 0.0;
+
+        /// <summary>EXP thật quái này cho khi chết: EXP gốc × hệ số EXP của tầng, làm tròn theo ScaleExperience.</summary>
+        public int ExperienceReward => definition != null ? ScaleExperience(definition.ExperienceReward, _expMultiplier) : 0;
+
+        /// <summary>
+        /// Chỉ số sau khi nhân hệ số tầng, làm tròn về số nguyên: Math.Round + MidpointRounding.AwayFromZero (docs/07 §6).
+        /// Không làm tròn thì số thực kiểu 50 × 1.6f = 80.0000012 khiến quái sống dư một đòn.
+        /// </summary>
+        public static double ScaleStat(double baseValue, float multiplier)
+        {
+            return Math.Round(baseValue * multiplier, MidpointRounding.AwayFromZero);
+        }
+
+        /// <summary>EXP sau khi nhân hệ số tầng, làm tròn cùng quy tắc với ScaleStat (docs/07 §6).</summary>
+        public static int ScaleExperience(int baseExperience, float multiplier)
+        {
+            return (int)Math.Round(baseExperience * (double)multiplier, MidpointRounding.AwayFromZero);
+        }
+
         public double CriticalChance => 0.0;
         public double CriticalDamage => 1.0;
         public bool IsHurt => _hurtTimer > 0f;
@@ -242,8 +261,7 @@ namespace Game.PvE.Enemy
             GameEvents.RaiseEnemyDefeated(this);
             if (definition != null)
             {
-                int reward = UnityEngine.Mathf.RoundToInt(definition.ExperienceReward * _expMultiplier);
-                GameEvents.RaiseExperienceGained(this, reward);
+                GameEvents.RaiseExperienceGained(this, ExperienceReward);
             }
             Died?.Invoke(this);
         }

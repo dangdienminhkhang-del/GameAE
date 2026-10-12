@@ -114,6 +114,19 @@ namespace Game.PvE.Player
             }
         }
 
+        /// <summary>
+        /// Restore HP từ save — gọi sau khi MaxHealth đã được thiết lập đúng (equipment stats áp dụng xong).
+        /// Clamp về [0, MaxHealth]; không phát event nếu IsDead để tránh kích hoạt permadeath lần hai.
+        /// </summary>
+        public void SetCurrentHealth(double value)
+        {
+            if (_stats == null) return;
+            double clamped = System.Math.Max(0.0, System.Math.Min(value, MaxHealth));
+            _currentHealth = clamped;
+            // Không RaisePlayerDied dù clamped == 0 vì đây là restore save, không phải combat damage.
+            RaiseChanged(0.0);
+        }
+
         /// <summary>Khớp đúng ngữ nghĩa IDamageable.SetMaxHealth(..., resetCurrent): false = giữ tỉ lệ HP hiện tại.</summary>
         public void SetMaxHealth(double max, bool resetCurrent = false)
         {

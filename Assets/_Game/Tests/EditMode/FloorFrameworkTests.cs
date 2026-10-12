@@ -76,16 +76,7 @@ namespace Game.Tests.EditMode
         private static FloorDatabase MakeDatabase(params FloorDefinition[] floors)
         {
             var db = UnityEngine.ScriptableObject.CreateInstance<FloorDatabase>();
-
-            // Dùng SerializedObject để set private field, hoặc dùng reflection.
-            // Cách đơn giản và không phụ thuộc Editor: dùng reflection.
-            var field = typeof(FloorDatabase).GetField(
-                "floors",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            Assert.IsNotNull(field, "FloorDatabase.floors field không tìm thấy qua reflection");
-            field.SetValue(db, new System.Collections.Generic.List<FloorDefinition>(floors));
-
+            db.floors = new System.Collections.Generic.List<FloorDefinition>(floors);
             return db;
         }
 

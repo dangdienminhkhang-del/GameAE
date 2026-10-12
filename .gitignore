@@ -76,3 +76,5 @@ crashlytics-build.properties
 
 # Unity build temp (Android NDK, IL2CPP)
 .utmp/
+
+AgentScripts/

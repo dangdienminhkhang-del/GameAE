@@ -63,6 +63,9 @@ namespace Game.PvE.Skills
         // ── Dirty save (delay 2s) ──
         private bool _masteryDirty;
         private float _dirtySince;
+        private float _nextSaveAttemptAt;
+        private bool _saveInFlight;
+        private bool _masteryEventsSubscribed;
         private const float SaveDelaySeconds = 2f;
 
         // ── One-time error flags ──
@@ -103,29 +106,29 @@ namespace Game.PvE.Skills
             _slotCooldown[TechniqueInputSlot.Traverse]  = new CooldownSystem();
             _slotCooldown[TechniqueInputSlot.Control]   = new CooldownSystem();
             _slotCooldown[TechniqueInputSlot.Signature] = new CooldownSystem();
+            if (_mastery == null) _mastery = new PlayerMasteryService();
         }
 
         private async void Start()
         {
-            if (_mastery == null) _mastery = new PlayerMasteryService();
-            if (_mastery != null)
-                _mastery.TechniqueMasteryChanged += OnMasteryChanged;
             try { await _mastery.LoadAsync(); }
             catch { /* không block gameplay nếu save lỗi */ }
         }
+
+        private void OnEnable() => SubscribeMasteryEvents();
 
         private void OnMasteryChanged(object sender, TechniqueMasteryChangedArgs args)
         {
             _masteryDirty = true;
             _dirtySince = UnityEngine.Time.unscaledTime;
+            _nextSaveAttemptAt = _dirtySince + SaveDelaySeconds;
         }
 
         private void Update()
         {
             // Dirty-save: flush sau 2s không có thay đổi mới
-            if (_masteryDirty && UnityEngine.Time.unscaledTime - _dirtySince >= SaveDelaySeconds)
+            if (_masteryDirty && !_saveInFlight && UnityEngine.Time.unscaledTime >= _nextSaveAttemptAt)
             {
-                _masteryDirty = false;
                 _ = FlushSaveAsync();
             }
 
@@ -139,27 +142,41 @@ namespace Game.PvE.Skills
 
         private void OnApplicationPause(bool pauseStatus)
         {
-            if (pauseStatus) { _masteryDirty = false; _ = FlushSaveAsync(); }
+            if (pauseStatus) _ = FlushSaveAsync();
         }
 
         private void OnDisable()
         {
-            _masteryDirty = false;
             _ = FlushSaveAsync();
-            if (_mastery != null) _mastery.TechniqueMasteryChanged -= OnMasteryChanged;
+            UnsubscribeMasteryEvents();
         }
 
-        private void OnDestroy()
+        private async void OnDestroy()
         {
-            _masteryDirty = false;
-            _ = FlushSaveAsync();
+            while (_saveInFlight) await System.Threading.Tasks.Task.Yield();
+            await FlushSaveAsync();
+            (_mastery as IDisposable)?.Dispose();
         }
 
         public void AssignMasteryService(IMasteryService service)
         {
-            if (_mastery != null) _mastery.TechniqueMasteryChanged -= OnMasteryChanged;
+            UnsubscribeMasteryEvents();
             _mastery = service;
-            if (_mastery != null) _mastery.TechniqueMasteryChanged += OnMasteryChanged;
+            if (isActiveAndEnabled) SubscribeMasteryEvents();
+        }
+
+        private void SubscribeMasteryEvents()
+        {
+            if (_mastery == null || _masteryEventsSubscribed) return;
+            _mastery.TechniqueMasteryChanged += OnMasteryChanged;
+            _masteryEventsSubscribed = true;
+        }
+
+        private void UnsubscribeMasteryEvents()
+        {
+            if (_mastery == null || !_masteryEventsSubscribed) return;
+            _mastery.TechniqueMasteryChanged -= OnMasteryChanged;
+            _masteryEventsSubscribed = false;
         }
 
         // ── Public API ─────────────────────────────────────────────
@@ -276,7 +293,6 @@ namespace Game.PvE.Skills
                     elapsedInActive < window.startTimeOffset + window.duration + 0.0001f)
                 {
                     ProcessWindowDamageOnce(window, w);
-                    ApplyWindowMovementOnce(window, w);
                 }
             }
 
@@ -285,6 +301,22 @@ namespace Game.PvE.Skills
                 _state = TechniqueExecutionState.Recovery;
                 _stateEnterTime = UnityEngine.Time.time;
                 if (logHits) Debug.Log($"[TechniqueController] Sang Recovery {_activeDefinition.RecoverySeconds:F2}s");
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (_state != TechniqueExecutionState.Active || _activeDefinition == null) return;
+
+            float elapsedInActive = UnityEngine.Time.time - _stateEnterTime;
+            for (int w = 0; w < _activeDefinition.ActiveWindows.Count; w++)
+            {
+                TechniqueHitWindow window = _activeDefinition.ActiveWindows[w];
+                if (elapsedInActive >= window.startTimeOffset &&
+                    elapsedInActive < window.startTimeOffset + window.duration + 0.0001f)
+                {
+                    ApplyWindowMovementOnce(window, w);
+                }
             }
         }
 
@@ -319,7 +351,8 @@ namespace Game.PvE.Skills
                 double defense  = AttackExecutor.ResolveDefense(target);
                 double critRoll = UnityEngine.Random.value;
                 DamageInfo dmg  = CalculateSingleWindow(attacker, defense, _activeDefinition, window, critRoll, gameObject.name);
-                target.TakeDamage(dmg);
+                // ApplyHit = TakeDamage + phát GameEvents.OnHitResolved (túi đồ dùng để chặn uống thuốc khi đang đánh).
+                AttackExecutor.ApplyHit(target, dmg);
 
                 AwardMasteryCredit(targetInstanceId, isTechniqueHit: true);
 
@@ -357,6 +390,7 @@ namespace Game.PvE.Skills
 
                 var hits = new RaycastHit2D[4];
                 var filter = new ContactFilter2D { useTriggers = false };
+                filter.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
                 Vector2 dir = new Vector2(facing, 0f);
                 int hitCount = rb.Cast(dir, filter, hits, distance);
                 if (hitCount > 0 && hits[0].collider != null)
@@ -406,7 +440,7 @@ namespace Game.PvE.Skills
             double critDmg = def.CriticalDamageOverride >= 0.0 ? def.CriticalDamageOverride : (attacker != null ? attacker.CriticalDamage : 1.5);
             bool isCrit = critRoll < critChance;
             double final = DamageCalculator.Calculate(
-                attacker != null ? attacker.Attack : 0.0, defense, window.hitMultiplier, isCrit, critDmg);
+                attacker != null ? attacker.Attack : 0.0, defense, window.hitMultiplier, isCrit, critDmg, Game.Core.Combat.CombatBalance.DefenseWeight);
             return new DamageInfo(final)
             {
                 IsCritical        = isCrit,
@@ -479,11 +513,17 @@ namespace Game.PvE.Skills
 
         private async System.Threading.Tasks.Task FlushSaveAsync()
         {
-            if (_mastery != null)
+            if (_mastery == null || _saveInFlight) return;
+
+            _saveInFlight = true;
+            try
             {
-                try { await _mastery.SaveAsync(); }
-                catch { }
+                bool saved = await _mastery.SaveAsync();
+                if (saved) _masteryDirty = false;
+                else _nextSaveAttemptAt = UnityEngine.Time.unscaledTime + 5f;
             }
+            catch { _nextSaveAttemptAt = UnityEngine.Time.unscaledTime + 5f; }
+            finally { _saveInFlight = false; }
         }
     }
 }

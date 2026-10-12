@@ -15,16 +15,16 @@ MonoBehaviour:
   id: enemy.bat
   displayName: Doi Dem
   sprite: {fileID: 21300000, guid: b0d3ce8845fb7c54e9b91f9f1429d7d7, type: 3}
-  maxHealth: 45
-  attack: 8
-  defense: 3
+  maxHealth: 40
+  attack: 12
+  defense: 0
   moveSpeed: 2.6
   detectionRange: 7
   attackRange: 1.2
   attackCooldownSeconds: 1.8
   hurtSeconds: 0.25
   deathSeconds: 0.6
-  experienceReward: 20
+  experienceReward: 14
   drops:
   - item: {fileID: 11400000, guid: 7e83af74fd9295943bd30c023eea7a7a, type: 2}
     chance: 0.5

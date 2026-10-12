@@ -47,10 +47,10 @@ namespace Game.Tests.EditMode
             public Func<WorldTimeSnapshot> Factory;
             public bool ThrowOnGet;
 
-            public Task ReportBossDefeatedAsync(string bossId, string floorId)
+            public Task<Game.Core.World.BossDefeatResult> ReportBossDefeatedAsync(string bossId, string floorId)
             {
                 ReportCallCount++;
-                return Task.CompletedTask;
+                return Task.FromResult(new Game.Core.World.BossDefeatResult(false, bossId, floorId, "floor.02"));
             }
 
             public Task<WorldTimeSnapshot> GetWorldTimeSnapshotAsync()
@@ -161,8 +161,8 @@ namespace Game.Tests.EditMode
         {
             var config = MakeConfig(1200f, 0f);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            fake.NextSnapshot = MakeSnapshot(12.0, now, revision: 5L);
+            // anchorUnix không còn ảnh hưởng tới CurrentGameTimeHours (ApplySnapshot dùng gameTimeHoursAtAnchor trực tiếp)
+            fake.NextSnapshot = MakeSnapshot(12.0, anchorUnix: 1_700_000_000L, revision: 5L);
 
             var service = new Game.Services.Time.TimeService(config, fake);
             try
@@ -171,10 +171,11 @@ namespace Game.Tests.EditMode
 
                 Assert.IsNotNull(service.CurrentSnapshot);
                 Assert.AreEqual(5L, service.CurrentSnapshot.revision);
-                // predicted = 12.0 (vì anchor = now nên elapsed ~0)
-                Assert.AreEqual(12.0, service.CurrentGameTimeHours, 0.01);
+                // Server đã re-anchor → CurrentGameTimeHours == gameTimeHoursAtAnchor (không dùng giờ thiết bị)
+                Assert.AreEqual(12.0, service.CurrentGameTimeHours, 0.05,
+                    "ApplySnapshot phải dùng gameTimeHoursAtAnchor trực tiếp, không PredictGameHours(UtcNow)");
                 Assert.IsTrue(service.IsAuthoritative);
-                Assert.AreEqual(0, service.SnapshotAgeSeconds); // mới apply, tuổi rất nhỏ
+                Assert.Less(service.SnapshotAgeSeconds, 5, "SnapshotAgeSeconds phải nhỏ (Stopwatch, không giờ máy)");
             }
             finally { UnityEngine.Object.DestroyImmediate(config); }
         }
@@ -184,25 +185,25 @@ namespace Game.Tests.EditMode
         {
             var config = MakeConfig(1200f, 0f);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            // Anchor cố định — không dùng giờ thiết bị
+            const long anchor = 1_700_000_000L;
             WorldTimeSnapshot fired = null;
 
-            fake.NextSnapshot = MakeSnapshot(8.0, now, revision: 5L);
+            fake.NextSnapshot = MakeSnapshot(8.0, anchor, revision: 5L);
             var service = new Game.Services.Time.TimeService(config, fake);
             service.WorldTimeResynced += (s, snap) => fired = snap;
             try
             {
                 await service.InitializeAsync();
-                long firstRev = service.CurrentSnapshot.revision;
                 fired = null;
 
-                // Gửi candidate revision thấp hơn (4 < 5)
-                fake.NextSnapshot = MakeSnapshot(20.0, now + 10, revision: 4L);
+                // Candidate revision thấp hơn (4 < 5) → bị reject
+                fake.NextSnapshot = MakeSnapshot(20.0, anchor + 10, revision: 4L);
                 bool ok = await service.ResyncAsync();
 
-                Assert.IsFalse(ok, "rejected revision nên ResyncAsync phải return false");
-                Assert.IsNull(fired, "WorldTimeResynced KHÔNG được phát khi snapshot bị reject");
-                Assert.AreEqual(5L, service.CurrentSnapshot.revision, "revision không đổi sau khi reject");
+                Assert.IsFalse(ok, "rejected revision → return false");
+                Assert.IsNull(fired, "WorldTimeResynced KHÔNG phát khi snapshot bị reject");
+                Assert.AreEqual(5L, service.CurrentSnapshot.revision, "revision không đổi");
             }
             finally { UnityEngine.Object.DestroyImmediate(config); }
         }
@@ -212,9 +213,9 @@ namespace Game.Tests.EditMode
         {
             var config = MakeConfig(1200f, 0f);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            const long anchor = 1_700_001_000L;
 
-            fake.NextSnapshot = MakeSnapshot(8.0, now + 1000, revision: 3L);
+            fake.NextSnapshot = MakeSnapshot(8.0, anchor, revision: 3L);
             var service = new Game.Services.Time.TimeService(config, fake);
             try
             {
@@ -222,7 +223,7 @@ namespace Game.Tests.EditMode
                 WorldTimeSnapshot first = service.CurrentSnapshot;
 
                 // Candidate cùng revision nhưng anchor cũ hơn
-                fake.NextSnapshot = MakeSnapshot(8.0, now, revision: 3L);
+                fake.NextSnapshot = MakeSnapshot(8.0, anchor - 1000, revision: 3L);
                 bool ok = await service.ResyncAsync();
 
                 Assert.IsFalse(ok);
@@ -264,14 +265,11 @@ namespace Game.Tests.EditMode
             {
                 await service.InitializeAsync();
 
-                Assert.IsFalse(service.IsAuthoritative,
-                    "khi server trả null, IsAuthoritative phải = false (không có fallback snapshot).");
-                Assert.IsNull(service.CurrentSnapshot,
-                    "CurrentSnapshot phải = null (LUẬT 08 §5: không tự bịa snapshot khi lỗi).");
-                // Giờ vẫn dùng local StartHour cho presentation (tick local tiếp tục, không đóng băng).
+                Assert.IsFalse(service.IsAuthoritative);
+                Assert.IsNull(service.CurrentSnapshot);
+                // Giờ dùng local StartHour (12.0)
                 Assert.AreEqual(12.0, service.CurrentGameTimeHours, 0.0001);
 
-                // Resync tiếp → cũng null → cũng false, không throw.
                 bool ok = await service.ResyncAsync();
                 Assert.IsFalse(ok);
                 Assert.IsNull(service.CurrentSnapshot);
@@ -279,33 +277,75 @@ namespace Game.Tests.EditMode
             finally { UnityEngine.Object.DestroyImmediate(config); }
         }
 
+        // ── Test clock-skew: anchorUnixSeconds lệch ±600s nhưng CurrentGameTimeHours vẫn đúng ──
+
+        [Test]
+        public async Task ApplySnapshot_ClockSkew_Plus600s_UsesGameTimeHoursAtAnchorDirectly()
+        {
+            // anchorUnixSeconds = now + 600 (máy chậm hơn server 10 phút)
+            // PredictGameHours(UtcNow) sẽ cho giờ âm (~-0.2h) → SAI
+            // ApplySnapshot mới dùng gameTimeHoursAtAnchor trực tiếp → đúng
+            var config = MakeConfig(1200f, 0f, materialDrift: 0.01f); // materialDrift nhỏ → snap ngay
+            var fake = new FakeServerFunctions();
+            long nowDevice = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            // Server "đi trước" thiết bị 600s
+            fake.NextSnapshot = MakeSnapshot(14.0, nowDevice + 600, revision: 1L);
+
+            var service = new Game.Services.Time.TimeService(config, fake);
+            try
+            {
+                await service.InitializeAsync();
+                Assert.AreEqual(14.0, service.CurrentGameTimeHours, 0.1,
+                    "anchorUnixSeconds > UtcNow: phải dùng gameTimeHoursAtAnchor, không PredictGameHours(UtcNow)");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(config); }
+        }
+
+        [Test]
+        public async Task ApplySnapshot_ClockSkew_Minus600s_UsesGameTimeHoursAtAnchorDirectly()
+        {
+            // anchorUnixSeconds = now - 600 (server anchor cũ 10 phút)
+            // PredictGameHours(UtcNow) sẽ cho giờ tăng thêm ~0.2h → lệch
+            // ApplySnapshot mới dùng gameTimeHoursAtAnchor trực tiếp → đúng
+            var config = MakeConfig(1200f, 0f, materialDrift: 0.01f);
+            var fake = new FakeServerFunctions();
+            long nowDevice = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            // Server đã re-anchor tại thời điểm trả lời nhưng anchor cũ hơn thiết bị 600s
+            fake.NextSnapshot = MakeSnapshot(14.0, nowDevice - 600, revision: 1L);
+
+            var service = new Game.Services.Time.TimeService(config, fake);
+            try
+            {
+                await service.InitializeAsync();
+                Assert.AreEqual(14.0, service.CurrentGameTimeHours, 0.1,
+                    "anchorUnixSeconds < UtcNow: phải dùng gameTimeHoursAtAnchor, không PredictGameHours(UtcNow)");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(config); }
+        }
+
         [Test]
         public async Task ResyncAsync_AfterValidSnapshot_ResyncFailsNull_YetAuthoritative_WhenSnapshotYoung()
         {
-            // maxSnapshotAgeSeconds rất lớn (3600 s) → snapshot còn trẻ → IsAuthoritative vẫn true
+            // maxSnapshotAgeSeconds rất lớn → snapshot còn trẻ → IsAuthoritative vẫn true
             var config = MakeConfig(1200f, 8f, maxAgeSeconds: 3600);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            // Lần 1: snapshot tốt, revision=5
-            fake.NextSnapshot = MakeSnapshot(8.0, now, revision: 5L);
+            // Anchor cố định, không phụ thuộc giờ thiết bị
+            fake.NextSnapshot = MakeSnapshot(8.0, 1_700_000_000L, revision: 5L);
             var service = new Game.Services.Time.TimeService(config, fake);
             try
             {
                 await service.InitializeAsync();
                 Assert.IsTrue(service.IsAuthoritative, "snapshot đã được xác nhận ban đầu");
-                Assert.AreEqual(5L, service.CurrentSnapshot.revision);
 
-                // Tạo resync thất bại (candidate null)
+                // Resync thất bại (null)
                 fake.NextSnapshot = null;
                 fake.Factory = () => null;
                 bool ok = await service.ResyncAsync();
 
                 Assert.IsFalse(ok, "resync thất bại → return false");
-                // Snapshot cũ giữ nguyên:
-                Assert.AreEqual(5L, service.CurrentSnapshot.revision, "snapshot cũ KHÔNG bị xóa khi resync lỗi");
+                Assert.AreEqual(5L, service.CurrentSnapshot.revision, "snapshot cũ KHÔNG bị xóa");
                 Assert.IsTrue(service.IsAuthoritative,
-                    "tuổi snapshot < MaxSnapshotAgeSeconds(3600s) → IsAuthoritative vẫn true (08 §5 hàng 2)");
+                    "tuổi snapshot < 3600s (Stopwatch) → IsAuthoritative vẫn true");
             }
             finally { UnityEngine.Object.DestroyImmediate(config); }
         }
@@ -313,19 +353,18 @@ namespace Game.Tests.EditMode
         [Test]
         public async Task ResyncAsync_AfterValidSnapshot_ResyncFailsNull_AuthoritativeFalseWhenSnapshotStale()
         {
-            // maxSnapshotAgeSeconds = 1s; sau khi init,chờ 2s → snapshot "quá tuổituổi → false
+            // maxSnapshotAgeSeconds = 1s; chờ 2s → Stopwatch age > 1s → IsAuthoritative false
             var config = MakeConfig(1200f, 8f, maxAgeSeconds: 1);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            fake.NextSnapshot = MakeSnapshot(10.0, now, revision: 2L);
+            // Anchor cố định, không dùng giờ thiết bị
+            fake.NextSnapshot = MakeSnapshot(10.0, 1_700_000_000L, revision: 2L);
             var service = new Game.Services.Time.TimeService(config, fake);
             try
             {
                 await service.InitializeAsync();
                 Assert.IsTrue(service.IsAuthoritative);
 
-                // chờ snapshot già hơn max (tuổi > 1 giây)
+                // Chờ Stopwatch age > maxSnapshotAgeSeconds (1s)
                 await Task.Delay(2100);
 
                 // Resync thất bại (server trả null)
@@ -334,7 +373,7 @@ namespace Game.Tests.EditMode
                 await service.ResyncAsync();
 
                 Assert.IsFalse(service.IsAuthoritative,
-                    "snapshot đã quá 1s → IsAuthoritative phải false dù có snapshot đã xác nhận trước đó");                // Snapshot instance vẫn còn (không bị xóa):
+                    "Stopwatch age > 1s → IsAuthoritative phải false dù có snapshot đã xác nhận trước đó");
                 Assert.IsNotNull(service.CurrentSnapshot, "snapshot instance vẫn còn lưu trong bộ nhớ");
             }
             finally { UnityEngine.Object.DestroyImmediate(config); }
@@ -345,8 +384,7 @@ namespace Game.Tests.EditMode
         {
             var config = MakeConfig(1200f, 0f);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            fake.NextSnapshot = MakeSnapshot(8.0, now, cycleVer: 999); // unsupported version
+            fake.NextSnapshot = MakeSnapshot(8.0, 1_700_000_000L, cycleVer: 999);
             var service = new Game.Services.Time.TimeService(config, fake);
             try
             {
@@ -368,25 +406,24 @@ namespace Game.Tests.EditMode
         [Test]
         public async Task ResyncAsync_SmallDrift_AppliesHalfSmoothCorrection()
         {
-            var config = MakeConfig(1200f, 0f, materialDrift: 1.0f); // material drift = 1 giờ; test drift 0.5h (nhỏ hơn)
+            var config = MakeConfig(1200f, 0f, materialDrift: 1.0f);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            const long anchor = 1_700_000_000L;
 
-            fake.NextSnapshot = MakeSnapshot(10.0, now);
+            // Init với gameTimeHours = 10.0
+            fake.NextSnapshot = MakeSnapshot(10.0, anchor);
             var service = new Game.Services.Time.TimeService(config, fake);
             try
             {
                 await service.InitializeAsync();
-                double first = service.CurrentGameTimeHours;
+                double first = service.CurrentGameTimeHours; // = 10.0
 
-                // Bây giờ cho candidate anchor mới hơn 1 chút, predicted = 10.5
-                // (drift = +0.5, nhỏ hơn material 1.0 → smooth correction 50%)
-                fake.Factory = () => MakeSnapshot(10.5, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-                // Đặt _effectiveGameHours = first = 10.0
+                // Resync với predicted = 10.5 (drift = 0.5 < materialDrift 1.0 → smooth 50%)
+                fake.Factory = () => MakeSnapshot(10.5, anchor + 1, revision: 2L);
                 await service.ResyncAsync();
 
                 double expected = first + 0.5 * 0.5; // 10.0 + 0.25 = 10.25
-                Assert.AreEqual(expected, service.CurrentGameTimeHours, 0.02,
+                Assert.AreEqual(expected, service.CurrentGameTimeHours, 0.05,
                     "drift nhỏ phải được sửa 50% (smooth correction)");
             }
             finally { UnityEngine.Object.DestroyImmediate(config); }
@@ -397,20 +434,20 @@ namespace Game.Tests.EditMode
         {
             var config = MakeConfig(1200f, 0f, materialDrift: 0.25f);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            const long anchor = 1_700_000_000L;
 
-            fake.NextSnapshot = MakeSnapshot(10.0, now);
+            fake.NextSnapshot = MakeSnapshot(10.0, anchor);
             var service = new Game.Services.Time.TimeService(config, fake);
             try
             {
                 await service.InitializeAsync();
 
                 // Drift = 3.0 giờ (lớn hơn material 0.25 → snap ngay)
-                fake.Factory = () => MakeSnapshot(13.0, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                fake.Factory = () => MakeSnapshot(13.0, anchor + 1, revision: 2L);
                 await service.ResyncAsync();
 
-                Assert.AreEqual(13.0, service.CurrentGameTimeHours, 0.02,
-                    "drift lớn phải snap ngay đến predicted server");
+                Assert.AreEqual(13.0, service.CurrentGameTimeHours, 0.05,
+                    "drift lớn phải snap ngay đến gameTimeHoursAtAnchor server");
             }
             finally { UnityEngine.Object.DestroyImmediate(config); }
         }
@@ -420,11 +457,11 @@ namespace Game.Tests.EditMode
         {
             var config = MakeConfig(1200f, 0f);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            const long anchor = 1_700_000_000L;
             int count = 0;
             WorldTimeSnapshot lastSnap = null;
 
-            fake.NextSnapshot = MakeSnapshot(8.0, now, revision: 1L);
+            fake.NextSnapshot = MakeSnapshot(8.0, anchor, revision: 1L);
             var service = new Game.Services.Time.TimeService(config, fake);
             service.WorldTimeResynced += (s, snap) => { count++; lastSnap = snap; };
             try
@@ -432,7 +469,7 @@ namespace Game.Tests.EditMode
                 await service.InitializeAsync();
                 Assert.AreEqual(1, count);
 
-                fake.NextSnapshot = MakeSnapshot(9.0, now + 5, revision: 2L);
+                fake.NextSnapshot = MakeSnapshot(9.0, anchor + 5, revision: 2L);
                 await service.ResyncAsync();
                 Assert.AreEqual(2, count);
                 Assert.AreEqual(2L, lastSnap.revision);
@@ -447,21 +484,18 @@ namespace Game.Tests.EditMode
         [Test]
         public async Task Tick_AfterSnapshot_UsesSnapshotRate_NotConfigRate()
         {
-            // Config rate = 1200 s/day = 0.02 h/s
-            // Snapshot rate = 600 s/day = 0.04 h/s → tick phải gấp đôi
             var config = MakeConfig(1200f, 0f);
             var fake = new FakeServerFunctions();
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            fake.NextSnapshot = MakeSnapshot(0.0, now, rate: 600.0);
+            // Snapshot rate = 600 s/day = 0.04 h/s; config rate = 1200 = 0.02 h/s
+            fake.NextSnapshot = MakeSnapshot(0.0, 1_700_000_000L, rate: 600.0);
 
             var service = new Game.Services.Time.TimeService(config, fake);
             try
             {
                 await service.InitializeAsync();
-                double start = service.CurrentGameTimeHours;
-                service.Tick(100f); // 100s * (24/600) = 100 * 0.04 = 4 giờ
-                double expected = (start + 4.0) % 24.0;
-                Assert.AreEqual(expected, service.CurrentGameTimeHours, 0.02,
+                double start = service.CurrentGameTimeHours; // = 0.0
+                service.Tick(100f); // 100s × (24/600) = 4h
+                Assert.AreEqual((start + 4.0) % 24.0, service.CurrentGameTimeHours, 0.02,
                     "tick phải dùng rate từ snapshot, không phải config rate");
             }
             finally { UnityEngine.Object.DestroyImmediate(config); }

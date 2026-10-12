@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Game.Core.Floor;
 using Game.Core.World;
@@ -10,6 +11,10 @@ namespace Game.PvE.Floor
     /// Cài đặt IFloorLoader cho PvE (docs/02 §19, 13 §4.2).
     /// Kiểm tra world state rồi load scene additive.
     /// Không gọi UGS trực tiếp — chỉ gọi qua IWorldStateService.
+    ///
+    /// Scene host: Floor 1 hiện nằm ngay trong scene gameplay đang chạy (PvE_Gameplay).
+    /// Nếu sceneKey của tầng đã được nạp thì KHÔNG nạp lại (tránh nhân đôi người chơi/Canvas/EventSystem),
+    /// và KHÔNG bao giờ unload scene đang active (nó chứa người chơi + HUD + bootstrap).
     ///
     /// Constructor: FloorLoader(IWorldStateService, FloorDatabase)
     ///   — để tạo mà không cần account state, dùng overload có accountIsDead.
@@ -33,6 +38,32 @@ namespace Game.PvE.Floor
             _worldState = worldState;
             _database = database;
             _accountIsDead = accountIsDead;
+        }
+
+        // ── Logic thuần (test được trong EditMode) ───────────────────────────
+
+        /// <summary>
+        /// True nếu scene của tầng đã nằm trong danh sách scene đang nạp
+        /// (so sánh ordinal). sceneKey rỗng/null hoặc danh sách null → false.
+        /// </summary>
+        public static bool IsSceneAlreadyHosted(string sceneKey, IEnumerable<string> loadedSceneNames)
+        {
+            if (string.IsNullOrEmpty(sceneKey) || loadedSceneNames == null) return false;
+            foreach (var name in loadedSceneNames)
+                if (string.Equals(name, sceneKey, System.StringComparison.Ordinal))
+                    return true;
+            return false;
+        }
+
+        private static List<string> GetLoadedSceneNames()
+        {
+            var names = new List<string>(SceneManager.sceneCount);
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+                if (scene.isLoaded) names.Add(scene.name);
+            }
+            return names;
         }
 
         // ── IFloorLoader ─────────────────────────────────────────────────────
@@ -83,23 +114,45 @@ namespace Game.PvE.Floor
                 }
             }
 
-            // 4. Unload floor cũ nếu có
-            await UnloadCurrentFloorAsync();
-
-            // 5. Load scene additive (EditMode test: scene không tồn tại → trả Loaded với def)
+            // 4. sceneKey bắt buộc (kiểm tra trước khi unload để lỗi không làm mất tầng cũ)
             if (string.IsNullOrEmpty(def.sceneKey))
                 return FloorLoadResult.ErrorResult(
                     $"[FloorLoader] FloorDefinition '{floorId}' không có sceneKey.");
 
 #if UNITY_EDITOR
-            // Trong EditMode test, không load scene thật — chỉ trả Success
+            // Ngoài Play Mode (EditMode test): không đụng scene thật — chỉ trả Success
             if (!Application.isPlaying)
             {
+                await UnloadCurrentFloorAsync();
                 _currentFloorId = floorId;
                 return FloorLoadResult.Success(def);
             }
 #endif
 
+            // 5. Scene của tầng đã được nạp (vd. Floor 1 nằm trong scene host)?
+            var loadedNames = GetLoadedSceneNames();
+            bool hosted = IsSceneAlreadyHosted(def.sceneKey, loadedNames);
+
+            // Chọn đúng tầng đang đứng → không làm gì
+            if (hosted && _currentFloorId == floorId)
+            {
+                Debug.Log($"[FloorLoader] Tầng '{floorId}' đang là tầng hiện tại — không load lại " +
+                          $"(scene đang nạp: {loadedNames.Count}).");
+                return FloorLoadResult.Success(def);
+            }
+
+            // 6. Unload floor cũ nếu có (không bao giờ unload scene active)
+            await UnloadCurrentFloorAsync();
+
+            if (hosted)
+            {
+                _currentFloorId = floorId;
+                Debug.Log($"[FloorLoader] Tầng '{floorId}' đã nằm trong scene host '{def.sceneKey}' — " +
+                          $"bỏ qua load (scene đang nạp: {loadedNames.Count}).");
+                return FloorLoadResult.Success(def);
+            }
+
+            // 7. Load scene additive
             var op = SceneManager.LoadSceneAsync(def.sceneKey, LoadSceneMode.Additive);
             if (op == null)
                 return FloorLoadResult.ErrorResult(
@@ -141,6 +194,14 @@ namespace Game.PvE.Floor
             var scene = SceneManager.GetSceneByName(def.sceneKey);
             if (scene.IsValid() && scene.isLoaded)
             {
+                // Scene active = scene host (người chơi + HUD + bootstrap) → tuyệt đối không unload.
+                if (scene == SceneManager.GetActiveScene())
+                {
+                    Debug.Log($"[FloorLoader] Tầng '{_currentFloorId}' nằm trong scene host '{def.sceneKey}' — không unload.");
+                    _currentFloorId = null;
+                    return;
+                }
+
                 var op = SceneManager.UnloadSceneAsync(def.sceneKey);
                 if (op != null)
                 {

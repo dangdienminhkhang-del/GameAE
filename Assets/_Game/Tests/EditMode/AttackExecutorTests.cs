@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Game.Core.Combat;
+using Game.Core.Events;
 using NUnit.Framework;
 
 namespace Game.Tests.EditMode
@@ -87,6 +88,145 @@ namespace Game.Tests.EditMode
             Assert.AreEqual(1, hits);
             Assert.AreEqual(7.0, alive.LastDamage, 0.0001);
             Assert.AreEqual(0.0, dead.LastDamage, 0.0001);
+        }
+
+        // ── HitResolved (ACR-1): phát đúng 1 lần khi damage thật sự áp lên mục tiêu còn sống ──
+
+        [Test]
+        public void ApplyHit_AliveTarget_RaisesHitResolvedOnce_WithSourceTargetDamage()
+        {
+            var attacker = new FakeStats(10.0, 0.0, 0.0, 1.5);
+            var target = new FakeTarget(100.0);
+            var damage = new DamageInfo(7.0) { Source = attacker };
+            var received = new List<HitResolvedArgs>();
+            System.EventHandler<HitResolvedArgs> handler = (s, a) => received.Add(a);
+
+            GameEvents.OnHitResolved += handler;
+            try
+            {
+                bool raised = AttackExecutor.ApplyHit(target, damage);
+
+                Assert.IsTrue(raised);
+                Assert.AreEqual(1, received.Count, "mỗi hit chỉ phát một lần");
+                Assert.AreSame(attacker, received[0].Source);
+                Assert.AreSame(target, received[0].Target);
+                Assert.AreSame(damage, received[0].Damage);
+                Assert.AreEqual(93.0, target.CurrentHealth, 0.0001, "damage vẫn được áp lên mục tiêu");
+            }
+            finally
+            {
+                GameEvents.OnHitResolved -= handler;
+            }
+        }
+
+        [Test]
+        public void ApplyHit_KillingBlow_StillRaisesOnce()
+        {
+            var target = new FakeTarget(5.0);
+            int count = 0;
+            System.EventHandler<HitResolvedArgs> handler = (s, a) => count++;
+
+            GameEvents.OnHitResolved += handler;
+            try
+            {
+                Assert.IsTrue(AttackExecutor.ApplyHit(target, new DamageInfo(50.0)));
+                Assert.IsTrue(target.IsDead);
+                Assert.AreEqual(1, count, "đòn kết liễu cũng là một hit hợp lệ");
+            }
+            finally
+            {
+                GameEvents.OnHitResolved -= handler;
+            }
+        }
+
+        [Test]
+        public void ApplyHit_DeadTarget_DoesNotRaise()
+        {
+            var dead = new FakeTarget(100.0, startDead: true);
+            int count = 0;
+            System.EventHandler<HitResolvedArgs> handler = (s, a) => count++;
+
+            GameEvents.OnHitResolved += handler;
+            try
+            {
+                Assert.IsFalse(AttackExecutor.ApplyHit(dead, new DamageInfo(7.0)));
+                Assert.AreEqual(0, count);
+            }
+            finally
+            {
+                GameEvents.OnHitResolved -= handler;
+            }
+        }
+
+        [Test]
+        public void ApplyHit_TargetRefusesDamage_SafeZone_DoesNotRaise()
+        {
+            // Safe Zone từ chối damage trước khi IDamageable nhận (docs/12 §11) → máu không đổi → không phải hit.
+            var protectedTarget = new FakeRefusingTarget(100.0);
+            int count = 0;
+            System.EventHandler<HitResolvedArgs> handler = (s, a) => count++;
+
+            GameEvents.OnHitResolved += handler;
+            try
+            {
+                Assert.IsFalse(AttackExecutor.ApplyHit(protectedTarget, new DamageInfo(7.0)));
+                Assert.AreEqual(0, count);
+                Assert.AreEqual(100.0, protectedTarget.CurrentHealth, 0.0001);
+            }
+            finally
+            {
+                GameEvents.OnHitResolved -= handler;
+            }
+        }
+
+        [Test]
+        public void ApplyHit_NullTargetOrDamage_DoesNotRaise()
+        {
+            int count = 0;
+            System.EventHandler<HitResolvedArgs> handler = (s, a) => count++;
+
+            GameEvents.OnHitResolved += handler;
+            try
+            {
+                Assert.IsFalse(AttackExecutor.ApplyHit(null, new DamageInfo(7.0)));
+                Assert.IsFalse(AttackExecutor.ApplyHit(new FakeTarget(100.0), null));
+                Assert.AreEqual(0, count);
+            }
+            finally
+            {
+                GameEvents.OnHitResolved -= handler;
+            }
+        }
+
+        [Test]
+        public void ApplyDamage_RaisesHitResolvedOncePerAliveTarget_NotForDeadOnes()
+        {
+            var targets = new List<IDamageable> { new FakeTarget(100.0), new FakeTarget(100.0, startDead: true), new FakeTarget(100.0), null };
+            int count = 0;
+            System.EventHandler<HitResolvedArgs> handler = (s, a) => count++;
+
+            GameEvents.OnHitResolved += handler;
+            try
+            {
+                int hits = AttackExecutor.ApplyDamage(targets, new DamageInfo(7.0));
+
+                Assert.AreEqual(2, hits);
+                Assert.AreEqual(2, count);
+            }
+            finally
+            {
+                GameEvents.OnHitResolved -= handler;
+            }
+        }
+
+        private class FakeRefusingTarget : FakeTarget
+        {
+            public FakeRefusingTarget(double maxHealth) : base(maxHealth) { }
+
+            public override void TakeDamage(DamageInfo damage)
+            {
+                // Giả lập Safe Zone: không nhận damage.
+            }
         }
 
         private class FakeStats : ICombatStats
