@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f4219f40d50cb44f8c4ef96bafe2c06, type: 3}
+  m_Name: NPC_Cartographer
+  m_EditorClassIdentifier: Game.Core::Game.Core.NPC.NPCDefinition
+  id: npc.cartographer
+  displayName: "Ng\u01B0\u1EDDi V\u1EBD H\u1EA3i \u0110\u1ED3"
+  dialogueLines:
+  - "Tuy\u1EBFn n\xE0y v\u1EEBa m\u1EDF. Ta \u0111ang v\u1EBD l\u1EA1i h\u1EA3i \u0111\u1ED3
+    t\u1EEBng van m\u1ED9t."
+  - "Ngo\xE0i v\xF9ng \u0111\xE8n th\xEC t\u1EF1 lo l\u1EA5y th\xE2n."
+  questOfferLine: "Van \xE1p \u1EDF \u0111\xE2y c\xF2n r\u1EC9 h\u01A1i. H\u1EA1
+    gi\xFAp ta 3 L\xEDnh G\xE1c L\xF2 H\u01A1i, ta s\u1EBD \u0111\xE1nh d\u1EA5u
+    tuy\u1EBFn an to\xE0n."
+  questInProgressLine: "Ch\u01B0a \u0111\u1EE7 ba t\xEAn. \u0110\u1EEBng \u0111\u1EE9ng
+    y\xEAn khi ch\xFAng nh\u1EA5c tay."
+  questCompletedLine: "Van \u0111\xE3 y\xEAn. Tuy\u1EBFn n\xE0y ta v\u1EBD xong r\u1ED3i."
+  offeredQuest: {fileID: 11400000, guid: 34e7a6afaa1bebc46a590c787575ef33, type: 2}
+  onlyAtSpecificTime: 0
+  activeTimeOfDay: 5

@@ -5,7 +5,7 @@
 ## Dự án
 
 2D Action RPG leo tầng cho Android (Unity + C#). Đang ở Mốc 1: **ONLINE** — phải đăng nhập (ẩn danh) mới chơi; PvE chơi một mình nhưng tiến trình/boss dùng chung server; Duel là phiên realtime nhỏ (2 người, không cùng máy). Có **hệ thống ngày/đêm** và **permadeath** (chết PvE là chết vĩnh viễn) là điểm nhấn gameplay.
-Phase hiện tại: **Phase 8 — Boss and Shared World State**. Phase 6 (Wave 1A Quest/NPC + Wave 2B Authoritative Time), Phase 7 (Floor Framework), Phase 7.5 (Blade Techniques + Dodge), Task D (DeathRecord fail-closed) và Task B (Combat Balance sandbox) đã DONE có test và evidence. Đang thực hiện: Phase 8 (Boss & Shared World State). UGS Auth + Player Cloud Save đã test thật; có fallback file local khi offline.
+Phase hiện tại: **Phase 9.5–9.9** (thứ tự và điều kiện đóng phase: `docs/05`). Phase 8 và 9 đã có code + tests; device evidence (bảng P8-5, P9-3) còn chờ điền nên chưa ghi DONE.
 Lưu ý Editor: nếu bật "Enter Play Mode Options" (tắt Domain Reload) thì Play lần 2 trở đi KHÔNG chạy lại luồng đăng nhập ở scene Boot → màn hình đứng ở "Đang đăng nhập...". Tắt tuỳ chọn đó trong Project Settings → Editor.
 Danh tính, mốc, quyết định đã chốt: `docs/01_MASTER_PROJECT_CONTEXT.md`.
 

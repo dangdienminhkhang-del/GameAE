@@ -22,7 +22,9 @@ MonoBehaviour:
     enemyPowerMultiplier: 0
     expMultiplier: 0
   itemTierId: tier.common
-  spawnEnemyIds: []
+  spawnEnemyIds:
+  - enemy.slime
+  - enemy.bat
   npcIds: []
   questIds: []
   bossId: boss.floor_01

@@ -18,12 +18,18 @@ namespace Game.PvE.Floor
     ///
     /// Constructor: FloorLoader(IWorldStateService, FloorDatabase)
     ///   — để tạo mà không cần account state, dùng overload có accountIsDead.
+    /// Overload có thêm cổng chuyển tầng (Func&lt;FloorTravelRules.Result&gt;): chỉ cho đổi tầng khi cổng trả Ok
+    /// (đứng trong Vùng An Toàn, còn sống). Không truyền cổng = hành vi cũ hoàn toàn.
+    /// Overload có thêm callback <c>onFloorEntered</c>: gọi ở MỌI nhánh vào tầng thành công (kể cả nhánh "đang đứng đúng tầng"
+    /// và nhánh EditMode), KHÔNG gọi khi Locked/NotAllowed/NotFound/Error. Callback ném lỗi chỉ bị log, không làm hỏng việc vào tầng.
     /// </summary>
     public class FloorLoader : IFloorLoader
     {
         private readonly IWorldStateService _worldState;
         private readonly FloorDatabase _database;
         private readonly bool _accountIsDead;
+        private readonly System.Func<FloorTravelRules.Result> _travelGate;
+        private readonly System.Action<FloorDefinition> _onFloorEntered;
 
         private string _currentFloorId;
         public string CurrentFloorId => _currentFloorId;
@@ -32,12 +38,32 @@ namespace Game.PvE.Floor
         public FloorLoader(IWorldStateService worldState, FloorDatabase database)
             : this(worldState, database, accountIsDead: false) { }
 
-        /// <summary>Constructor đầy đủ — inject từ PvEBootstrap.</summary>
+        /// <summary>Constructor đầy đủ (không có cổng chuyển tầng) — hành vi cũ.</summary>
         public FloorLoader(IWorldStateService worldState, FloorDatabase database, bool accountIsDead)
+            : this(worldState, database, accountIsDead, null) { }
+
+        /// <summary>
+        /// Constructor có cổng chuyển tầng — inject từ PvEBootstrap.
+        /// <paramref name="travelGate"/> được gọi LÚC CẦN (đọc vị trí/trạng thái sống chết tại thời điểm đó);
+        /// null = không có cổng (hành vi cũ). Cổng trả khác Ok thì LoadFloorAsync trả NotAllowed và không đổi gì.
+        /// </summary>
+        public FloorLoader(IWorldStateService worldState, FloorDatabase database, bool accountIsDead,
+                           System.Func<FloorTravelRules.Result> travelGate)
+            : this(worldState, database, accountIsDead, travelGate, null) { }
+
+        /// <summary>
+        /// Constructor có cổng chuyển tầng và callback "đã vào tầng" (<paramref name="onFloorEntered"/>, có thể null).
+        /// PvEBootstrap dùng callback này để ghi nhận tầng cao nhất đã vào.
+        /// </summary>
+        public FloorLoader(IWorldStateService worldState, FloorDatabase database, bool accountIsDead,
+                           System.Func<FloorTravelRules.Result> travelGate,
+                           System.Action<FloorDefinition> onFloorEntered)
         {
             _worldState = worldState;
             _database = database;
             _accountIsDead = accountIsDead;
+            _travelGate = travelGate;
+            _onFloorEntered = onFloorEntered;
         }
 
         // ── Logic thuần (test được trong EditMode) ───────────────────────────
@@ -66,6 +92,58 @@ namespace Game.PvE.Floor
             return names;
         }
 
+        // ── Cổng chuyển tầng ─────────────────────────────────────────────────
+
+        // Chữ hiển thị cho người chơi (loader quyết định nội dung; UI chỉ hiện nguyên văn).
+        private const string NotInSafeZoneMessage = "Chỉ có thể chuyển tầng khi đang ở Vùng An Toàn.";
+        private const string PlayerDeadMessage = "Nhân vật đã gục, không thể chuyển tầng.";
+        private const string NotAllowedFallbackMessage = "Không thể chuyển tầng lúc này.";
+
+        private static string DescribeTravelDenial(FloorTravelRules.Result verdict)
+        {
+            switch (verdict)
+            {
+                case FloorTravelRules.Result.NotInSafeZone: return NotInSafeZoneMessage;
+                case FloorTravelRules.Result.PlayerDead: return PlayerDeadMessage;
+                default: return NotAllowedFallbackMessage;
+            }
+        }
+
+        /// <summary>
+        /// Hỏi cổng chuyển tầng. Trả null nếu được phép (hoặc không có cổng); ngược lại trả NotAllowedResult.
+        /// Không đổi bất kỳ trạng thái nào của loader.
+        /// </summary>
+        private FloorLoadResult CheckTravelGate(string floorId)
+        {
+            if (_travelGate == null) return null;
+
+            var verdict = _travelGate();
+            if (verdict == FloorTravelRules.Result.Ok) return null;
+
+            Debug.Log($"[FloorLoader] Từ chối chuyển tầng '{floorId}': {verdict}.");
+            return FloorLoadResult.NotAllowedResult(DescribeTravelDenial(verdict));
+        }
+
+        /// <summary>
+        /// Kết quả thành công của một lần vào tầng: báo callback (nếu có) rồi trả Success.
+        /// Callback ném lỗi → log, KHÔNG làm hỏng việc vào tầng.
+        /// </summary>
+        private FloorLoadResult Entered(FloorDefinition def)
+        {
+            if (_onFloorEntered != null)
+            {
+                try
+                {
+                    _onFloorEntered(def);
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
+            return FloorLoadResult.Success(def);
+        }
+
         // ── IFloorLoader ─────────────────────────────────────────────────────
 
         public async Task<FloorLoadResult> LoadFloorAsync(string floorId)
@@ -74,6 +152,10 @@ namespace Game.PvE.Floor
             if (_accountIsDead)
                 return FloorLoadResult.ErrorResult(
                     "[FloorLoader] Account đã chết — không thể vào Floor.");
+
+            // 1b. Cổng chuyển tầng (lần 1): từ chối sớm, khỏi đọc world state vô ích.
+            var denied = CheckTravelGate(floorId);
+            if (denied != null) return denied;
 
             // 2. Database lookup
             var def = _database?.GetFloor(floorId);
@@ -119,13 +201,18 @@ namespace Game.PvE.Floor
                 return FloorLoadResult.ErrorResult(
                     $"[FloorLoader] FloorDefinition '{floorId}' không có sceneKey.");
 
+            // 4b. Cổng chuyển tầng (lần 2): người chơi có thể đã bước ra khỏi Vùng An Toàn trong lúc chờ world state.
+            //     Kiểm NGAY TRƯỚC khi unload/nạp/kích hoạt bất cứ thứ gì — từ chối thì _currentFloorId không đổi.
+            denied = CheckTravelGate(floorId);
+            if (denied != null) return denied;
+
 #if UNITY_EDITOR
             // Ngoài Play Mode (EditMode test): không đụng scene thật — chỉ trả Success
             if (!Application.isPlaying)
             {
                 await UnloadCurrentFloorAsync();
                 _currentFloorId = floorId;
-                return FloorLoadResult.Success(def);
+                return Entered(def);
             }
 #endif
 
@@ -138,7 +225,9 @@ namespace Game.PvE.Floor
             {
                 Debug.Log($"[FloorLoader] Tầng '{floorId}' đang là tầng hiện tại — không load lại " +
                           $"(scene đang nạp: {loadedNames.Count}).");
-                return FloorLoadResult.Success(def);
+                // Đang đứng đúng tầng này: chỉ đảm bảo nội dung đang bật, KHÔNG dịch chuyển lại người chơi.
+                FloorActivation.ActivateFloor(def, placePlayer: false);
+                return Entered(def);
             }
 
             // 6. Unload floor cũ nếu có (không bao giờ unload scene active)
@@ -149,7 +238,8 @@ namespace Game.PvE.Floor
                 _currentFloorId = floorId;
                 Debug.Log($"[FloorLoader] Tầng '{floorId}' đã nằm trong scene host '{def.sceneKey}' — " +
                           $"bỏ qua load (scene đang nạp: {loadedNames.Count}).");
-                return FloorLoadResult.Success(def);
+                FloorActivation.ActivateFloor(def);
+                return Entered(def);
             }
 
             // 7. Load scene additive
@@ -169,7 +259,8 @@ namespace Game.PvE.Floor
 
             _currentFloorId = floorId;
             Debug.Log($"[FloorLoader] Đã load tầng '{floorId}' (scene: {def.sceneKey}).");
-            return FloorLoadResult.Success(def);
+            FloorActivation.ActivateFloor(def);
+            return Entered(def);
         }
 
         public async Task UnloadCurrentFloorAsync()

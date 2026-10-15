@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Game.Core.Floor;
 using UnityEngine;
 
 namespace Game.PvE.Enemy
@@ -9,7 +10,7 @@ namespace Game.PvE.Enemy
     /// Sinh quái theo cấu hình của scene, dùng pool (không Instantiate/Destroy trong combat).
     /// Một prefab dùng cho mọi loại quái — sprite lấy từ EnemyDefinition lúc spawn.
     /// </summary>
-    public class EnemySpawner : MonoBehaviour
+    public class EnemySpawner : MonoBehaviour, IFloorActivationListener
     {
         [Serializable]
         public class SpawnEntry
@@ -37,6 +38,9 @@ namespace Game.PvE.Enemy
         private readonly Dictionary<EnemyDefinition, Queue<EnemyController>> _pools = new Dictionary<EnemyDefinition, Queue<EnemyController>>();
         private readonly List<EnemyController> _all = new List<EnemyController>();
 
+        // Những con đã được đưa vào trận (bỏ pool dự phòng chưa dùng) — để hồi sinh khi vào lại tầng.
+        private readonly List<EnemyController> _slots = new List<EnemyController>();
+
         public IReadOnlyList<EnemyController> Spawned => _all;
 
         // ── Floor data integration (Wave 1B) ────────────────────────────────
@@ -58,6 +62,11 @@ namespace Game.PvE.Enemy
         public void SetFloorNumber(int floor)
         {
             floorNumber = Mathf.Max(1, floor);
+            // Quái đã sinh trước khi biết số tầng (spawnOnStart) cũng phải nhận hệ số đúng.
+            foreach (EnemyController enemy in _all)
+            {
+                if (enemy != null) enemy.SetFloor(floorNumber);
+            }
         }
 
         // ────────────────────────────────────────────────────────────────────
@@ -120,6 +129,7 @@ namespace Game.PvE.Enemy
                 _all.Add(enemy);
             }
 
+            if (!_slots.Contains(enemy)) _slots.Add(enemy);
             enemy.transform.position = RandomPoint(entry.Radius);
             enemy.gameObject.SetActive(true);
             return enemy;
@@ -140,6 +150,8 @@ namespace Game.PvE.Enemy
 
         private void HandleEnemyDied(EnemyController enemy)
         {
+            // Spawner đang tắt (tầng bị ẩn) thì không chạy được coroutine; ReviveSlots lo việc hồi sinh khi tầng bật lại.
+            if (!isActiveAndEnabled) return;
             StartCoroutine(RespawnAfterDelay(enemy));
         }
 
@@ -160,6 +172,46 @@ namespace Game.PvE.Enemy
                 enemy.transform.position = RandomPoint(GetRadius(enemy));
                 enemy.gameObject.SetActive(true);
             }
+        }
+
+        // ── IFloorActivationListener ────────────────────────────────────────
+
+        /// <summary>Vào (hoặc vào lại) tầng: hồi sinh mọi quái đã đưa vào trận, đặt lại vị trí trong bán kính spawn.</summary>
+        public void OnFloorActivated(FloorDefinition def)
+        {
+            ReviveSlots(_slots, enemy => RandomPoint(GetRadius(enemy)));
+        }
+
+        /// <summary>Tầng bị tắt cùng object này nên coroutine hồi sinh tự dừng; không cần dọn thêm.</summary>
+        public void OnFloorDeactivated() { }
+
+        /// <summary>
+        /// Hồi sinh các con trong danh sách: đặt lại vị trí, bật lại con đã tắt (đã chết), và trong Play Mode
+        /// reset máu con còn sống. Trả số con được xử lý. Hàm tĩnh để test được không cần scene.
+        /// </summary>
+        public static int ReviveSlots(IReadOnlyList<EnemyController> slots, Func<EnemyController, Vector2> pickPoint)
+        {
+            if (slots == null) return 0;
+
+            int count = 0;
+            foreach (EnemyController enemy in slots)
+            {
+                if (enemy == null) continue;
+
+                if (pickPoint != null) enemy.transform.position = pickPoint(enemy);
+
+                if (!enemy.gameObject.activeSelf)
+                {
+                    // OnEnable của EnemyController tự ResetForSpawn (đầy máu, về Idle).
+                    enemy.gameObject.SetActive(true);
+                }
+                else if (Application.isPlaying && enemy.isActiveAndEnabled)
+                {
+                    enemy.ResetForSpawn();
+                }
+                count++;
+            }
+            return count;
         }
 
         private static EnemyDefinition GetDefinition(EnemyController enemy)

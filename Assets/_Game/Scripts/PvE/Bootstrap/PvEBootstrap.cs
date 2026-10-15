@@ -56,6 +56,7 @@ namespace Game.PvE.Bootstrap
         private IFloorLoader _floorLoader;
         private IWorldStateService _worldState;
         private DeathRetryLoop _deathRetryLoop;
+        private PersonalProgress _progress;
 
         // ── Truy cập chỉ-đọc cho UI (UI → PvE; PvE không biết UI) ─────────────
 
@@ -75,6 +76,7 @@ namespace Game.PvE.Bootstrap
             WireCamera();
             WireHUD();
             WireDeathService();
+            WirePersonalProgress();
             WireFloorLoader();
         }
 
@@ -160,6 +162,24 @@ namespace Game.PvE.Bootstrap
             GameEvents.OnPlayerDeathRecorded += HandleDeathRecorded;
         }
 
+        /// <summary>
+        /// Theo dõi TẦNG CAO NHẤT đã vào (key "progress"). Dùng ISaveService từ ServiceProvider (mỗi lần tạo một instance mới,
+        /// các instance dùng chung thư mục local và bộ đếm lần lưu static nên không có hai bản cache xung đột).
+        /// LoadAsync không bao giờ ném; chưa đọc xong thì HighestFloor tạm là 1 và phép ghi nhận tầng mới tự gộp khi đọc xong.
+        /// </summary>
+        private void WirePersonalProgress()
+        {
+            _progress = new PersonalProgress(ServiceProvider.CreateSaveService());
+            _ = _progress.LoadAsync();
+        }
+
+        /// <summary>Callback của FloorLoader: người chơi vừa vào <paramref name="def"/>. RecordFloorEnteredAsync không bao giờ ném.</summary>
+        private void HandleFloorEntered(FloorDefinition def)
+        {
+            if (def == null || _progress == null) return;
+            _ = _progress.RecordFloorEnteredAsync(def.floorNumber);
+        }
+
         private void WireFloorLoader()
         {
             if (floorDatabase == null)
@@ -172,7 +192,33 @@ namespace Game.PvE.Bootstrap
 
             // MỘT instance world state dùng chung cho loader (và cho FloorSelector phía UI qua property WorldState).
             _worldState = ServiceProvider.CreateWorldStateService();
-            _floorLoader = new Game.PvE.Floor.FloorLoader(_worldState, floorDatabase, isDead);
+
+            // Cổng chuyển tầng: chỉ đổi tầng khi người chơi đang đứng trong Vùng An Toàn và còn sống
+            // (docs/09 §1.3, docs/11 §2). Cổng đọc vị trí/trạng thái TẠI THỜI ĐIỂM được hỏi, không chốt lúc Awake.
+            _floorLoader = new Game.PvE.Floor.FloorLoader(_worldState, floorDatabase, isDead, EvaluateFloorTravelGate, HandleFloorEntered);
+        }
+
+        /// <summary>Cổng truyền cho FloorLoader: lấy người chơi, Vùng An Toàn dùng chung và dịch vụ chết hiện tại.</summary>
+        private Game.PvE.Floor.FloorTravelRules.Result EvaluateFloorTravelGate()
+        {
+            return EvaluateTravelGate(
+                player != null ? player.transform : null,
+                Game.PvE.SafeZone.SafeZoneProvider.GetOrCreate(),
+                _deathService);
+        }
+
+        /// <summary>
+        /// Phần thuần của cổng chuyển tầng (test được không cần scene). Người chơi null được coi là KHÔNG ở Vùng An Toàn
+        /// (đóng cổng); không có dịch vụ chết thì coi như còn sống. Luật quyết định nằm ở <c>FloorTravelRules</c>.
+        /// </summary>
+        public static Game.PvE.Floor.FloorTravelRules.Result EvaluateTravelGate(
+            Transform playerTransform, SafeZoneService safeZones, IDeathService deathService)
+        {
+            bool inSafeZone = playerTransform != null
+                              && safeZones != null
+                              && safeZones.IsSafeZoneAt(playerTransform.position);
+            bool dead = deathService != null && deathService.IsPlayerDead;
+            return Game.PvE.Floor.FloorTravelRules.CanTravel(inSafeZone, dead);
         }
 
         // ──────────────────────────────────────────────
@@ -188,14 +234,20 @@ namespace Game.PvE.Bootstrap
 
             DeathReason reason = ResolveDeathReason(lastHit);
 
+            // Tầng đang đứng + tầng cao nhất: đọc từ BỘ NHỚ (không await đọc save lúc chết).
+            (int finalFloor, int finalHighestFloor) = ResolveDeathFloors(
+                ResolveCurrentFloorNumber(),
+                _progress != null ? _progress.HighestFloor : 0);
+
             // Chụp bản ghi NGAY lúc chết (docs/09 §1.3) rồi mới ghi.
             var record = new DeathRecord(
                 reason,
                 lastHit?.SourceId ?? "unknown",
                 level,
-                ResolveCurrentFloorNumber(),
-                playTime,
-                System.DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                finalHighestFloor: finalHighestFloor,
+                finalFloor: finalFloor,
+                totalPlayTimeSeconds: playTime,
+                deathTimeUnix: System.DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
             try
             {
@@ -214,6 +266,20 @@ namespace Game.PvE.Bootstrap
                 Debug.LogError($"[Death] Ghi nhận cái chết lỗi: {error}", this);
                 GameEvents.RaiseDeathRecordUnconfirmed(this, _deathService.CurrentDeathInfo);
             }
+        }
+
+        /// <summary>
+        /// Hai giá trị tầng ghi vào DeathRecord (hàm thuần). Từ Phase 9 hai giá trị này có thể khác nhau
+        /// (lên Tầng 2 rồi về chết ở Tầng 1).
+        /// • finalFloor = tầng đang đứng lúc chết; 0 nếu không xác định (không đoán).
+        /// • finalHighestFloor = tầng cao nhất đã vào = max(trần theo dõi, tầng đang đứng) — không bao giờ thấp hơn tầng đang đứng
+        ///   (docs/03: finalHighestFloor = personalHighestFloor). Giá trị âm coi như 0.
+        /// </summary>
+        public static (int finalFloor, int finalHighestFloor) ResolveDeathFloors(int currentFloor, int trackedHighest)
+        {
+            int floor = Mathf.Max(0, currentFloor);
+            int highest = Mathf.Max(Mathf.Max(0, trackedHighest), floor);
+            return (floor, highest);
         }
 
         /// <summary>

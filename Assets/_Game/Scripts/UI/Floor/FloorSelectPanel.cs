@@ -204,16 +204,10 @@ namespace Game.UI.Floor
             if (this == null) return;
             SetLoading(false);
 
-            // FloorLoadStatus chỉ có: Loaded, Locked, NotFound, Error (định nghĩa trong FloorLoadResult.cs)
+            // Không phải Loaded → hiện lý do và GIỮ panel mở (để người chơi đọc được, không mất danh sách).
             if (result.Status != FloorLoadStatus.Loaded)
             {
-                string msg = result.Status switch
-                {
-                    FloorLoadStatus.Locked   => "Tầng chưa mở.",
-                    FloorLoadStatus.NotFound => "Tầng không tồn tại.",
-                    _                        => CleanMessage(result.ErrorMessage)
-                };
-                SetError(true, msg);
+                SetError(true, DescribeFailure(result));
                 return;
             }
 
@@ -222,6 +216,29 @@ namespace Game.UI.Floor
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Chữ hiện cho người chơi khi tầng không vào được. NotAllowed: câu tiếng Việt do loader quyết định
+        /// (luật chuyển tầng nằm ở PvE) — UI chỉ hiện NGUYÊN VĂN, không tự quyết định.
+        /// </summary>
+        public static string DescribeFailure(FloorLoadResult result)
+        {
+            if (result == null) return CleanMessage(null);
+
+            switch (result.Status)
+            {
+                case FloorLoadStatus.Locked:
+                    return "Tầng chưa mở.";
+                case FloorLoadStatus.NotFound:
+                    return "Tầng không tồn tại.";
+                case FloorLoadStatus.NotAllowed:
+                    return string.IsNullOrWhiteSpace(result.ErrorMessage)
+                        ? CleanMessage(null)
+                        : result.ErrorMessage;
+                default:
+                    return CleanMessage(result.ErrorMessage);
+            }
+        }
 
         private static string CleanMessage(string message)
         {

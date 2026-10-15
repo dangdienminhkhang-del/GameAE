@@ -41,19 +41,32 @@ namespace Game.PvE.Boss
         }
 
         /// <summary>
+        /// Boss này có phải rematch không: World State báo boss đã Defeated.
+        /// Đọc lỗi → false (không suy ra rematch; server idempotent sẽ quyết định khi report).
+        /// BossController gọi hàm này TRƯỚC để EXP, đồ hiếm và báo cáo dùng cùng một giá trị.
+        /// </summary>
+        public Task<bool> ResolveIsRematchAsync(string bossId)
+        {
+            return IsAlreadyDefeatedAsync(bossId);
+        }
+
+        /// <summary>
         /// Xử lý report và rewards. <paramref name="grantItem"/> chỉ được gọi khi player còn sống;
         /// first-clear claim được authoritative-confirm trước khi callback cấp item.
+        /// <paramref name="knownRematch"/>: đã biết rematch hay chưa (từ <see cref="ResolveIsRematchAsync"/>);
+        /// có giá trị thì dùng luôn, KHÔNG đọc World State lần nữa. null → tự đọc như trước.
         /// </summary>
         public async Task<BossDefeatFlowResult> HandleDefeatAsync(
             BossDefinition definition,
             bool isPlayerDead,
-            Func<Game.Core.Items.ItemDefinition, int, int> grantItem)
+            Func<Game.Core.Items.ItemDefinition, int, int> grantItem,
+            bool? knownRematch = null)
         {
             if (definition == null) throw new ArgumentNullException(nameof(definition));
 
             var result = new BossDefeatFlowResult
             {
-                IsRematch = await IsAlreadyDefeatedAsync(definition.Id),
+                IsRematch = knownRematch ?? await IsAlreadyDefeatedAsync(definition.Id),
                 FirstClearResult = FirstClearClaimResult.NotConfigured,
                 MainDrops = Array.Empty<KeyValuePair<Game.Core.Items.ItemDefinition, int>>(),
                 RareDrops = Array.Empty<KeyValuePair<Game.Core.Items.ItemDefinition, int>>()

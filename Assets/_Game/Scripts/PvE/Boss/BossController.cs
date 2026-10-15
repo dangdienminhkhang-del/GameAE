@@ -4,6 +4,7 @@ using Game.Core.AI;
 using Game.Core.Character;
 using Game.Core.Combat;
 using Game.Core.Events;
+using Game.Core.Floor;
 using Game.Core.World;
 using Game.Services;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace Game.PvE.Boss
     /// - Lethal damage lên người chơi mang sourceId là Boss ID, kích hoạt Permadeath đúng chuẩn.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    public class BossController : MonoBehaviour, IDamageable, ICombatStats
+    public class BossController : MonoBehaviour, IDamageable, ICombatStats, IFloorActivationListener
     {
         [SerializeField] private BossDefinition definition;
         [SerializeField] private SpriteRenderer spriteRenderer;
@@ -48,6 +49,10 @@ namespace Game.PvE.Boss
         private Items.PlayerInventory _playerInventory;
         private BossDefeatFlow _defeatFlow;
         private bool _hasPendingDefeatReport;
+
+        // Vị trí ban đầu để đặt lại khi vào lại tầng (rematch).
+        private Vector3 _homePosition;
+        private bool _homeCaptured;
 
         public event Action<BossController> Died;
 
@@ -82,6 +87,7 @@ namespace Game.PvE.Boss
         {
             _rigidbody = GetComponent<Rigidbody2D>();
             if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            CaptureHomeIfNeeded();
 
             InitializeStateMachine();
             ResetHealth();
@@ -232,6 +238,46 @@ namespace Game.PvE.Boss
             }
         }
 
+        // ── IFloorActivationListener (rematch) ──────────────────────────────────────
+
+        /// <summary>Vào (hoặc vào lại) tầng: reset trận đấu để đánh lại được (docs/12 §7.2).</summary>
+        public void OnFloorActivated(FloorDefinition def)
+        {
+            ResetEncounter();
+        }
+
+        /// <summary>Boss đứng yên khi tầng bị tắt; không cần dọn thêm vì reset xảy ra lúc vào lại.</summary>
+        public void OnFloorDeactivated() { }
+
+        /// <summary>
+        /// Đưa boss về trạng thái ban đầu: máu đầy, hết cuồng nộ, về vị trí gốc, về Idle, bật lại nếu đang tắt.
+        /// KHÔNG đụng luồng báo server: cờ retry báo cáo đang chờ (_hasPendingDefeatReport) được giữ nguyên.
+        /// </summary>
+        public void ResetEncounter()
+        {
+            CaptureHomeIfNeeded();
+
+            if (!gameObject.activeSelf) gameObject.SetActive(true);
+
+            ResetHealth();
+            _attackTimer = 0f;
+            _stateTimer = 0f;
+            _pressureHitGate.Reset();
+
+            transform.position = _homePosition;
+            StopMoving();
+            RestoreBaseColor();
+
+            _machine?.ChangeTo<IdleState>();
+        }
+
+        private void CaptureHomeIfNeeded()
+        {
+            if (_homeCaptured) return;
+            _homePosition = transform.position;
+            _homeCaptured = true;
+        }
+
         public void Heal(double amount)
         {
             if (amount <= 0.0 || IsDead) return;
@@ -349,11 +395,10 @@ namespace Game.PvE.Boss
             StopMoving();
             if (spriteRenderer != null) spriteRenderer.color = new Color(0.3f, 0.3f, 0.3f, 0.8f);
 
-            // 1. Domain Events
+            // 1. Domain Events (phát ngay, không chờ World State)
             GameEvents.RaiseEnemyDefeated(this);
             if (definition != null)
             {
-                GameEvents.RaiseExperienceGained(this, definition.ExperienceReward);
                 GameEvents.RaiseBossDefeated(this, new BossDefeatedArgs
                 {
                     BossId = definition.Id,
@@ -365,15 +410,29 @@ namespace Game.PvE.Boss
 
             if (definition == null) return;
 
+            // Chốt definition: SetDefinition có thể đổi trong lúc đang await.
+            BossDefinition defeated = definition;
+
             if (_defeatFlow == null) RebuildDefeatFlow();
+
+            // 2. Rematch? Đọc MỘT lần; EXP, đồ hiếm và báo cáo dùng cùng giá trị này.
+            //    Đọc lỗi → false (không-rematch, như hành vi cũ) nên vẫn có EXP.
+            bool isRematch = await _defeatFlow.ResolveIsRematchAsync(defeated.Id);
+
+            // Rematch KHÔNG cho EXP (docs/02 §24): chỉ đồ chính và đồ hiếm.
+            if (!isRematch)
+            {
+                GameEvents.RaiseExperienceGained(this, defeated.ExperienceReward);
+            }
 
             BossDefeatFlowResult result;
             try
             {
                 result = await _defeatFlow.HandleDefeatAsync(
-                    definition,
+                    defeated,
                     _deathService != null && _deathService.IsPlayerDead,
-                    _playerInventory != null ? new Func<Game.Core.Items.ItemDefinition, int, int>(GrantItem) : null);
+                    _playerInventory != null ? new Func<Game.Core.Items.ItemDefinition, int, int>(GrantItem) : null,
+                    knownRematch: isRematch);
             }
             catch (Exception error)
             {

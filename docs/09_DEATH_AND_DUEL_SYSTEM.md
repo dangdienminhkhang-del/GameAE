@@ -28,6 +28,7 @@ Damage request
 - Enemy không spawn trong Safe Zone.
 - Safe Zone có thể hồi HP chậm qua service riêng, nhưng không được thay `death.isDead` về false.
 - Trigger dùng Collider2D; state không lưu Player Data.
+- Chuyển tầng chỉ được khi người chơi đang đứng trong Safe Zone (kiểm theo vị trí) và còn sống; Safe Zone không được thành nút thoát hiểm giữa trận. Điểm vào của mọi tầng phải nằm trong Safe Zone của tầng đó (chi tiết `02` §19).
 
 ### 1.3. Critical death flow
 
@@ -48,7 +49,8 @@ deathTime
 deathCause                 // Enemy, Boss, Trap
 deathSourceId
 finalLevel
-finalHighestFloor
+finalHighestFloor          // tầng cao nhất đã vào (= personalHighestFloor)
+finalFloor                 // tầng đang đứng lúc chết (0 = không xác định)
 totalPlayTimeSeconds
 ```
 
@@ -58,7 +60,19 @@ Migration note: code baseline hiện có `OnPlayerDiedAsync(...)`; đây là API
 
 ### 1.4. Death Screen
 
-Hiển thị nguyên nhân, nguồn death, play time, level cuối, Floor cao nhất và trạng thái account.
+Hiển thị nguyên nhân, nguồn death, play time, level cuối, tầng lúc chết, Floor cao nhất và trạng thái account, chia hai nhóm:
+
+```text
+Nguyên nhân: ...
+Chết ở tầng: {finalFloor}
+
+Thành tích
+Level cuối: ...
+Tầng cao nhất: {finalHighestFloor}
+Thời gian chơi: mm:ss
+```
+
+Bản ghi cũ chưa có `finalFloor` (đọc ra 0): "Chết ở tầng" lấy `finalHighestFloor`. Cả hai bằng 0 thì hiện "?" (không đoán là tầng 1).
 
 | Account state | Nút hợp lệ |
 |---|---|

@@ -596,6 +596,23 @@ Floor loading phải được thiết kế độc lập với combat.
 
 Nếu account isDead = true: không load Floor. Hiện Death Screen.
 
+Khung chuyển tầng đã cài (Phase 9, P9-1/P9-1b) — dùng chung cho mọi tầng, không rẽ nhánh theo số tầng (`FloorBranchingScanTests` chặn):
+
+```text
+FloorLoader.LoadFloorAsync(id)
+  → kiểm account chết → cổng luật chuyển tầng (lần 1, từ chối sớm)
+  → FloorDefinition → world state / personal progression
+  → cổng luật chuyển tầng (lần 2, NGAY TRƯỚC khi unload/nạp/kích hoạt)
+  → nạp scene additive (tầng nằm sẵn trong scene host thì không nạp)
+  → FloorActivation.ActivateFloor(def):
+      tắt MỌI FloorSceneBinder khác → bật binder đích → đặt người chơi tại EntryPoint
+```
+
+- `FloorSceneBinder` (PvE/Floor): nằm trên object LUÔN BẬT của mỗi tầng; giữ `floorId`, `contentRoot` (bật/tắt nội dung tầng), `entryPoint`, `FloorSpawnRegistrar`. Tầng nằm sẵn trong scene host (Tầng 1, scene chính không gỡ được) cũng phải gom vào một `contentRoot` như mọi tầng.
+- `IFloorActivationListener` (Core/Floor): `EnemySpawner` (hồi sinh quái) và `BossController` (reset trận để đánh lại) lắng nghe; thêm loại nội dung cần reset khi vào tầng chỉ cần implement interface này.
+- Cổng luật chuyển tầng (`FloorTravelRules`): chỉ chuyển tầng khi người chơi đang đứng trong Safe Zone (kiểm theo VỊ TRÍ, `SafeZoneService.IsSafeZoneAt`) VÀ còn sống; ngược lại `FloorLoadStatus.NotAllowed` kèm câu thông báo cho người chơi, không unload, không đổi gì. Chọn lại đúng tầng đang đứng thì không dịch chuyển, không reset. Quy tắc này để Safe Zone không thành nút thoát hiểm giữa trận (docs/09 §1.2).
+- Mỗi tầng: `entryPoint` phải nằm TRONG một Safe Zone của chính tầng đó (nếu không, người chơi hạ cánh ngoài vùng bảo hộ và không chuyển tầng tiếp được); vùng spawn quái nằm NGOÀI Safe Zone (docs/09 §1.2).
+
 20. PERSONAL PROGRESSION
 Player progression gồm:
 
@@ -689,6 +706,7 @@ Possible rare rewards
 World Boss progression không bị reset. Rematch chỉ phục vụ gameplay/reward.
 
 - Rematch giữ main drop như boss thật (ADR-016, 07 §7); phần rare ngẫu nhiên nhân 0.05, đặt trong `BossDefinition` (data, không hard-code).
+- Rematch không cho EXP; chỉ đồ chính và đồ hiếm.
 - Death-aware: Boss Rematch cũng có permadeath. Nếu chết trong Rematch → account bị khóa.
 
 25. WORLD STATE VS PERSONAL STATE

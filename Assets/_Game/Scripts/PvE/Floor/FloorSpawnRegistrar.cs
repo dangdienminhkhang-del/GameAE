@@ -4,12 +4,12 @@ using UnityEngine;
 namespace Game.PvE.Floor
 {
     /// <summary>
-    /// Sau khi scene floor được load additive, FloorSpawnRegistrar đọc FloorDefinition
-    /// và kích hoạt EnemySpawner theo data — KHÔNG có if floorId cụ thể.
+    /// Đọc FloorDefinition và kích hoạt EnemySpawner theo data — KHÔNG có if floorId cụ thể.
     ///
-    /// Đặt MonoBehaviour này lên một root GameObject trong scene của mỗi floor.
-    /// FloorSceneController (cũng trong scene đó) gọi Register(def) khi nhận được
-    /// FloorDefinition từ FloorLoader.
+    /// Đặt MonoBehaviour này trong nội dung của mỗi tầng. FloorSceneBinder gọi Register(def)
+    /// mỗi khi tầng được bật (qua FloorActivation, do FloorLoader gọi sau khi vào tầng thành công).
+    /// Gọi lại Register nhiều lần là an toàn: EnemySpawner chống spawn hai lần, và hồi sinh quái
+    /// được xử lý riêng qua IFloorActivationListener.
     /// </summary>
     public class FloorSpawnRegistrar : MonoBehaviour
     {
@@ -18,8 +18,11 @@ namespace Game.PvE.Floor
 
         private FloorDefinition _def;
 
+        /// <summary>ID của tầng đã đăng ký gần nhất; null nếu chưa đăng ký.</summary>
+        public string RegisteredFloorId => _def != null ? _def.id : null;
+
         /// <summary>
-        /// Gọi sau khi scene floor được load, truyền FloorDefinition tương ứng.
+        /// Gọi khi tầng được bật, truyền FloorDefinition tương ứng.
         /// </summary>
         public void Register(FloorDefinition def)
         {

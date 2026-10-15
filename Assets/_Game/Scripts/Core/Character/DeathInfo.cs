@@ -14,7 +14,16 @@ namespace Game.Core.Character
         public string deathCause;
         public string deathSourceId;
         public int finalLevel;
+
+        /// <summary>Tầng CAO NHẤT đã vào (= personalHighestFloor lúc chết, docs/03). 0 = chưa có.</summary>
         public int finalHighestFloor;
+
+        /// <summary>
+        /// Tầng người chơi đang đứng lúc chết. 0 = không xác định / bản ghi cũ chưa có field này
+        /// (thiếu field khi đọc JSON → 0, nên bản ghi cũ vẫn đọc được).
+        /// </summary>
+        public int finalFloor;
+
         public int totalPlayTimeSeconds;
     }
 }

@@ -65,7 +65,7 @@ Người chơi đăng nhập (Authentication, ẩn danh — `AuthenticationServi
   "linkedProvider": null            // "Google" | "Facebook" | "Apple" | null
 }
 
-// key "progress"
+// key "progress"                ← personalHighestFloor tăng khi vào tầng cao hơn (FloorLoader → PersonalProgress)
 {
   "personalHighestFloor": 1,
   "currentFloorId": "floor.01"
@@ -104,7 +104,8 @@ Người chơi đăng nhập (Authentication, ẩn danh — `AuthenticationServi
   "deathCause": null,               // "Enemy" | "Boss" | "Trap"
   "deathSourceId": null,            // id của enemy/boss/trap đã giết player
   "finalLevel": null,
-  "finalHighestFloor": null,
+  "finalHighestFloor": null,       // tầng CAO NHẤT đã vào (= personalHighestFloor lúc chết)
+  "finalFloor": null,               // tầng ĐANG ĐỨNG lúc chết (0/thiếu = không xác định; bản ghi cũ không có field này)
   "totalPlayTimeSeconds": 0
 }
 
@@ -134,7 +135,7 @@ instanceId sinh bằng bộ đếm hoặc GUID, không trùng. Trang bị = Item
 
 Weapon Technique KHÔNG lưu riêng danh sách "đã mở" — availability suy ra từ weapon mastery của discipline >= `WeaponTechniqueDefinition.masteryRequired` mỗi lần cần dùng, nên không cần field lưu trữ thêm (07 §3–4).
 
-personalHighestFloor bị chặn bởi World State toàn cục (mục 6) — không thể vượt quá tầng đã mở cho cả thế giới, nhưng cũng không tự nhảy tới đó, người chơi vẫn phải tự đi.
+personalHighestFloor bị chặn bởi World State toàn cục (mục 6) — không thể vượt quá tầng đã mở cho cả thế giới, nhưng cũng không tự nhảy tới đó, người chơi vẫn phải tự đi. Giá trị này được cập nhật khi người chơi vào một tầng cao hơn mức đã lưu: `FloorLoader` báo qua callback "đã vào tầng", lớp `PersonalProgress` (Core/World) chỉ tăng và ghi key `progress` (chỉ đổi `personalHighestFloor`, giữ nguyên `currentFloorId`). Lưu lỗi thì giữ giá trị trong bộ nhớ và thử lại ở lần lưu sau; lúc chết, giá trị lấy từ bộ nhớ chứ không đọc lại save. Lưu ý: `currentFloorId` hiện chưa được dùng — game chưa khôi phục tầng đang đứng khi mở lại app (việc tương lai).
 
 Challenge History giới hạn 100 trận gần nhất để tránh phình Player Data. Khi vượt 100, xóa trận cũ nhất.
 
@@ -150,7 +151,9 @@ death.deathCause = "Enemy" | "Boss" | "Trap"
 
 death.finalLevel = level hiện tại
 
-death.finalHighestFloor = personalHighestFloor
+death.finalHighestFloor = personalHighestFloor (tầng cao nhất đã vào, lấy từ bộ nhớ lúc chết; không bao giờ thấp hơn tầng đang đứng)
+
+death.finalFloor = tầng đang đứng lúc chết (0 = không xác định; bản ghi cũ không có field này đọc ra 0)
 
 Save NGAY lập tức (không đợi định kỳ) — đây là sự kiện critical.
 

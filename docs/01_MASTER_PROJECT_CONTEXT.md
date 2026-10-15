@@ -2,7 +2,7 @@
 ## Game2D Android Online Action RPG
 
 > Luật thiết kế cấp cao. Đọc `AGENTS.md` trước; đọc `12_ORIGINAL_GAMEPLAY_BIBLE.md` trước mọi thay đổi gameplay; đọc `13_TWO_AGENT_IMPLEMENTATION_PLAN.md` khi giao việc cho AI.
-> Cập nhật: 03/10/2026.
+> Cập nhật: 16/10/2026.
 
 ---
 
@@ -107,9 +107,10 @@ Game chỉ dùng những ý tưởng thiết kế phổ biến của thể loạ
 ## 8. Trạng thái hiện tại
 - Phase 6 đã DONE.
 - Phase 7 (Floor Framework) và Phase 7.5 (Blade Techniques + Dodge) đã DONE.
-- Code baseline đã có implementation từ Phase 0 đến 7.5.
+- Code baseline đã có implementation từ Phase 0 đến Phase 9.
 - Đăng nhập ẩn danh và Cloud Save Player Data đã được kiểm thử với backend thật theo `AGENTS.md`.
-- Phase tiếp theo theo roadmap là Phase 8: Boss and Shared World State. 
+- Phase 8 (Boss and Shared World State) và Phase 9 (Floor 2 data-only) đã có code + tests; device evidence (P8-5, P9-3) còn chờ điền nên chưa ghi DONE (`05` §2).
+- Phase đang làm theo roadmap: Phase 9.5–9.9 (thuộc Mốc 1, đã duyệt 2026-10-14, xem `05`). Phase 10 Duel làm sau 9.9; Duel vẫn thuộc Mốc 1 cho đến khi có ADR chuyển sang Mốc 2. 
 - Không tự ghi `DONE` trong roadmap chỉ vì code compile. Mỗi phase cần test, Unity Editor wiring và APK evidence.
 
 ## 9. Death và account tóm tắt

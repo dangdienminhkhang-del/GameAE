@@ -165,10 +165,12 @@ Không balance bằng HP lớn đơn thuần. Nếu boss quá lâu, giảm armor
 | Tình huống | Target |
 |---|---|
 | Quái thường hạ player đứng im | 10–20 đòn |
-| Elite hạ player | 5–10 đòn (chưa có dữ liệu Elite để đo) |
+| Elite hạ player | 5–10 đòn (đo bằng `enemy.pressure_warden` Tầng 2, xem §9) |
 | Số quái mỗi level | 8–15 quái |
 
 Đã chốt ở Task B2 bằng `BalanceSandboxTests`: với EXPNext (§1) và hệ số tầng (§6), Slime và Bat thật ở Tầng 1–10, đầu và cuối dải recommended level (5N − 4 và 5N), `defenseWeight = 0.3`, đều nằm trong khoảng mục tiêu: 3–5 đòn thường để hạ quái (§5), 10–20 đòn để quái hạ player đứng im, 8–15 quái mỗi level, và damage không chạm clamp 1. Kết quả chi tiết ở §9.
+
+Tầng 2 (Task P9-3) có thêm hai quái riêng, được `FloorTwoBalanceSandboxTests` đo ở Lv 6 và Lv 10 (đầu và cuối dải recommended level của floor.02): Guard `enemy.boiler_guard` phải nằm trong 4–7 đòn thường để hạ Guard, 10–20 đòn để Guard hạ người đứng im, 8–15 Guard mỗi level; Elite `enemy.pressure_warden` phải nằm trong 12–20 giây để hạ Elite (ước lượng = số đòn × 0.45s ÷ hiệu suất trúng 70%, cùng giả định với sandbox boss ở §5.2) và 5–10 đòn thường để Elite hạ người đứng im (Elite không bị ràng buộc "quái mỗi level"). Cả hai không được chạm clamp 1. Kết quả thật ở §9.
 
 ### 5.2. Boss Floor 1: ba pha, vùng đánh, field data và mô hình ước lượng (Task P8-4)
 
@@ -230,6 +232,8 @@ Hệ số tăng đều (tuyến tính), không tăng theo lũy thừa — chốt
 | 1 (Bat) | 1.00 | 1.00 | 40 / 12 / 0 / 14 |
 | 2 (Slime) | 1.60 | 1.75 | 80 / 18 / 0 / 21 |
 | 2 (Bat) | 1.60 | 1.75 | 64 / 19 / 0 / 25 |
+| 2 (Guard) | 1.60 | 1.75 | 112 / 21 / 6 / 25 |
+| 2 (Elite) | 1.60 | 1.75 | 480 / 29 / 10 / 63 |
 | 5 (Slime) | 3.40 | 4.00 | 170 / 37 / 0 / 48 |
 | 5 (Bat) | 3.40 | 4.00 | 136 / 41 / 0 / 56 |
 | 10 (Slime) | 6.40 | 7.75 | 320 / 70 / 0 / 93 |
@@ -270,6 +274,7 @@ First clear chỉ cấp bonus riêng cho người thỏa điều kiện; main bo
 | Unit curve | Số quái cần để lên mỗi level trong dải recommended level nằm trong 8–15. |
 | Unit curve | 3–5 đòn thường để hạ quái; 10–20 đòn để quái hạ player đứng im (`defenseWeight` 0.3). |
 | Unit rounding | `EnemyController` làm tròn HP/ATK/DEF/EXP về số nguyên (Slime Tầng 2 = 80 / 18; EXP Bat Tầng 2 = 25). |
+| Unit curve (Tầng 2) | `FloorTwoBalanceSandboxTests` với `enemy.boiler_guard` và `enemy.pressure_warden` thật (tìm theo ID), Lv 6 và Lv 10, `defenseWeight` 0.3: Guard 4–7 đòn hạ Guard, 10–20 đòn hạ người, 8–15 Guard/level; Elite 12–20 giây hạ Elite (ước lượng, §5.1), 5–10 đòn hạ người; không chạm clamp 1; `attackWindupSeconds` Guard > Slime; mọi quái trong `spawnEnemyIds` của floor.02 có asset và nằm trong bộ test. |
 | Asset | `FloorDefinition` floor.01/floor.02 khớp hàm `FloorScaling` và dải level 5N − 4 … 5N; scene `PvE_Gameplay` nạp `CombatBalanceConfig` có `defenseWeight` 0.3. |
 | Sandbox | TTK enemy/elite/boss ở recommended level. |
 | Unit boss | Luật trúng đòn của Boss (`BossHitRulesTests`): trong vùng đánh → trúng; lùi ra ngoài vùng trước lúc đánh → trượt; đứng ngoài hành lang lao → trượt, trong → trúng; mỗi lần lao chỉ một lần damage. |
@@ -288,6 +293,17 @@ Kết quả sandbox khi chốt Task B2 (Slime và Bat thật, Tầng 1–10 × h
 | Bat | 3–4 | 10–18 | 8–13 |
 
 Một số ca nằm sát mép: Slime Tầng 1 Lv 5 = 20 đòn và 15 quái (đúng mức tối đa); Bat Tầng 1 Lv 1 = 8 quái (đúng mức tối thiểu). Đổi số gốc, EXP hay hệ số tầng thì phải chạy lại sandbox.
+
+Kết quả sandbox Tầng 2 (Task P9-3, `FloorTwoBalanceSandboxTests`; số quái là số thực tế sau hệ số tầng 1.6 / 1.75 và làm tròn; `defenseWeight` 0.3; đòn thường người chơi hệ số 1.0, không chí mạng; Giây hạ quái = số đòn × 0.45s ÷ 70% hiệu suất trúng, chỉ là ước lượng đua sát thương, không tính thời gian tiếp cận):
+
+| Quái | Lv người | Quái HP / ATK / DEF / EXP | Dame người → quái | Đòn hạ quái | Giây hạ quái (ước lượng) | Dame quái → người | Đòn hạ người đứng im | Quái mỗi level | Khoảng mục tiêu |
+|---|---:|---|---:|---:|---:|---:|---:|---:|---|
+| Guard `enemy.boiler_guard` | 6 | 112 / 21 / 6 / 25 | 18 | 7 | 4.5 | 18 | 10 | 8 | 4–7 đòn / 10–20 / 8–15 |
+| Guard `enemy.boiler_guard` | 10 | 112 / 21 / 6 / 25 | 26 | 5 | 3.2 | 17 | 14 | 12 | 4–7 đòn / 10–20 / 8–15 |
+| Elite `enemy.pressure_warden` | 6 | 480 / 29 / 10 / 63 | 17 | 29 | 18.6 | 26 | 7 | 4 (không ràng buộc) | 12–20 giây / 5–10 đòn |
+| Elite `enemy.pressure_warden` | 10 | 480 / 29 / 10 / 63 | 25 | 20 | 12.9 | 25 | 10 | 5 (không ràng buộc) | 12–20 giây / 5–10 đòn |
+
+Người chơi: Lv 6 = 175 HP / 20 ATK / 10 DEF (EXPNext 200); Lv 10 = 235 HP / 28 ATK / 14 DEF (EXPNext 280). Mọi số đo nằm trong khoảng mục tiêu, nhưng một số ca đúng mép: Guard Lv 6 = 7 đòn hạ Guard (tối đa 7), 10 đòn hạ người (tối thiểu 10) và 8 Guard mỗi level (tối thiểu 8); Elite Lv 10 = 10 đòn hạ người (tối đa 10) và hạ Elite trong ≈ 12.9s (sát tối thiểu 12s); Elite Lv 6 ≈ 18.6s (còn dư 1.4s so với tối đa 20s). Chỉnh chỉ số người chơi, `defenseWeight`, hệ số tầng hoặc số gốc của hai quái này sẽ dễ làm test đỏ (xem FB-020 ở `10`). `attackWindupSeconds`: Guard 0.7s, Elite 0.6s, Slime 0.35s (mặc định, asset Slime không ghi field này); telegraph dài hơn là điểm dạy chính của Tầng 2. Lịch sử chỉnh: máu gốc Elite ban đầu là 200 (hiệu lực 320) và test đo bằng 12–20 đòn; theo mô hình §5.2 con số đó chỉ ≈ 8.4–12.2s, thấp hơn mục tiêu 12–20s ở §5, nên đã tăng lên 300 (hiệu lực 480) và test chuyển sang đo bằng giây.
 
 Kết quả sandbox Boss Floor 1 (Task P8-4, `BossBalanceSandboxTests`; `Boss_Floor01` HP 1500 / ATK 28 / DEF 4, `defenseWeight` 0.3, `Attack_PlayerBasic` ×1.0 mỗi 0.45s, hiệu suất trúng 70%, tiếp cận 1.5s/chu kỳ):
 

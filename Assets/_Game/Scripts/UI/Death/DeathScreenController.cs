@@ -86,19 +86,7 @@ namespace Game.UI.Death
             if (titleText != null) titleText.text = "BẠN ĐÃ CHẾT";
             if (retryButton != null) retryButton.gameObject.SetActive(false); // đã xác nhận → không còn gì để thử lại
 
-            if (detailsText != null)
-            {
-                string cause = info != null ? info.deathCause : "?";
-                int level = info != null && info.finalLevel > 0 ? info.finalLevel : 1;
-                int floor = info != null && info.finalHighestFloor > 0 ? info.finalHighestFloor : 1;
-                int seconds = info != null ? info.totalPlayTimeSeconds : 0;
-
-                detailsText.text =
-                    $"Nguyên nhân: {TranslateCause(cause)}\n" +
-                    $"Level cuối: {level}\n" +
-                    $"Tầng cao nhất: {floor}\n" +
-                    $"Thời gian chơi: {seconds / 60:00}:{seconds % 60:00}";
-            }
+            if (detailsText != null) detailsText.text = BuildDetailsText(info);
 
             bool canReset = _resetService == null || _resetService.CanResetCurrentAccount();
             if (newAccountButton != null)
@@ -111,6 +99,50 @@ namespace Game.UI.Death
             {
                 detailsText.text += "\n\n(Tài khoản Official hoặc đã liên kết — không thể tạo tài khoản mới)";
             }
+        }
+
+        /// <summary>Chữ hiển thị khi không biết tầng (không đoán là tầng 1).</summary>
+        public const string UnknownFloorText = "?";
+
+        /// <summary>
+        /// Phần chi tiết của màn "BẠN ĐÃ CHẾT" (hàm thuần, test được). Bố cục hai nhóm:
+        /// <code>
+        /// Nguyên nhân: ...
+        /// Chết ở tầng: {finalFloor}
+        ///
+        /// Thành tích
+        /// Level cuối: ...
+        /// Tầng cao nhất: {finalHighestFloor}
+        /// Thời gian chơi: mm:ss
+        /// </code>
+        /// Bản ghi cũ (finalFloor = 0): "Chết ở tầng" lấy finalHighestFloor (bản cũ lưu tầng lúc chết ở đó).
+        /// Cả hai bằng 0 → "?" (không đoán).
+        /// </summary>
+        public static string BuildDetailsText(DeathInfo info)
+        {
+            string cause = info != null ? info.deathCause : "?";
+            int level = info != null && info.finalLevel > 0 ? info.finalLevel : 1;
+            int seconds = info != null ? info.totalPlayTimeSeconds : 0;
+
+            int finalFloor = info != null ? info.finalFloor : 0;
+            int highest = info != null ? info.finalHighestFloor : 0;
+
+            string deathFloorText = FloorText(finalFloor > 0 ? finalFloor : highest);
+            string highestText = FloorText(highest > 0 ? highest : finalFloor);
+
+            return
+                $"Nguyên nhân: {TranslateCause(cause)}\n" +
+                $"Chết ở tầng: {deathFloorText}\n" +
+                "\n" +
+                "Thành tích\n" +
+                $"Level cuối: {level}\n" +
+                $"Tầng cao nhất: {highestText}\n" +
+                $"Thời gian chơi: {seconds / 60:00}:{seconds % 60:00}";
+        }
+
+        private static string FloorText(int floor)
+        {
+            return floor > 0 ? floor.ToString() : UnknownFloorText;
         }
 
         /// <summary>

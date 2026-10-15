@@ -215,7 +215,7 @@ Locked → Available → Active → ReadyToTurnIn → Completed
 | Kill | `EnemyDefeated(enemyId)` | quest Active, target ID khớp | Không đếm enemy đã chết trước khi nhận quest. |
 | Collect | `ItemAcquired(itemId, quantity)` | quest Active, target ID khớp; chỉ quantity dương từ acquisition đã commit | Definition quyết định consume-on-turn-in hay giữ item. Khi nhận quest, seed `progress = min(required, số lượng đang có)`; turn-in cần consume mà không đủ số lượng → từ chối, quest về `Active`. |
 | Talk | `NpcTalked(npcId)` | NPC và quest target khớp | Không tự nhận quest khi chỉ đi ngang NPC. |
-| Reach | `ZoneEntered(zoneId)` | quest Active, zone khớp | Trigger chỉ báo intent, Quest service quyết định progress. |
+| Reach | `ZoneEntered(zoneId, displayName)` | quest Active, zone khớp | Trigger chỉ báo intent, Quest service quyết định progress. Chỉ so `zoneId`; `displayName` dành cho banner tên vùng (§11). |
 
 Quest có time rule phải kiểm tra ở cả lúc nhận và lúc tiến triển. UI chỉ giải thích “đúng thời điểm nào”; UI không tự chặn hoặc tự cộng progress.
 
@@ -268,7 +268,7 @@ EnemyDefeated(enemyId)
 ItemAcquired(itemId, quantity)                 // chỉ sau khi inventory add thành công
 InventoryChanged(itemId, quantityDelta, currentQuantity) // mọi thay đổi inventory đã commit
 NpcTalked(npcId)
-ZoneEntered(zoneId)
+ZoneEntered(zoneId, displayName)                 // displayName chỉ để UI hiện banner tên vùng (Phase 9.7a); Reach chỉ so zoneId
 QuestStateChanged(questId, state)
 TechniqueMasteryChanged(discipline, value)
 TimeChanged(gameTimeHours, gameDay, phase)      // presentation tick/correction

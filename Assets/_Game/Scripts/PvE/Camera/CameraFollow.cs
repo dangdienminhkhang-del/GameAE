@@ -43,6 +43,25 @@ namespace Game.PvE.Camera
             transform.position = next;
         }
 
+        /// <summary>Đặt camera ngay lên mục tiêu (không SmoothDamp) — dùng khi người chơi bị dịch chuyển sang tầng khác.</summary>
+        public void SnapToTarget()
+        {
+            if (target == null) return;
+
+            _velocity = Vector3.zero;
+            Vector3 snapped = new Vector3(target.position.x, target.position.y, offset.z);
+
+            if (useBounds && _cam != null)
+            {
+                float halfH = _cam.orthographicSize;
+                float halfW = halfH * _cam.aspect;
+                snapped.x = UnityEngine.Mathf.Clamp(snapped.x, minBounds.x + halfW, maxBounds.x - halfW);
+                snapped.y = UnityEngine.Mathf.Clamp(snapped.y, minBounds.y + halfH, maxBounds.y - halfH);
+            }
+
+            transform.position = snapped;
+        }
+
         public void AssignTarget(Transform t)
         {
             target = t;

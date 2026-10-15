@@ -22,9 +22,14 @@ MonoBehaviour:
     enemyPowerMultiplier: 0
     expMultiplier: 0
   itemTierId: tier.common
-  spawnEnemyIds: []
-  npcIds: []
-  questIds: []
+  spawnEnemyIds:
+  - enemy.boiler_guard
+  - enemy.pressure_warden
+  - enemy.bat
+  npcIds:
+  - npc.cartographer
+  questIds:
+  - quest.floor2_valve_check
   bossId: 
   safeZoneConfigIds: []
   requiredBossDefeatedId: boss.floor_01

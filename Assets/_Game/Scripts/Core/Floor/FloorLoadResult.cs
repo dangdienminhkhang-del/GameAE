@@ -15,7 +15,13 @@ namespace Game.Core.Floor
         NotFound = 2,
 
         /// <summary>Lỗi khi load (network, exception, v.v.).</summary>
-        Error = 3
+        Error = 3,
+
+        /// <summary>
+        /// Bị từ chối theo luật chuyển tầng (vd. không đứng trong Vùng An Toàn, nhân vật đã gục).
+        /// ErrorMessage là câu tiếng Việt dành cho người chơi, hiển thị nguyên văn.
+        /// </summary>
+        NotAllowed = 4
     }
 
     /// <summary>
@@ -63,5 +69,16 @@ namespace Game.Core.Floor
         /// <summary>Lỗi khi load.</summary>
         public static FloorLoadResult ErrorResult(string message) =>
             new FloorLoadResult(FloorLoadStatus.Error, null, $"[Floor] Lỗi: {message}");
+
+        /// <summary>
+        /// Bị từ chối vì luật chuyển tầng. <paramref name="reason"/> là thông báo tiếng Việt dành cho người chơi,
+        /// giữ NGUYÊN VĂN (không thêm tiền tố) để UI hiển thị trực tiếp; null/rỗng → câu mặc định.
+        /// </summary>
+        public static FloorLoadResult NotAllowedResult(string reason) =>
+            new FloorLoadResult(
+                FloorLoadStatus.NotAllowed, null,
+                string.IsNullOrWhiteSpace(reason) ? DefaultNotAllowedMessage : reason);
+
+        private const string DefaultNotAllowedMessage = "Không thể chuyển tầng lúc này.";
     }
 }
