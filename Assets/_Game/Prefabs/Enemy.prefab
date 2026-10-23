@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 3281798297884886213}
   - component: {fileID: 5394909182066476074}
   - component: {fileID: 3692111653161936446}
+  - component: {fileID: 7946046002648335183}
+  - component: {fileID: 7741086119465228702}
   m_Layer: 8
   m_Name: Enemy
   m_TagString: Untagged
@@ -197,3 +199,128 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.PvE::Game.PvE.Items.LootDropper
   enemy: {fileID: 0}
   pickupPrefab: {fileID: 8573551758083491827, guid: 6126efb8430360d4f97d712f34583adf, type: 3}
+--- !u!114 &7946046002648335183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4940644911288997230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54a963c48bb23164a896cbd5ccd2123e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.PvE::Game.PvE.Presentation.EnemyHealthBar
+  enemy: {fileID: 0}
+  anchorRenderer: {fileID: 0}
+  config: {fileID: 0}
+--- !u!114 &7741086119465228702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4940644911288997230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0ba4d25c8469844a984042205812a98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.PvE::Game.PvE.Presentation.EnemySpriteAnimator
+  entries:
+  - enemyId: enemy.slime
+    idle:
+    - {fileID: 4070383645940323317, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    - {fileID: 597747033389371652, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    - {fileID: 4585270487031852065, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    - {fileID: 5588470457809106922, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    move:
+    - {fileID: 7068792351187267079, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    - {fileID: 8126661217913572354, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    - {fileID: 56023129187908725, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    - {fileID: -5349320960225804432, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    attack:
+    - {fileID: -5008689870936261823, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    - {fileID: -6058431253333429413, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    - {fileID: 249388362339135272, guid: 9eb35f6dfc0dfb54fa3170df16f3d690, type: 3}
+    fps: 7
+  - enemyId: enemy.bat
+    idle:
+    - {fileID: -3232250881991471260, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    - {fileID: 5936679901786189013, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    - {fileID: -4459330139543563820, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    - {fileID: 8683758424267062322, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    move:
+    - {fileID: -5157333458966243126, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    - {fileID: 7386518874396089306, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    - {fileID: 4482462028533332284, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    - {fileID: 2810353146298080704, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    attack:
+    - {fileID: 7278949030064442444, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    - {fileID: 7932074679744164367, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    - {fileID: 6708777916937898218, guid: 59361138bc7ab59489bb5987a7810f8c, type: 3}
+    fps: 10
+  - enemyId: enemy.boiler_guard
+    idle:
+    - {fileID: 189288547010310628, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    - {fileID: 4710649615172916974, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    - {fileID: -8624015493676317216, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    - {fileID: 4574166354201889351, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    move:
+    - {fileID: 4133945442071017998, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    - {fileID: -4224091592015881641, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    - {fileID: -223312965577226323, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    - {fileID: 5177919976768455222, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    attack:
+    - {fileID: -1604620923122884649, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    - {fileID: -8436692335637214859, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    - {fileID: -9112079090564555094, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
+    fps: 7
+  - enemyId: enemy.pressure_warden
+    idle:
+    - {fileID: -7409974038716792639, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    - {fileID: -1354098927631102442, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    - {fileID: -538577490541229508, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    - {fileID: 7458720822070426032, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    move:
+    - {fileID: 270817600301392790, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    - {fileID: 2646748864601665280, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    - {fileID: 1281556360829501315, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    - {fileID: 5906452807745264019, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    attack:
+    - {fileID: -3696820279753362279, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    - {fileID: -5349113488390430354, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    - {fileID: -5834871587923488974, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
+    fps: 6
+  - enemyId: enemy.pipe_spitter
+    idle:
+    - {fileID: 3249497465523509631, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    - {fileID: -8833994967210963178, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    - {fileID: 8961658579834838489, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    - {fileID: -8061277113212645514, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    move:
+    - {fileID: -8874544079891600334, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    - {fileID: 2048039796495853214, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    - {fileID: 6477706849521225867, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    - {fileID: 6691398810721770461, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    attack:
+    - {fileID: -6627112928005901903, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    - {fileID: -8247340660022457171, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    - {fileID: 1694127941698113742, guid: be227aa2f40255949b5262b4cf701254, type: 3}
+    fps: 6
+  - enemyId: enemy.wire_stalker
+    idle:
+    - {fileID: 4141362085858935820, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    - {fileID: 3733898760856830342, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    - {fileID: -8820690328260888875, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    - {fileID: -1451670201579665876, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    move:
+    - {fileID: -114657107876549404, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    - {fileID: -139624048171003757, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    - {fileID: 2618587811695544069, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    - {fileID: -6771860255435183109, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    attack:
+    - {fileID: -1009606822482221569, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    - {fileID: 7749250758322538449, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    - {fileID: 1226710790002274333, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+    fps: 6
+  strikeSeconds: 0.22

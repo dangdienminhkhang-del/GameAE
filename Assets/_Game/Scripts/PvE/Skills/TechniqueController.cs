@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Core.Combat;
+using Game.Core.Facing;
 using Game.Core.Input;
 using Game.Core.Items;
 using Game.Core.Skills;
@@ -385,13 +386,12 @@ namespace Game.PvE.Skills
             var rb = playerController.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                int facing = playerController.Facing;
+                Vector2 dir = playerController.FacingDirection;
                 float safeDistance = distance;
 
                 var hits = new RaycastHit2D[4];
                 var filter = new ContactFilter2D { useTriggers = false };
                 filter.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
-                Vector2 dir = new Vector2(facing, 0f);
                 int hitCount = rb.Cast(dir, filter, hits, distance);
                 if (hitCount > 0 && hits[0].collider != null)
                     safeDistance = UnityEngine.Mathf.Max(0f, hits[0].distance - 0.05f);
@@ -401,9 +401,10 @@ namespace Game.PvE.Skills
             else
             {
                 // Fallback nếu không có Rigidbody2D (EditMode test)
-                int facing = playerController.Facing;
+                Vector2 dir = playerController.FacingDirection;
                 Vector3 pos = playerController.transform.position;
-                pos.x += facing * distance;
+                pos.x += dir.x * distance;
+                pos.y += dir.y * distance;
                 playerController.transform.position = pos;
             }
         }
@@ -493,10 +494,9 @@ namespace Game.PvE.Skills
 
         private Vector2 ResolveHitboxCenter(WeaponTechniqueDefinition def)
         {
-            int facing     = playerController != null ? playerController.Facing : 1;
-            Vector3 pos    = transform.position;
+            Vector2 facingDirection = playerController != null ? playerController.FacingDirection : Vector2.right;
             Vector2 offset = def != null ? def.HitboxOffset : Vector2.zero;
-            return new Vector2(pos.x + offset.x * facing, pos.y + offset.y);
+            return HitboxMath.Center(transform.position, facingDirection, offset);
         }
 
         private void FireAnimatorTrigger(TechniqueInputSlot slot)

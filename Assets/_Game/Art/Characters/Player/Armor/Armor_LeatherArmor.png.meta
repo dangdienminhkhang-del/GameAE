@@ -1,0 +1,3908 @@
+fileFormatVersion: 2
+guid: 763467c204fb4b3438a7ed92944a628c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6857231924506085028
+    second: Armor_LeatherArmor_0
+  - first:
+      213: 4800718701504083788
+    second: Armor_LeatherArmor_1
+  - first:
+      213: 8513199885596918344
+    second: Armor_LeatherArmor_2
+  - first:
+      213: -582111086205570740
+    second: Armor_LeatherArmor_3
+  - first:
+      213: -8225775422744994679
+    second: Armor_LeatherArmor_4
+  - first:
+      213: -884969015487661746
+    second: Armor_LeatherArmor_5
+  - first:
+      213: -440968172555660876
+    second: Armor_LeatherArmor_6
+  - first:
+      213: 7040042675284945702
+    second: Armor_LeatherArmor_7
+  - first:
+      213: -6529752469756486104
+    second: Armor_LeatherArmor_8
+  - first:
+      213: -3041567938048606308
+    second: Armor_LeatherArmor_9
+  - first:
+      213: -5245874045894314747
+    second: Armor_LeatherArmor_10
+  - first:
+      213: 6599404860851187069
+    second: Armor_LeatherArmor_11
+  - first:
+      213: -5693774459172406971
+    second: Armor_LeatherArmor_12
+  - first:
+      213: 4936597754890776693
+    second: Armor_LeatherArmor_13
+  - first:
+      213: 1243076013592133149
+    second: Armor_LeatherArmor_14
+  - first:
+      213: -908516446671931661
+    second: Armor_LeatherArmor_15
+  - first:
+      213: -8681119896058246557
+    second: Armor_LeatherArmor_16
+  - first:
+      213: -6379641901571915563
+    second: Armor_LeatherArmor_17
+  - first:
+      213: 5596942060992995267
+    second: Armor_LeatherArmor_18
+  - first:
+      213: -1459580620577867513
+    second: Armor_LeatherArmor_19
+  - first:
+      213: 149695683562193661
+    second: Armor_LeatherArmor_20
+  - first:
+      213: 8889575973220640960
+    second: Armor_LeatherArmor_21
+  - first:
+      213: -1983319857519202379
+    second: Armor_LeatherArmor_22
+  - first:
+      213: -6725770195359486816
+    second: Armor_LeatherArmor_23
+  - first:
+      213: -4164972220527179875
+    second: Armor_LeatherArmor_24
+  - first:
+      213: -5170192392958089702
+    second: Armor_LeatherArmor_25
+  - first:
+      213: 4787025507402084736
+    second: Armor_LeatherArmor_26
+  - first:
+      213: -1605247077289784221
+    second: Armor_LeatherArmor_27
+  - first:
+      213: -996851918603194358
+    second: Armor_LeatherArmor_28
+  - first:
+      213: 8398660828503598707
+    second: Armor_LeatherArmor_29
+  - first:
+      213: -4010263325203214144
+    second: Armor_LeatherArmor_30
+  - first:
+      213: -2986203959336964012
+    second: Armor_LeatherArmor_31
+  - first:
+      213: 8560594621806317230
+    second: Armor_LeatherArmor_32
+  - first:
+      213: -2850072456326711309
+    second: Armor_LeatherArmor_33
+  - first:
+      213: 3239963892486892632
+    second: Armor_LeatherArmor_34
+  - first:
+      213: -753395034404169749
+    second: Armor_LeatherArmor_35
+  - first:
+      213: -5183841049858691123
+    second: Armor_LeatherArmor_36
+  - first:
+      213: -2267197983130290750
+    second: Armor_LeatherArmor_37
+  - first:
+      213: -5865754065485544154
+    second: Armor_LeatherArmor_38
+  - first:
+      213: -8326524995722485533
+    second: Armor_LeatherArmor_39
+  - first:
+      213: 7588596207464644106
+    second: Armor_LeatherArmor_40
+  - first:
+      213: 4643741072149621760
+    second: Armor_LeatherArmor_41
+  - first:
+      213: 6361484798459741816
+    second: Armor_LeatherArmor_42
+  - first:
+      213: 175037376052204892
+    second: Armor_LeatherArmor_43
+  - first:
+      213: 7518381493917530525
+    second: Armor_LeatherArmor_44
+  - first:
+      213: -1424136650984822906
+    second: Armor_LeatherArmor_45
+  - first:
+      213: 14937556664421042
+    second: Armor_LeatherArmor_46
+  - first:
+      213: -2086237219471309050
+    second: Armor_LeatherArmor_47
+  - first:
+      213: 625956307195962670
+    second: Armor_LeatherArmor_48
+  - first:
+      213: 6738510582797435780
+    second: Armor_LeatherArmor_49
+  - first:
+      213: -1465708213333200639
+    second: Armor_LeatherArmor_50
+  - first:
+      213: 476395404195126497
+    second: Armor_LeatherArmor_51
+  - first:
+      213: -167176440156215700
+    second: Armor_LeatherArmor_52
+  - first:
+      213: 3952922343565343545
+    second: Armor_LeatherArmor_53
+  - first:
+      213: -3420169351854059046
+    second: Armor_LeatherArmor_54
+  - first:
+      213: -7466397607512441778
+    second: Armor_LeatherArmor_55
+  - first:
+      213: -7268119866520809616
+    second: Armor_LeatherArmor_56
+  - first:
+      213: 9026071854720969855
+    second: Armor_LeatherArmor_57
+  - first:
+      213: -6095134118305455809
+    second: Armor_LeatherArmor_58
+  - first:
+      213: 6280409057512787768
+    second: Armor_LeatherArmor_59
+  - first:
+      213: -7378789144383779747
+    second: Armor_LeatherArmor_60
+  - first:
+      213: 6537881793322561853
+    second: Armor_LeatherArmor_61
+  - first:
+      213: -8529742002183836184
+    second: Armor_LeatherArmor_62
+  - first:
+      213: -6572732336141018932
+    second: Armor_LeatherArmor_63
+  - first:
+      213: -1718647608815708319
+    second: Armor_LeatherArmor_64
+  - first:
+      213: -5319927630414913532
+    second: Armor_LeatherArmor_65
+  - first:
+      213: 6847138088849263550
+    second: Armor_LeatherArmor_66
+  - first:
+      213: -3747847416766123357
+    second: Armor_LeatherArmor_67
+  - first:
+      213: -5322804855608928962
+    second: Armor_LeatherArmor_68
+  - first:
+      213: -4682828991069196274
+    second: Armor_LeatherArmor_69
+  - first:
+      213: -6117422954177347404
+    second: Armor_LeatherArmor_70
+  - first:
+      213: -6259819854938275746
+    second: Armor_LeatherArmor_71
+  - first:
+      213: 1484777980810615911
+    second: Armor_LeatherArmor_72
+  - first:
+      213: -863281019104979703
+    second: Armor_LeatherArmor_73
+  - first:
+      213: 666460372875106755
+    second: Armor_LeatherArmor_74
+  - first:
+      213: 8890797959626544236
+    second: Armor_LeatherArmor_75
+  - first:
+      213: -1396380552686483150
+    second: Armor_LeatherArmor_76
+  - first:
+      213: 2333676483681030025
+    second: Armor_LeatherArmor_77
+  - first:
+      213: 910298234545459599
+    second: Armor_LeatherArmor_78
+  - first:
+      213: -1011094482873371246
+    second: Armor_LeatherArmor_79
+  - first:
+      213: 3604964936378455698
+    second: Armor_LeatherArmor_80
+  - first:
+      213: -1536692743537838106
+    second: Armor_LeatherArmor_81
+  - first:
+      213: -3004648293535730295
+    second: Armor_LeatherArmor_82
+  - first:
+      213: 454452808525851255
+    second: Armor_LeatherArmor_83
+  - first:
+      213: 3235429862394257351
+    second: Armor_LeatherArmor_84
+  - first:
+      213: -5268679049605881211
+    second: Armor_LeatherArmor_85
+  - first:
+      213: 5067997553310443535
+    second: Armor_LeatherArmor_86
+  - first:
+      213: 6769866150296270110
+    second: Armor_LeatherArmor_87
+  - first:
+      213: -1135360066293333418
+    second: Armor_LeatherArmor_88
+  - first:
+      213: 1767505651943796653
+    second: Armor_LeatherArmor_89
+  - first:
+      213: 1366247862098930591
+    second: Armor_LeatherArmor_90
+  - first:
+      213: -7885171674830166997
+    second: Armor_LeatherArmor_91
+  - first:
+      213: 8724759344894578803
+    second: Armor_LeatherArmor_92
+  - first:
+      213: 3979257494403908054
+    second: Armor_LeatherArmor_93
+  - first:
+      213: 2897000586678523260
+    second: Armor_LeatherArmor_94
+  - first:
+      213: -458388271870688467
+    second: Armor_LeatherArmor_95
+  - first:
+      213: 7399677180817914016
+    second: Armor_LeatherArmor_96
+  - first:
+      213: -8953492308552736340
+    second: Armor_LeatherArmor_97
+  - first:
+      213: 8587359748451786437
+    second: Armor_LeatherArmor_98
+  - first:
+      213: -2750002974574976232
+    second: Armor_LeatherArmor_99
+  - first:
+      213: 101544178197713749
+    second: Armor_LeatherArmor_100
+  - first:
+      213: -4645018188630456448
+    second: Armor_LeatherArmor_101
+  - first:
+      213: 5079272070289951211
+    second: Armor_LeatherArmor_102
+  - first:
+      213: -3710496459311067278
+    second: Armor_LeatherArmor_103
+  - first:
+      213: -524959975863734986
+    second: Armor_LeatherArmor_104
+  - first:
+      213: 2147845954384148973
+    second: Armor_LeatherArmor_105
+  - first:
+      213: -3530370383146626033
+    second: Armor_LeatherArmor_106
+  - first:
+      213: -5527141770991243753
+    second: Armor_LeatherArmor_107
+  - first:
+      213: 1957332273234565301
+    second: Armor_LeatherArmor_108
+  - first:
+      213: 6736905727979000581
+    second: Armor_LeatherArmor_109
+  - first:
+      213: 4652675719500620008
+    second: Armor_LeatherArmor_110
+  - first:
+      213: 8355492726867828452
+    second: Armor_LeatherArmor_111
+  - first:
+      213: -265149871226236005
+    second: Armor_LeatherArmor_112
+  - first:
+      213: -2032831939613018904
+    second: Armor_LeatherArmor_113
+  - first:
+      213: 7182410218361094291
+    second: Armor_LeatherArmor_114
+  - first:
+      213: -9052779887005224057
+    second: Armor_LeatherArmor_115
+  - first:
+      213: 6779600485001142310
+    second: Armor_LeatherArmor_116
+  - first:
+      213: -2108775665971511291
+    second: Armor_LeatherArmor_117
+  - first:
+      213: 1276823190966424428
+    second: Armor_LeatherArmor_118
+  - first:
+      213: 7383914406728362238
+    second: Player_Hero_Idle_S_0
+  - first:
+      213: 6239698418219902830
+    second: Player_Hero_Idle_S_1
+  - first:
+      213: -8091953699245900417
+    second: Player_Hero_Idle_S_2
+  - first:
+      213: -4006884688508813402
+    second: Player_Hero_Idle_S_3
+  - first:
+      213: -3726881522802426757
+    second: Player_Hero_Idle_SE_0
+  - first:
+      213: 7790171186627521613
+    second: Player_Hero_Idle_SE_1
+  - first:
+      213: -2409653825994433751
+    second: Player_Hero_Idle_SE_2
+  - first:
+      213: -960944683067177619
+    second: Player_Hero_Idle_SE_3
+  - first:
+      213: 5273521354948416614
+    second: Player_Hero_Idle_E_0
+  - first:
+      213: 8563053639751522096
+    second: Player_Hero_Idle_E_1
+  - first:
+      213: 8070378667835966205
+    second: Player_Hero_Idle_E_2
+  - first:
+      213: -125162706294776875
+    second: Player_Hero_Idle_E_3
+  - first:
+      213: 5736030052111004394
+    second: Player_Hero_Idle_NE_0
+  - first:
+      213: -4686886940977416462
+    second: Player_Hero_Idle_NE_1
+  - first:
+      213: -4349883924881983999
+    second: Player_Hero_Idle_NE_2
+  - first:
+      213: -5289031636631707948
+    second: Player_Hero_Idle_NE_3
+  - first:
+      213: -3479611631856529710
+    second: Player_Hero_Idle_N_0
+  - first:
+      213: 7387968977307386739
+    second: Player_Hero_Idle_N_1
+  - first:
+      213: -4121867235645007428
+    second: Player_Hero_Idle_N_2
+  - first:
+      213: -660372851093039085
+    second: Player_Hero_Idle_N_3
+  - first:
+      213: 249749032327855417
+    second: Player_Hero_Walk_S_0
+  - first:
+      213: 8265528645882358332
+    second: Player_Hero_Walk_S_1
+  - first:
+      213: -8367118899009080556
+    second: Player_Hero_Walk_S_2
+  - first:
+      213: 7119494898305799309
+    second: Player_Hero_Walk_S_3
+  - first:
+      213: 3039537729809428496
+    second: Player_Hero_Walk_S_4
+  - first:
+      213: -9034613287244121698
+    second: Player_Hero_Walk_S_5
+  - first:
+      213: -8130158487989051187
+    second: Player_Hero_Walk_SE_0
+  - first:
+      213: 8128282654699721334
+    second: Player_Hero_Walk_SE_1
+  - first:
+      213: 4110181443082450907
+    second: Player_Hero_Walk_SE_2
+  - first:
+      213: 4114519731346631656
+    second: Player_Hero_Walk_SE_3
+  - first:
+      213: -7487687084012150153
+    second: Player_Hero_Walk_SE_4
+  - first:
+      213: -496983211543011467
+    second: Player_Hero_Walk_SE_5
+  - first:
+      213: -1621181273232018555
+    second: Player_Hero_Walk_E_0
+  - first:
+      213: 7239072943227417409
+    second: Player_Hero_Walk_E_1
+  - first:
+      213: -3469050385525754524
+    second: Player_Hero_Walk_E_2
+  - first:
+      213: 7877058369591141647
+    second: Player_Hero_Walk_E_3
+  - first:
+      213: 4210666235270049282
+    second: Player_Hero_Walk_E_4
+  - first:
+      213: -5516057124352865622
+    second: Player_Hero_Walk_E_5
+  - first:
+      213: 7115282875358923465
+    second: Player_Hero_Walk_NE_0
+  - first:
+      213: -2633582490333577558
+    second: Player_Hero_Walk_NE_1
+  - first:
+      213: -7016199179991414716
+    second: Player_Hero_Walk_NE_2
+  - first:
+      213: 8365043879782792797
+    second: Player_Hero_Walk_NE_3
+  - first:
+      213: -3798151976487397361
+    second: Player_Hero_Walk_NE_4
+  - first:
+      213: -7292392466475361642
+    second: Player_Hero_Walk_NE_5
+  - first:
+      213: -4113794459694576300
+    second: Player_Hero_Walk_N_0
+  - first:
+      213: 7442872703320040091
+    second: Player_Hero_Walk_N_1
+  - first:
+      213: -5735234790178691330
+    second: Player_Hero_Walk_N_2
+  - first:
+      213: 8252737874156453416
+    second: Player_Hero_Walk_N_3
+  - first:
+      213: 3340643778945480876
+    second: Player_Hero_Walk_N_4
+  - first:
+      213: 3248850169519089072
+    second: Player_Hero_Walk_N_5
+  - first:
+      213: 2876753473854553925
+    second: Player_Hero_Attack_S_0
+  - first:
+      213: 7558124093003088410
+    second: Player_Hero_Attack_S_1
+  - first:
+      213: 6624095609244134396
+    second: Player_Hero_Attack_S_2
+  - first:
+      213: 7439676230424790020
+    second: Player_Hero_Attack_S_3
+  - first:
+      213: -4421590127349792109
+    second: Player_Hero_Attack_S_4
+  - first:
+      213: 583214798418367223
+    second: Player_Hero_Attack_S_5
+  - first:
+      213: -8327979096565987592
+    second: Player_Hero_Attack_SE_0
+  - first:
+      213: 7669017464696266985
+    second: Player_Hero_Attack_SE_1
+  - first:
+      213: 7738240066288260677
+    second: Player_Hero_Attack_SE_2
+  - first:
+      213: 1026454335319630187
+    second: Player_Hero_Attack_SE_3
+  - first:
+      213: -1102346428464682575
+    second: Player_Hero_Attack_SE_4
+  - first:
+      213: 7793249788561975217
+    second: Player_Hero_Attack_SE_5
+  - first:
+      213: -3126244399903696271
+    second: Player_Hero_Attack_E_0
+  - first:
+      213: -2676624939248513844
+    second: Player_Hero_Attack_E_1
+  - first:
+      213: -3626312515479863131
+    second: Player_Hero_Attack_E_2
+  - first:
+      213: 2700674836860061265
+    second: Player_Hero_Attack_E_3
+  - first:
+      213: 2028619344019092691
+    second: Player_Hero_Attack_E_4
+  - first:
+      213: -5798207098925987627
+    second: Player_Hero_Attack_E_5
+  - first:
+      213: 6757828030576159158
+    second: Player_Hero_Attack_NE_0
+  - first:
+      213: -2875879549889840110
+    second: Player_Hero_Attack_NE_1
+  - first:
+      213: 3166719240998454783
+    second: Player_Hero_Attack_NE_2
+  - first:
+      213: 3151016103884148062
+    second: Player_Hero_Attack_NE_3
+  - first:
+      213: -7243109105312283702
+    second: Player_Hero_Attack_NE_4
+  - first:
+      213: -7538006361778104459
+    second: Player_Hero_Attack_NE_5
+  - first:
+      213: 6496469930867883109
+    second: Player_Hero_Attack_N_0
+  - first:
+      213: -616250920943227047
+    second: Player_Hero_Attack_N_1
+  - first:
+      213: -1640688444121128586
+    second: Player_Hero_Attack_N_2
+  - first:
+      213: -4104098215887346129
+    second: Player_Hero_Attack_N_3
+  - first:
+      213: -425356519640995295
+    second: Player_Hero_Attack_N_4
+  - first:
+      213: 5496217674313422949
+    second: Player_Hero_Attack_N_5
+  - first:
+      213: 1477954917150331691
+    second: Player_Hero_Dodge_S_0
+  - first:
+      213: -1942132244384091353
+    second: Player_Hero_Dodge_S_1
+  - first:
+      213: 289345308085788269
+    second: Player_Hero_Dodge_S_2
+  - first:
+      213: -3313070568279793098
+    second: Player_Hero_Dodge_S_3
+  - first:
+      213: 7715729571688477409
+    second: Player_Hero_Dodge_S_4
+  - first:
+      213: -3366077376546008230
+    second: Player_Hero_Dodge_SE_0
+  - first:
+      213: 2471327528444978561
+    second: Player_Hero_Dodge_SE_1
+  - first:
+      213: -4190405140669495538
+    second: Player_Hero_Dodge_SE_2
+  - first:
+      213: 2599318170270752176
+    second: Player_Hero_Dodge_SE_3
+  - first:
+      213: 4598598815867049860
+    second: Player_Hero_Dodge_SE_4
+  - first:
+      213: 606295132326312614
+    second: Player_Hero_Dodge_E_0
+  - first:
+      213: 4557842108117283795
+    second: Player_Hero_Dodge_E_1
+  - first:
+      213: -641617573256612366
+    second: Player_Hero_Dodge_E_2
+  - first:
+      213: -916521283408097163
+    second: Player_Hero_Dodge_E_3
+  - first:
+      213: 8312272138471607561
+    second: Player_Hero_Dodge_E_4
+  - first:
+      213: 219734753569425180
+    second: Player_Hero_Dodge_NE_0
+  - first:
+      213: 3679245101489018688
+    second: Player_Hero_Dodge_NE_1
+  - first:
+      213: 2425025564907744910
+    second: Player_Hero_Dodge_NE_2
+  - first:
+      213: -1430408652881005627
+    second: Player_Hero_Dodge_NE_3
+  - first:
+      213: 4331638963572652807
+    second: Player_Hero_Dodge_NE_4
+  - first:
+      213: -4679424915230444956
+    second: Player_Hero_Dodge_N_0
+  - first:
+      213: -3266070545440198650
+    second: Player_Hero_Dodge_N_1
+  - first:
+      213: -3464860785466251233
+    second: Player_Hero_Dodge_N_2
+  - first:
+      213: 1885125418262417806
+    second: Player_Hero_Dodge_N_3
+  - first:
+      213: -1377710134877196586
+    second: Player_Hero_Dodge_N_4
+  - first:
+      213: 2215598995611051787
+    second: Player_Hero_Hurt_S_0
+  - first:
+      213: -1795328056036689299
+    second: Player_Hero_Hurt_S_1
+  - first:
+      213: -8109262363993543824
+    second: Player_Hero_Hurt_S_2
+  - first:
+      213: 8266044849993086277
+    second: Player_Hero_Hurt_SE_0
+  - first:
+      213: 2198538060110089384
+    second: Player_Hero_Hurt_SE_1
+  - first:
+      213: 3249184806217081107
+    second: Player_Hero_Hurt_SE_2
+  - first:
+      213: 7421460223688512663
+    second: Player_Hero_Hurt_E_0
+  - first:
+      213: -163807204691746954
+    second: Player_Hero_Hurt_E_1
+  - first:
+      213: 8530903906598963896
+    second: Player_Hero_Hurt_E_2
+  - first:
+      213: -4753608571991034599
+    second: Player_Hero_Hurt_NE_0
+  - first:
+      213: 1870852136525033045
+    second: Player_Hero_Hurt_NE_1
+  - first:
+      213: 1635108451843873201
+    second: Player_Hero_Hurt_NE_2
+  - first:
+      213: -876342257298972058
+    second: Player_Hero_Hurt_N_0
+  - first:
+      213: -3033952269340508960
+    second: Player_Hero_Hurt_N_1
+  - first:
+      213: 8762574843047881035
+    second: Player_Hero_Hurt_N_2
+  - first:
+      213: 969762408347292431
+    second: Player_Hero_Death_E_0
+  - first:
+      213: -4306389536831202949
+    second: Player_Hero_Death_E_1
+  - first:
+      213: -1830213036123789617
+    second: Player_Hero_Death_E_2
+  - first:
+      213: 2460707938746255595
+    second: Player_Hero_Death_E_3
+  - first:
+      213: -1592098651169398277
+    second: Player_Hero_Death_E_4
+  - first:
+      213: -1697538434097368790
+    second: Player_Hero_Death_E_5
+  - first:
+      213: -4323350586446040666
+    second: Player_Hero_Death_E_6
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Player_Hero_Idle_S_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1200
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef8eee0080fe87660800000000000000
+      internalID: 7383914406728362238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_S_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 1200
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e67609be6acd79650800000000000000
+      internalID: 6239698418219902830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_S_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 1200
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7d3a89cbfa93bf80800000000000000
+      internalID: -8091953699245900417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_S_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 1200
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6affa7dea9fa468c0800000000000000
+      internalID: -4006884688508813402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_SE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1152
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7cf4693005774cc0800000000000000
+      internalID: -3726881522802426757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_SE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 1152
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4caa6e8b6f3c1c60800000000000000
+      internalID: 7790171186627521613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_SE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 1152
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 92bd0f5bc903f8ed0800000000000000
+      internalID: -2409653825994433751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_SE_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 1152
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d650bfce6e90aa2f0800000000000000
+      internalID: -960944683067177619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_E_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1104
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66413256bbf4f2940800000000000000
+      internalID: 5273521354948416614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_E_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 1104
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03751069ae316d670800000000000000
+      internalID: 8563053639751522096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_E_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 1104
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df2c043c3aebfff60800000000000000
+      internalID: 8070378667835966205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_E_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 1104
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5db5c288e25534ef0800000000000000
+      internalID: -125162706294776875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_NE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1056
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae2ba0d01f87a9f40800000000000000
+      internalID: 5736030052111004394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_NE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 1056
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f6bf9cc825d4feb0800000000000000
+      internalID: -4686886940977416462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_NE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 1056
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1063a33fd9b12a3c0800000000000000
+      internalID: -4349883924881983999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_NE_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 1056
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4de93ccbfb59996b0800000000000000
+      internalID: -5289031636631707948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_N_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1008
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2decfd618afe5bfc0800000000000000
+      internalID: -3479611631856529710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_N_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 1008
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 373430844a6578660800000000000000
+      internalID: 7387968977307386739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_N_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 1008
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb9de08769f2cc6c0800000000000000
+      internalID: -4121867235645007428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Idle_N_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 1008
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31899470462e5d6f0800000000000000
+      internalID: -660372851093039085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_S_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 960
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93d36e2fb69477300800000000000000
+      internalID: 249749032327855417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_S_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 960
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3a22a2c28e05b270800000000000000
+      internalID: 8265528645882358332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_S_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 960
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4133b1731b502eb80800000000000000
+      internalID: -8367118899009080556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_S_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 960
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8419b9a3e68dc260800000000000000
+      internalID: 7119494898305799309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_S_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 960
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01030ba067b9e2a20800000000000000
+      internalID: 3039537729809428496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_S_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 960
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e993aca251b9e9280800000000000000
+      internalID: -9034613287244121698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_SE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 912
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc029cb3eefdb2f80800000000000000
+      internalID: -8130158487989051187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_SE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 912
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 672985b42067dc070800000000000000
+      internalID: 8128282654699721334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_SE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 912
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd7f45dee3c4a0930800000000000000
+      internalID: 4110181443082450907
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_SE_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 912
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8eb604065e5b91930800000000000000
+      internalID: 4114519731346631656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_SE_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 912
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 772ec20c444661890800000000000000
+      internalID: -7487687084012150153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_SE_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 912
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57f55a8f66c5a19f0800000000000000
+      internalID: -496983211543011467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_E_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 864
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5837d7ca8386089e0800000000000000
+      internalID: -1621181273232018555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_E_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 864
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1433634dc7a567460800000000000000
+      internalID: 7239072943227417409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_E_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 864
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4653ecedd057bdfc0800000000000000
+      internalID: -3469050385525754524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_E_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 864
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f056f7a4adee05d60800000000000000
+      internalID: 7877058369591141647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_E_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 864
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20ea005c1aa4f6a30800000000000000
+      internalID: 4210666235270049282
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_E_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 864
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aaa4f2e45470373b0800000000000000
+      internalID: -5516057124352865622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_NE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 816
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ca4036a3109eb260800000000000000
+      internalID: 7115282875358923465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_NE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 816
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aae7af8ada2a37bd0800000000000000
+      internalID: -2633582490333577558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_NE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 816
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 448893be40471ae90800000000000000
+      internalID: -7016199179991414716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_NE_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 816
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5e3209b61b961470800000000000000
+      internalID: 8365043879782792797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_NE_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 816
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f08558e96e04a4bc0800000000000000
+      internalID: -3798151976487397361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_NE_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 816
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69a500140b73cca90800000000000000
+      internalID: -7292392466475361642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_N_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 768
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45d4fe61cbdd8e6c0800000000000000
+      internalID: -4113794459694576300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_N_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 768
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b92a7d52a456a4760800000000000000
+      internalID: 7442872703320040091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_N_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 768
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef6efeb485a5860b0800000000000000
+      internalID: -5735234790178691330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_N_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 768
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82ef1852f5d978270800000000000000
+      internalID: 8252737874156453416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_N_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 768
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca8f92541d95c5e20800000000000000
+      internalID: 3340643778945480876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Walk_N_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 768
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b527aa140c361d20800000000000000
+      internalID: 3248850169519089072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_S_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 720
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54fb873fa084ce720800000000000000
+      internalID: 2876753473854553925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_S_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 720
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1245c361d9d3e860800000000000000
+      internalID: 7558124093003088410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_S_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 720
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfba8335cd38deb50800000000000000
+      internalID: 6624095609244134396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_S_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 720
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 404036e4d1a0f3760800000000000000
+      internalID: 7439676230424790020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_S_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 720
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39201fca43b53a2c0800000000000000
+      internalID: -4421590127349792109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_S_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 720
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f25a77e4cef71800800000000000000
+      internalID: 583214798418367223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_SE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 672
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f64e4c92231d6c80800000000000000
+      internalID: -8327979096565987592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_SE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 672
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e0ec7f70c2dd6a60800000000000000
+      internalID: 7669017464696266985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_SE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 672
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5469ec16750c36b60800000000000000
+      internalID: 7738240066288260677
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_SE_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 672
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b61e2e297c2be3e00800000000000000
+      internalID: 1026454335319630187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_SE_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 672
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b921f783cda3b0f0800000000000000
+      internalID: -1102346428464682575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_SE_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 672
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b7ef1d646f272c60800000000000000
+      internalID: 7793249788561975217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_E_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 624
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17a9fa628495d94d0800000000000000
+      internalID: -3126244399903696271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_E_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 624
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccc04239cc7badad0800000000000000
+      internalID: -2676624939248513844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_E_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 624
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a0054eeaffbcadc0800000000000000
+      internalID: -3626312515479863131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_E_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 624
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15641e09479ba7520800000000000000
+      internalID: 2700674836860061265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_E_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 624
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d47eb89b8a172c10800000000000000
+      internalID: 2028619344019092691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_E_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 624
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d84e5e1d51a88fa0800000000000000
+      internalID: -5798207098925987627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_NE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 576
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b96baf0ac0a8cd50800000000000000
+      internalID: 6757828030576159158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_NE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 576
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21c710459c2d618d0800000000000000
+      internalID: -2875879549889840110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_NE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 576
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff58b172f5272fb20800000000000000
+      internalID: 3166719240998454783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_NE_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 576
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5dcc81a378aabb20800000000000000
+      internalID: 3151016103884148062
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_NE_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 576
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac3c674f4ae4b7b90800000000000000
+      internalID: -7243109105312283702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_NE_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 576
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 577d49be62f936790800000000000000
+      internalID: -7538006361778104459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_N_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 528
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56cf26b7bf8182a50800000000000000
+      internalID: 6496469930867883109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_N_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 528
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95febac6d03a277f0800000000000000
+      internalID: -616250920943227047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_N_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 528
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67162158d8a1b39e0800000000000000
+      internalID: -1640688444121128586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_N_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 528
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2668b6ca605b07c0800000000000000
+      internalID: -4104098215887346129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_N_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 528
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12ae6efbf74d81af0800000000000000
+      internalID: -425356519640995295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Attack_N_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 528
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 568dca5cadc764c40800000000000000
+      internalID: 5496217674313422949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_S_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 480
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2399c6aa20c28410800000000000000
+      internalID: 1477954917150331691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_S_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 480
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72377aa73092c05e0800000000000000
+      internalID: -1942132244384091353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_S_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 480
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6e11e15606f30400800000000000000
+      internalID: 289345308085788269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_S_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 480
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 632a1ed1fdb9502d0800000000000000
+      internalID: -3313070568279793098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_S_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 480
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e2f77f6a27c31b60800000000000000
+      internalID: 7715729571688477409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_SE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 432
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a531f74d57a4941d0800000000000000
+      internalID: -3366077376546008230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_SE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 432
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1856b902b4beb4220800000000000000
+      internalID: 2471327528444978561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_SE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 432
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e078c6de9b0b8d5c0800000000000000
+      internalID: -4190405140669495538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_SE_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 432
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bdd435aa12a21420800000000000000
+      internalID: 2599318170270752176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_SE_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 432
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4879944324181df30800000000000000
+      internalID: 4598598815867049860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_E_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 384
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6aabb57e53ef96800800000000000000
+      internalID: 606295132326312614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_E_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 384
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d3f5a4bf35b04f30800000000000000
+      internalID: 4557842108117283795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_E_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 384
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f5346077348817f0800000000000000
+      internalID: -641617573256612366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_E_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 384
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5701069afbcd743f0800000000000000
+      internalID: -916521283408097163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_E_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 384
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90d0af9387f1b5370800000000000000
+      internalID: 8312272138471607561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_NE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 336
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c17405b1897ac0300800000000000000
+      internalID: 219734753569425180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_NE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 336
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04759d32ded4f0330800000000000000
+      internalID: 3679245101489018688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_NE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 336
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8e219727eb67a120800000000000000
+      internalID: 2425025564907744910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_NE_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 336
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c3f169a8ea262ce0800000000000000
+      internalID: -1430408652881005627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_NE_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 336
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70b3df6ffa21d1c30800000000000000
+      internalID: 4331638963572652807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_N_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 288
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 462b39e05d75f0fb0800000000000000
+      internalID: -4679424915230444956
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_N_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 288
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 600bbafa4269ca2d0800000000000000
+      internalID: -3266070545440198650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_N_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 288
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f186a1629775aefc0800000000000000
+      internalID: -3464860785466251233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_N_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 288
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e815790849f492a10800000000000000
+      internalID: 1885125418262417806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Dodge_N_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 288
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6de60378ee361ece0800000000000000
+      internalID: -1377710134877196586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_S_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 240
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b07eb1a3c836fbe10800000000000000
+      internalID: 2215598995611051787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_S_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 240
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6af3a425a6b517e0800000000000000
+      internalID: -1795328056036689299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_S_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 240
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07b68bb38dc167f80800000000000000
+      internalID: -8109262363993543824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_SE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 192
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 545f845eef3e6b270800000000000000
+      internalID: 8266044849993086277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_SE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 192
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8acc902a7b6c28e10800000000000000
+      internalID: 2198538060110089384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_SE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 192
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3116a28cd5c671d20800000000000000
+      internalID: 3249184806217081107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_E_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 144
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79415abb0c25ef660800000000000000
+      internalID: 7421460223688512663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_E_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 144
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67fd2b8173a0abdf0800000000000000
+      internalID: -163807204691746954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_E_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 144
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bac2d587ebd36670800000000000000
+      internalID: 8530903906598963896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_NE_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 96
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 915f831803ac70eb0800000000000000
+      internalID: -4753608571991034599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_NE_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 96
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55eead02b1a96f910800000000000000
+      internalID: 1870852136525033045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_NE_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 96
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b99469497211b610800000000000000
+      internalID: 1635108451843873201
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_N_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 48
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 662e70c2c5b96d3f0800000000000000
+      internalID: -876342257298972058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_N_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 48
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ecf7705c7c35e5d0800000000000000
+      internalID: -3033952269340508960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Hurt_N_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 48
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b49a4a5c46bea9970800000000000000
+      internalID: 8762574843047881035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Death_E_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f03511ab5c9457d00800000000000000
+      internalID: 969762408347292431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Death_E_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7997b05881ac34c0800000000000000
+      internalID: -4306389536831202949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Death_E_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc66d86c0f6c996e0800000000000000
+      internalID: -1830213036123789617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Death_E_3
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 0
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be844f835d0362220800000000000000
+      internalID: 2460707938746255595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Death_E_4
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf16ba946bab7e9e0800000000000000
+      internalID: -1592098651169398277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Death_E_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a21bd03c9c12178e0800000000000000
+      internalID: -1697538434097368790
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Hero_Death_E_6
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 0
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.041666668}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a138673c8f5004c0800000000000000
+      internalID: -4323350586446040666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Armor_LeatherArmor_0: 6857231924506085028
+      Armor_LeatherArmor_1: 4800718701504083788
+      Armor_LeatherArmor_10: -5245874045894314747
+      Armor_LeatherArmor_100: 101544178197713749
+      Armor_LeatherArmor_101: -4645018188630456448
+      Armor_LeatherArmor_102: 5079272070289951211
+      Armor_LeatherArmor_103: -3710496459311067278
+      Armor_LeatherArmor_104: -524959975863734986
+      Armor_LeatherArmor_105: 2147845954384148973
+      Armor_LeatherArmor_106: -3530370383146626033
+      Armor_LeatherArmor_107: -5527141770991243753
+      Armor_LeatherArmor_108: 1957332273234565301
+      Armor_LeatherArmor_109: 6736905727979000581
+      Armor_LeatherArmor_11: 6599404860851187069
+      Armor_LeatherArmor_110: 4652675719500620008
+      Armor_LeatherArmor_111: 8355492726867828452
+      Armor_LeatherArmor_112: -265149871226236005
+      Armor_LeatherArmor_113: -2032831939613018904
+      Armor_LeatherArmor_114: 7182410218361094291
+      Armor_LeatherArmor_115: -9052779887005224057
+      Armor_LeatherArmor_116: 6779600485001142310
+      Armor_LeatherArmor_117: -2108775665971511291
+      Armor_LeatherArmor_118: 1276823190966424428
+      Armor_LeatherArmor_12: -5693774459172406971
+      Armor_LeatherArmor_13: 4936597754890776693
+      Armor_LeatherArmor_14: 1243076013592133149
+      Armor_LeatherArmor_15: -908516446671931661
+      Armor_LeatherArmor_16: -8681119896058246557
+      Armor_LeatherArmor_17: -6379641901571915563
+      Armor_LeatherArmor_18: 5596942060992995267
+      Armor_LeatherArmor_19: -1459580620577867513
+      Armor_LeatherArmor_2: 8513199885596918344
+      Armor_LeatherArmor_20: 149695683562193661
+      Armor_LeatherArmor_21: 8889575973220640960
+      Armor_LeatherArmor_22: -1983319857519202379
+      Armor_LeatherArmor_23: -6725770195359486816
+      Armor_LeatherArmor_24: -4164972220527179875
+      Armor_LeatherArmor_25: -5170192392958089702
+      Armor_LeatherArmor_26: 4787025507402084736
+      Armor_LeatherArmor_27: -1605247077289784221
+      Armor_LeatherArmor_28: -996851918603194358
+      Armor_LeatherArmor_29: 8398660828503598707
+      Armor_LeatherArmor_3: -582111086205570740
+      Armor_LeatherArmor_30: -4010263325203214144
+      Armor_LeatherArmor_31: -2986203959336964012
+      Armor_LeatherArmor_32: 8560594621806317230
+      Armor_LeatherArmor_33: -2850072456326711309
+      Armor_LeatherArmor_34: 3239963892486892632
+      Armor_LeatherArmor_35: -753395034404169749
+      Armor_LeatherArmor_36: -5183841049858691123
+      Armor_LeatherArmor_37: -2267197983130290750
+      Armor_LeatherArmor_38: -5865754065485544154
+      Armor_LeatherArmor_39: -8326524995722485533
+      Armor_LeatherArmor_4: -8225775422744994679
+      Armor_LeatherArmor_40: 7588596207464644106
+      Armor_LeatherArmor_41: 4643741072149621760
+      Armor_LeatherArmor_42: 6361484798459741816
+      Armor_LeatherArmor_43: 175037376052204892
+      Armor_LeatherArmor_44: 7518381493917530525
+      Armor_LeatherArmor_45: -1424136650984822906
+      Armor_LeatherArmor_46: 14937556664421042
+      Armor_LeatherArmor_47: -2086237219471309050
+      Armor_LeatherArmor_48: 625956307195962670
+      Armor_LeatherArmor_49: 6738510582797435780
+      Armor_LeatherArmor_5: -884969015487661746
+      Armor_LeatherArmor_50: -1465708213333200639
+      Armor_LeatherArmor_51: 476395404195126497
+      Armor_LeatherArmor_52: -167176440156215700
+      Armor_LeatherArmor_53: 3952922343565343545
+      Armor_LeatherArmor_54: -3420169351854059046
+      Armor_LeatherArmor_55: -7466397607512441778
+      Armor_LeatherArmor_56: -7268119866520809616
+      Armor_LeatherArmor_57: 9026071854720969855
+      Armor_LeatherArmor_58: -6095134118305455809
+      Armor_LeatherArmor_59: 6280409057512787768
+      Armor_LeatherArmor_6: -440968172555660876
+      Armor_LeatherArmor_60: -7378789144383779747
+      Armor_LeatherArmor_61: 6537881793322561853
+      Armor_LeatherArmor_62: -8529742002183836184
+      Armor_LeatherArmor_63: -6572732336141018932
+      Armor_LeatherArmor_64: -1718647608815708319
+      Armor_LeatherArmor_65: -5319927630414913532
+      Armor_LeatherArmor_66: 6847138088849263550
+      Armor_LeatherArmor_67: -3747847416766123357
+      Armor_LeatherArmor_68: -5322804855608928962
+      Armor_LeatherArmor_69: -4682828991069196274
+      Armor_LeatherArmor_7: 7040042675284945702
+      Armor_LeatherArmor_70: -6117422954177347404
+      Armor_LeatherArmor_71: -6259819854938275746
+      Armor_LeatherArmor_72: 1484777980810615911
+      Armor_LeatherArmor_73: -863281019104979703
+      Armor_LeatherArmor_74: 666460372875106755
+      Armor_LeatherArmor_75: 8890797959626544236
+      Armor_LeatherArmor_76: -1396380552686483150
+      Armor_LeatherArmor_77: 2333676483681030025
+      Armor_LeatherArmor_78: 910298234545459599
+      Armor_LeatherArmor_79: -1011094482873371246
+      Armor_LeatherArmor_8: -6529752469756486104
+      Armor_LeatherArmor_80: 3604964936378455698
+      Armor_LeatherArmor_81: -1536692743537838106
+      Armor_LeatherArmor_82: -3004648293535730295
+      Armor_LeatherArmor_83: 454452808525851255
+      Armor_LeatherArmor_84: 3235429862394257351
+      Armor_LeatherArmor_85: -5268679049605881211
+      Armor_LeatherArmor_86: 5067997553310443535
+      Armor_LeatherArmor_87: 6769866150296270110
+      Armor_LeatherArmor_88: -1135360066293333418
+      Armor_LeatherArmor_89: 1767505651943796653
+      Armor_LeatherArmor_9: -3041567938048606308
+      Armor_LeatherArmor_90: 1366247862098930591
+      Armor_LeatherArmor_91: -7885171674830166997
+      Armor_LeatherArmor_92: 8724759344894578803
+      Armor_LeatherArmor_93: 3979257494403908054
+      Armor_LeatherArmor_94: 2897000586678523260
+      Armor_LeatherArmor_95: -458388271870688467
+      Armor_LeatherArmor_96: 7399677180817914016
+      Armor_LeatherArmor_97: -8953492308552736340
+      Armor_LeatherArmor_98: 8587359748451786437
+      Armor_LeatherArmor_99: -2750002974574976232
+      Player_Hero_Attack_E_0: -3126244399903696271
+      Player_Hero_Attack_E_1: -2676624939248513844
+      Player_Hero_Attack_E_2: -3626312515479863131
+      Player_Hero_Attack_E_3: 2700674836860061265
+      Player_Hero_Attack_E_4: 2028619344019092691
+      Player_Hero_Attack_E_5: -5798207098925987627
+      Player_Hero_Attack_NE_0: 6757828030576159158
+      Player_Hero_Attack_NE_1: -2875879549889840110
+      Player_Hero_Attack_NE_2: 3166719240998454783
+      Player_Hero_Attack_NE_3: 3151016103884148062
+      Player_Hero_Attack_NE_4: -7243109105312283702
+      Player_Hero_Attack_NE_5: -7538006361778104459
+      Player_Hero_Attack_N_0: 6496469930867883109
+      Player_Hero_Attack_N_1: -616250920943227047
+      Player_Hero_Attack_N_2: -1640688444121128586
+      Player_Hero_Attack_N_3: -4104098215887346129
+      Player_Hero_Attack_N_4: -425356519640995295
+      Player_Hero_Attack_N_5: 5496217674313422949
+      Player_Hero_Attack_SE_0: -8327979096565987592
+      Player_Hero_Attack_SE_1: 7669017464696266985
+      Player_Hero_Attack_SE_2: 7738240066288260677
+      Player_Hero_Attack_SE_3: 1026454335319630187
+      Player_Hero_Attack_SE_4: -1102346428464682575
+      Player_Hero_Attack_SE_5: 7793249788561975217
+      Player_Hero_Attack_S_0: 2876753473854553925
+      Player_Hero_Attack_S_1: 7558124093003088410
+      Player_Hero_Attack_S_2: 6624095609244134396
+      Player_Hero_Attack_S_3: 7439676230424790020
+      Player_Hero_Attack_S_4: -4421590127349792109
+      Player_Hero_Attack_S_5: 583214798418367223
+      Player_Hero_Death_E_0: 969762408347292431
+      Player_Hero_Death_E_1: -4306389536831202949
+      Player_Hero_Death_E_2: -1830213036123789617
+      Player_Hero_Death_E_3: 2460707938746255595
+      Player_Hero_Death_E_4: -1592098651169398277
+      Player_Hero_Death_E_5: -1697538434097368790
+      Player_Hero_Death_E_6: -4323350586446040666
+      Player_Hero_Dodge_E_0: 606295132326312614
+      Player_Hero_Dodge_E_1: 4557842108117283795
+      Player_Hero_Dodge_E_2: -641617573256612366
+      Player_Hero_Dodge_E_3: -916521283408097163
+      Player_Hero_Dodge_E_4: 8312272138471607561
+      Player_Hero_Dodge_NE_0: 219734753569425180
+      Player_Hero_Dodge_NE_1: 3679245101489018688
+      Player_Hero_Dodge_NE_2: 2425025564907744910
+      Player_Hero_Dodge_NE_3: -1430408652881005627
+      Player_Hero_Dodge_NE_4: 4331638963572652807
+      Player_Hero_Dodge_N_0: -4679424915230444956
+      Player_Hero_Dodge_N_1: -3266070545440198650
+      Player_Hero_Dodge_N_2: -3464860785466251233
+      Player_Hero_Dodge_N_3: 1885125418262417806
+      Player_Hero_Dodge_N_4: -1377710134877196586
+      Player_Hero_Dodge_SE_0: -3366077376546008230
+      Player_Hero_Dodge_SE_1: 2471327528444978561
+      Player_Hero_Dodge_SE_2: -4190405140669495538
+      Player_Hero_Dodge_SE_3: 2599318170270752176
+      Player_Hero_Dodge_SE_4: 4598598815867049860
+      Player_Hero_Dodge_S_0: 1477954917150331691
+      Player_Hero_Dodge_S_1: -1942132244384091353
+      Player_Hero_Dodge_S_2: 289345308085788269
+      Player_Hero_Dodge_S_3: -3313070568279793098
+      Player_Hero_Dodge_S_4: 7715729571688477409
+      Player_Hero_Hurt_E_0: 7421460223688512663
+      Player_Hero_Hurt_E_1: -163807204691746954
+      Player_Hero_Hurt_E_2: 8530903906598963896
+      Player_Hero_Hurt_NE_0: -4753608571991034599
+      Player_Hero_Hurt_NE_1: 1870852136525033045
+      Player_Hero_Hurt_NE_2: 1635108451843873201
+      Player_Hero_Hurt_N_0: -876342257298972058
+      Player_Hero_Hurt_N_1: -3033952269340508960
+      Player_Hero_Hurt_N_2: 8762574843047881035
+      Player_Hero_Hurt_SE_0: 8266044849993086277
+      Player_Hero_Hurt_SE_1: 2198538060110089384
+      Player_Hero_Hurt_SE_2: 3249184806217081107
+      Player_Hero_Hurt_S_0: 2215598995611051787
+      Player_Hero_Hurt_S_1: -1795328056036689299
+      Player_Hero_Hurt_S_2: -8109262363993543824
+      Player_Hero_Idle_E_0: 5273521354948416614
+      Player_Hero_Idle_E_1: 8563053639751522096
+      Player_Hero_Idle_E_2: 8070378667835966205
+      Player_Hero_Idle_E_3: -125162706294776875
+      Player_Hero_Idle_NE_0: 5736030052111004394
+      Player_Hero_Idle_NE_1: -4686886940977416462
+      Player_Hero_Idle_NE_2: -4349883924881983999
+      Player_Hero_Idle_NE_3: -5289031636631707948
+      Player_Hero_Idle_N_0: -3479611631856529710
+      Player_Hero_Idle_N_1: 7387968977307386739
+      Player_Hero_Idle_N_2: -4121867235645007428
+      Player_Hero_Idle_N_3: -660372851093039085
+      Player_Hero_Idle_SE_0: -3726881522802426757
+      Player_Hero_Idle_SE_1: 7790171186627521613
+      Player_Hero_Idle_SE_2: -2409653825994433751
+      Player_Hero_Idle_SE_3: -960944683067177619
+      Player_Hero_Idle_S_0: 7383914406728362238
+      Player_Hero_Idle_S_1: 6239698418219902830
+      Player_Hero_Idle_S_2: -8091953699245900417
+      Player_Hero_Idle_S_3: -4006884688508813402
+      Player_Hero_Walk_E_0: -1621181273232018555
+      Player_Hero_Walk_E_1: 7239072943227417409
+      Player_Hero_Walk_E_2: -3469050385525754524
+      Player_Hero_Walk_E_3: 7877058369591141647
+      Player_Hero_Walk_E_4: 4210666235270049282
+      Player_Hero_Walk_E_5: -5516057124352865622
+      Player_Hero_Walk_NE_0: 7115282875358923465
+      Player_Hero_Walk_NE_1: -2633582490333577558
+      Player_Hero_Walk_NE_2: -7016199179991414716
+      Player_Hero_Walk_NE_3: 8365043879782792797
+      Player_Hero_Walk_NE_4: -3798151976487397361
+      Player_Hero_Walk_NE_5: -7292392466475361642
+      Player_Hero_Walk_N_0: -4113794459694576300
+      Player_Hero_Walk_N_1: 7442872703320040091
+      Player_Hero_Walk_N_2: -5735234790178691330
+      Player_Hero_Walk_N_3: 8252737874156453416
+      Player_Hero_Walk_N_4: 3340643778945480876
+      Player_Hero_Walk_N_5: 3248850169519089072
+      Player_Hero_Walk_SE_0: -8130158487989051187
+      Player_Hero_Walk_SE_1: 8128282654699721334
+      Player_Hero_Walk_SE_2: 4110181443082450907
+      Player_Hero_Walk_SE_3: 4114519731346631656
+      Player_Hero_Walk_SE_4: -7487687084012150153
+      Player_Hero_Walk_SE_5: -496983211543011467
+      Player_Hero_Walk_S_0: 249749032327855417
+      Player_Hero_Walk_S_1: 8265528645882358332
+      Player_Hero_Walk_S_2: -8367118899009080556
+      Player_Hero_Walk_S_3: 7119494898305799309
+      Player_Hero_Walk_S_4: 3039537729809428496
+      Player_Hero_Walk_S_5: -9034613287244121698
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -53,6 +53,8 @@ namespace Game.Core.World
         /// → HealthComponent sẽ dùng MaxHealth mặc định thay thế.
         /// </summary>
         public double currentHp = 0;
+        /// <summary>Số Col trong ví khi lưu. -1 = chưa có dữ liệu (save cũ) → dùng Col khởi điểm.</summary>
+        public int col = -1;
     }
 
     [Serializable]

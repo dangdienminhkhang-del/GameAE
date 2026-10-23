@@ -23,7 +23,7 @@ namespace Game.PvE.Items
         [SerializeField] private PlayerController playerController;
         [SerializeField] private PlayerProgress playerProgress;
         [SerializeField] private bool loadOnStart = true;
-        [Tooltip("Tự động lưu sau N giây kể từ thay đổi cuối cùng (gom nhiều thay đổi thành 1 lần ghi).")]
+        [Tooltip("Tự động lưu sau N giây kể từ thay đổi ĐẦU TIÊN chưa lưu (gom các thay đổi trong N giây thành 1 lần ghi; thay đổi liên tục như hồi máu không làm lùi lịch lưu).")]
         [SerializeField] private float saveDelaySeconds = 2f;
 
         private const float SaveRetrySeconds = 5f;
@@ -32,6 +32,7 @@ namespace Game.PvE.Items
         private readonly Equipment _equipment = new Equipment();
         private ISaveService _save;
         private CharacterStats _stats;
+        private PlayerWallet _wallet;
         private int _instanceCounter;
 
         // ── Dùng vật phẩm tiêu hao (docs/07 §2) ──
@@ -51,7 +52,25 @@ namespace Game.PvE.Items
         public ItemDatabase Database => database;
         /// <summary>Mốc thời gian giao chiến / lần dùng gần nhất (UI không cần đụng, test dùng để giả lập thời gian).</summary>
         public ConsumableUseClock UseClock => _useClock;
+
+        /// <summary>Số giây còn lại của khóa giao chiến (0 = đã hết). Chỉ đọc, dùng cùng mốc với luật dùng bình (UI Pause/Bình dùng).</summary>
+        public float CombatLockRemainingSeconds
+        {
+            get
+            {
+                float since = _useClock.SecondsSinceCombat(UnityEngine.Time.time);
+                float remaining = ConsumableRules.DefaultCombatLockSeconds - since;
+                return remaining > 0f ? remaining : 0f;
+            }
+        }
+
+        /// <summary>Đang giao chiến (vừa đánh/bị đánh chưa đủ số giây khóa). Không đổi luật, chỉ đọc.</summary>
+        public bool IsInCombat => CombatLockRemainingSeconds > 0f;
+
         public event Action Changed;
+
+        /// <summary>Vừa dùng thành công một vật phẩm tiêu hao (đã hồi máu và trừ 1 trong túi). Nút Bình và bảng túi đều đi qua đây nên nghe ở đây là phủ cả hai (SFX bình).</summary>
+        public event Action ConsumableUsed;
 
         private void Awake()
         {
@@ -64,6 +83,8 @@ namespace Game.PvE.Items
         {
             _inventory.Changed += HandleChanged;
             _equipment.Changed += HandleChanged;
+            if (_wallet == null) TryGetComponent(out _wallet);
+            if (_wallet != null) _wallet.Changed += RequestSave;
             GameEvents.OnExperienceChanged += HandleExperienceChanged;
             GameEvents.OnPlayerDied += HandlePlayerDied;
             GameEvents.OnPlayerDeathRecorded += HandleDeathRecorded;
@@ -76,6 +97,7 @@ namespace Game.PvE.Items
         {
             _inventory.Changed -= HandleChanged;
             _equipment.Changed -= HandleChanged;
+            if (_wallet != null) _wallet.Changed -= RequestSave;
             GameEvents.OnExperienceChanged -= HandleExperienceChanged;
             GameEvents.OnPlayerDied -= HandlePlayerDied;
             GameEvents.OnPlayerDeathRecorded -= HandleDeathRecorded;
@@ -173,11 +195,17 @@ namespace Game.PvE.Items
 
         // ── Tự động lưu (docs/03 §12) ───────────────────────────────
 
+        /// <summary>
+        /// Đánh dấu cần lưu. Lịch lưu chỉ được đặt ở thay đổi ĐẦU TIÊN chưa lưu (không lùi lịch ở các thay đổi sau):
+        /// các thay đổi nhỏ liên tục (hồi máu tự nhiên mỗi giây) vẫn được lưu đều sau mỗi saveDelaySeconds
+        /// thay vì bị hoãn đến khi ngừng thay đổi. Dữ liệu ghi là trạng thái TẠI THỜI ĐIỂM lưu nên các thay đổi
+        /// xảy ra trong khoảng chờ vẫn được gom vào cùng một lần ghi.
+        /// </summary>
         public void RequestSave()
         {
             if (!_loaded || _loading || _saveLocked) return;
+            if (!_dirty) _saveDueAt = UnityEngine.Time.unscaledTime + saveDelaySeconds;
             _dirty = true;
-            _saveDueAt = UnityEngine.Time.unscaledTime + saveDelaySeconds;
         }
 
         private void Update()
@@ -301,6 +329,7 @@ namespace Game.PvE.Items
             {
                 Debug.LogError($"[Inventory] Dùng '{itemId}' nhưng không trừ được 1 trong túi.", this);
             }
+            ConsumableUsed?.Invoke();
             return ConsumableUseResult.Ok;
         }
 
@@ -371,7 +400,8 @@ namespace Game.PvE.Items
                 {
                     level     = playerProgress.Level,
                     exp       = playerProgress.CurrentExp,
-                    currentHp = health != null ? health.CurrentHealth : 0.0
+                    currentHp = health != null ? health.CurrentHealth : 0.0,
+                    col       = _wallet != null ? _wallet.Col : -1
                 }
                 : null;
 
@@ -390,6 +420,8 @@ namespace Game.PvE.Items
                 var profile = await _save.LoadAsync<ProfileData>(SaveKeys.Profile);
                 if (profile != null && playerProgress != null)
                     playerProgress.SetProgress(profile.level, profile.exp);
+
+                if (_wallet != null) _wallet.LoadFromSave(profile != null ? profile.col : -1);
 
                 var inventoryData = await _save.LoadAsync<InventoryData>(SaveKeys.Inventory);
                 var equipmentData = await _save.LoadAsync<EquipmentData>(SaveKeys.Equipment);

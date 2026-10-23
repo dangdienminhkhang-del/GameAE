@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Game.Core.Quest;
+using Game.Core.Shop;
 using Game.Core.Time;
 using UnityEngine;
 
@@ -24,6 +25,9 @@ namespace Game.Core.NPC
         [Header("Nhiệm vụ giao")]
         [SerializeField] private QuestDefinition offeredQuest;
 
+        [Header("Cửa hàng (để trống = NPC không bán đồ)")]
+        [SerializeField] private ShopDefinition shop;
+
         [Header("Thời gian hoạt động (docs/08 §3.3)")]
         [SerializeField] private bool onlyAtSpecificTime;
         [SerializeField] private TimeOfDay activeTimeOfDay = TimeOfDay.Night;
@@ -35,6 +39,7 @@ namespace Game.Core.NPC
         public string QuestInProgressLine => questInProgressLine;
         public string QuestCompletedLine => questCompletedLine;
         public QuestDefinition OfferedQuest => offeredQuest;
+        public ShopDefinition Shop => shop;
         public bool OnlyAtSpecificTime => onlyAtSpecificTime;
         public TimeOfDay ActiveTimeOfDay => activeTimeOfDay;
 

@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Game.Core.Floor;
+using Game.PvE.SafeZone;
+using Game.PvE.Zones;
 using UnityEngine;
 
 namespace Game.PvE.Enemy
@@ -31,6 +33,12 @@ namespace Game.PvE.Enemy
         [SerializeField] private Transform spawnCenter;
         [SerializeField] private int poolSizePerDefinition = 6;
         [SerializeField] private bool spawnOnStart = true;
+
+        [Tooltip("Tùy chọn (Phase 9.7a): chỉ spawn quái BÊN TRONG vùng này. Để trống = chỉ cần nằm ngoài Safe Zone.")]
+        [SerializeField] private ZoneVolume spawnZone;
+
+        [Tooltip("Số lần thử tìm điểm spawn hợp lệ (ngoài Safe Zone, trong vùng) trước khi dùng tâm spawn.")]
+        [SerializeField] private int spawnPointAttempts = SpawnPointPicker.DefaultAttempts;
 
         [Tooltip("Tầng hiện tại — quyết định hệ số sức mạnh quái (docs/07 §5). Phase 7 sẽ lấy từ FloorDefinition.")]
         [SerializeField] private int floorNumber = 1;
@@ -145,7 +153,31 @@ namespace Game.PvE.Enemy
         private Vector2 RandomPoint(float radius)
         {
             Vector2 center = spawnCenter != null ? spawnCenter.position : transform.position;
-            return center + UnityEngine.Random.insideUnitCircle * Mathf.Max(0.1f, radius);
+            if (_isSpawnBlocked == null) _isSpawnBlocked = IsSpawnBlocked;
+            return SpawnPointPicker.Pick(center, Mathf.Max(0.1f, radius), _isSpawnBlocked, UnitCircle, spawnPointAttempts).Position;
+        }
+
+        // ── Điểm spawn tránh Safe Zone (Phase 9.7a) ──────────────────────────────────────────
+
+        private static readonly Func<Vector2> UnitCircle = () => UnityEngine.Random.insideUnitCircle;
+        private Func<Vector2, bool> _isSpawnBlocked;
+
+        /// <summary>Điểm bị chặn: nằm trong Safe Zone, hoặc (khi có spawnZone) nằm ngoài vùng đó.</summary>
+        private bool IsSpawnBlocked(Vector2 point)
+        {
+            if (SafeZoneProvider.GetOrCreate().IsSafeZoneAt(point)) return true;
+            return spawnZone != null && !spawnZone.Contains(point);
+        }
+
+        /// <summary>Vùng giới hạn spawn (có thể null).</summary>
+        public ZoneVolume SpawnZone => spawnZone;
+
+        /// <summary>Vị trí tâm spawn (dùng cho công cụ kiểm bố cục).</summary>
+        public Vector2 SpawnCenterPosition => spawnCenter != null ? (Vector2)spawnCenter.position : (Vector2)transform.position;
+
+        public void SetSpawnZone(ZoneVolume zone)
+        {
+            spawnZone = zone;
         }
 
         private void HandleEnemyDied(EnemyController enemy)

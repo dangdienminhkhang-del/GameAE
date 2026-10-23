@@ -36,10 +36,19 @@ namespace Game.Tests.EditMode
         private const string NpcPath = "Assets/_Game/Data/NPCs/NPC_Cartographer.asset";
 
         // Các object GỐC được phép có trong scene host (nội dung Tầng 1 chỉ được nằm dưới Floor01).
+        // CombatFeel (cảm giác chiến đấu) và AudioService (âm thanh) là hệ thống DÙNG CHUNG mọi tầng (P9.5), không phải nội dung Tầng 1.
+        // PauseController và HapticFeedbackListener (P9.6), ZoneTracker/ZoneCameraController/ZoneMusicRouter (P9.7a) cũng là hệ thống DÙNG CHUNG
+        // mọi tầng: đặt NGOÀI Floor01/Content để không bị tắt khi đổi tầng.
         private static readonly HashSet<string> HostRootAllowList = new HashSet<string>
         {
             "Grid", "WorldClock", "FloorSpawnRegistrar", "PvEBootstrap", "Global Light 2D",
-            "Main Camera", "EventSystem", "Player"
+            "Main Camera", "EventSystem", "Player",
+            "CombatFeel", "AudioService",
+            "PauseController", "HapticFeedbackListener",
+            "ZoneTracker", "ZoneCameraController", "ZoneMusicRouter",
+            "EnemyProjectilePool", "ZoneSystem",
+            // P9.9: hệ hướng dẫn (toast + mũi tên quest) dùng chung mọi tầng, đặt NGOÀI Floor01/Content để không bị tắt khi đổi tầng.
+            "TutorialRouter", "QuestArrowHud"
         };
 
         // ── Hỗ trợ ──────────────────────────────────────────────────────────
@@ -140,6 +149,17 @@ namespace Game.Tests.EditMode
             var spawners = content.GetComponentsInChildren<EnemySpawner>(true);
             Assert.AreEqual(1, spawners.Length, $"'{content.transform.parent.name}/Content' phải có đúng 1 EnemySpawner.");
             return spawners[0];
+        }
+
+        /// <summary>
+        /// Tầng nhiều khu (Phase 9.7a) có mỗi khu một spawner, nên Tầng 1 không còn "đúng 1 spawner".
+        /// Tầng 2 vẫn dùng SingleSpawnerIn.
+        /// </summary>
+        private static EnemySpawner[] SpawnersIn(GameObject content)
+        {
+            var spawners = content.GetComponentsInChildren<EnemySpawner>(true);
+            Assert.GreaterOrEqual(spawners.Length, 1, $"'{content.transform.parent.name}/Content' phải có ít nhất 1 EnemySpawner.");
+            return spawners;
         }
 
         // ── 1. Build Settings + binder Tầng 2 ───────────────────────────────
@@ -252,9 +272,17 @@ namespace Game.Tests.EditMode
 
                 // Prefab quái dùng chung với Tầng 1.
                 // Lấy prefab ngay trong scope scene host (scene sẽ đóng sau đó, component sẽ bị hủy).
+                // Tầng 1 có thể nhiều spawner (mỗi khu một cái) nhưng tất cả phải dùng chung MỘT prefab.
                 var hostPrefab = WithScene(HostScenePath, hs =>
-                    new SerializedObject(SingleSpawnerIn(BinderFor(hs, LoadFloor(Floor01Path).id).ContentRoot))
-                        .FindProperty("enemyPrefab").objectReferenceValue);
+                {
+                    var hostSpawners = SpawnersIn(BinderFor(hs, LoadFloor(Floor01Path).id).ContentRoot);
+                    var prefabs = hostSpawners
+                        .Select(s => new SerializedObject(s).FindProperty("enemyPrefab").objectReferenceValue)
+                        .Distinct()
+                        .ToList();
+                    Assert.AreEqual(1, prefabs.Count, "Mọi spawner Tầng 1 phải dùng chung một prefab quái.");
+                    return prefabs[0];
+                });
                 Assert.AreEqual(
                     hostPrefab,
                     so.FindProperty("enemyPrefab").objectReferenceValue,
@@ -310,19 +338,60 @@ namespace Game.Tests.EditMode
         // ── 5. Scene host: nội dung Tầng 1 nằm trong Floor01 ────────────────
 
         [Test]
-        public void HostScene_Floor01Content_HoldsSpawnerBossNpcAndSafeZone()
+        public void HostScene_Floor01Content_HoldsSpawnersBossNpcAndSafeZone()
         {
             var def = LoadFloor(Floor01Path);
             WithScene(HostScenePath, scene =>
             {
-                var content = BinderFor(scene, def.id).ContentRoot;
-                var spawner = SingleSpawnerIn(content);
+                var binder = BinderFor(scene, def.id);
+                var content = binder.ContentRoot;
+                var spawners = SpawnersIn(content);
                 Assert.IsNotEmpty(content.GetComponentsInChildren<BossController>(true), "Content Tầng 1 thiếu Boss.");
                 Assert.IsNotEmpty(content.GetComponentsInChildren<NPCInteractable>(true), "Content Tầng 1 thiếu NPC.");
                 Assert.IsNotEmpty(content.GetComponentsInChildren<SafeZoneTrigger>(true), "Content Tầng 1 thiếu Safe Zone.");
 
-                CollectionAssert.AreEquivalent(new HashSet<string>(def.spawnEnemyIds), EntryIds(spawner),
-                    "spawnEnemyIds của Tầng 1 phải đúng bằng tập ID quái trong entries của spawner Tầng 1.");
+                // Hợp ID quái của MỌI spawner phải đúng bằng spawnEnemyIds.
+                var allEntryIds = new HashSet<string>();
+                foreach (var s in spawners) allEntryIds.UnionWith(EntryIds(s));
+                CollectionAssert.AreEquivalent(new HashSet<string>(def.spawnEnemyIds), allEntryIds,
+                    "spawnEnemyIds của Tầng 1 phải đúng bằng hợp ID quái trong entries của mọi spawner Tầng 1.");
+
+                // Mọi spawner phải được registrar đăng ký, nếu không quái khu đó không được lọc theo
+                // spawnEnemyIds và không nhận floorNumber từ FloorDefinition.
+                var registrar = new SerializedObject(binder).FindProperty("floorSpawnRegistrar").objectReferenceValue
+                    as FloorSpawnRegistrar;
+                Assert.IsNotNull(registrar, "Binder Tầng 1 chưa gán floorSpawnRegistrar.");
+                var rso = new SerializedObject(registrar);
+                var registered = new HashSet<EnemySpawner>();
+                var main = rso.FindProperty("enemySpawner").objectReferenceValue as EnemySpawner;
+                if (main != null) registered.Add(main);
+                var extra = rso.FindProperty("additionalSpawners");
+                for (int i = 0; i < extra.arraySize; i++)
+                {
+                    var s = extra.GetArrayElementAtIndex(i).objectReferenceValue as EnemySpawner;
+                    if (s != null) registered.Add(s);
+                }
+                foreach (var s in spawners)
+                    Assert.IsTrue(registered.Contains(s),
+                        $"Spawner '{s.name}' của Tầng 1 chưa được FloorSpawnRegistrar đăng ký (enemySpawner/additionalSpawners).");
+
+                // Vùng spawn của mọi khu không giao Safe Zone (Thị trấn không có quái).
+                var zones = SafeZoneRects(content);
+                foreach (var s in spawners)
+                {
+                    var sso = new SerializedObject(s);
+                    var entries = sso.FindProperty("entries");
+                    float maxRadius = 0f;
+                    for (int i = 0; i < entries.arraySize; i++)
+                        maxRadius = Mathf.Max(maxRadius, entries.GetArrayElementAtIndex(i).FindPropertyRelative("radius").floatValue);
+                    var centerT = sso.FindProperty("spawnCenter").objectReferenceValue as Transform;
+                    Assert.IsNotNull(centerT, $"Spawner '{s.name}' chưa gán spawnCenter.");
+                    var spawnRect = new Rect(
+                        centerT.position.x - maxRadius, centerT.position.y - maxRadius, maxRadius * 2f, maxRadius * 2f);
+                    foreach (var zone in zones)
+                        Assert.IsFalse(spawnRect.Overlaps(zone),
+                            $"Vùng spawn của '{s.name}' {spawnRect} giao Safe Zone {zone}: quái sẽ xuất hiện trong vùng an toàn.");
+                }
                 return true;
             });
         }
@@ -414,8 +483,10 @@ namespace Game.Tests.EditMode
             {
                 var binder = BinderFor(scene, LoadFloor(Floor02Path).id);
                 var npcs = binder.ContentRoot.GetComponentsInChildren<NPCInteractable>(true);
-                Assert.AreEqual(1, npcs.Length, "Content Tầng 2 phải có đúng 1 NPC.");
-                Assert.AreSame(npc, new SerializedObject(npcs[0]).FindProperty("definition").objectReferenceValue);
+                // Tầng 2: Nhà Vẽ Bản Đồ (giao quest) và Bác Tô (cửa hàng, gói Shop). Cartographer phải có đúng 1.
+                var cartographers = npcs.Where(n => ReferenceEquals(new SerializedObject(n).FindProperty("definition").objectReferenceValue, npc)).ToList();
+                Assert.AreEqual(1, cartographers.Count, "Content Tầng 2 phải có đúng 1 NPC Nhà Vẽ Bản Đồ.");
+                Assert.AreEqual(2, npcs.Length, "Content Tầng 2 phải có đúng 2 NPC: Nhà Vẽ Bản Đồ và Bác Tô.");
                 return true;
             });
         }
@@ -456,7 +527,26 @@ namespace Game.Tests.EditMode
             Assert.AreEqual(6, def.recommendedLevelMin);
             Assert.AreEqual(10, def.recommendedLevelMax);
             Assert.AreEqual(2, def.floorNumber);
-            Assert.IsTrue(string.IsNullOrEmpty(def.bossId), "Tầng 2 chưa có boss riêng.");
+            Assert.AreEqual("boss.floor_02", def.bossId, "Tầng 2 có boss riêng: Bộ Điều Áp Cổ.");
+        }
+
+        [Test]
+        public void Floor02_Boss_IsLinkedToTheFloor_AndPlacedExactlyOnceInItsScene()
+        {
+            var def = LoadFloor(Floor02Path);
+            var boss = AssetDatabase.LoadAssetAtPath<BossDefinition>("Assets/_Game/Data/Enemies/Boss_Floor02.asset");
+            Assert.IsNotNull(boss, "Thiếu Boss_Floor02.asset.");
+            Assert.IsTrue(boss.HasValidId(), "Id boss Tầng 2 phải đúng dạng boss.floor_NN.");
+            Assert.AreEqual(def.bossId, boss.Id, "bossId của Tầng 2 phải khớp định nghĩa boss.");
+            Assert.AreEqual(def.id, StringOf(boss, "floorId"), "Boss phải khai báo đúng tầng của nó.");
+            Assert.AreNotEqual(AssetDatabase.LoadAssetAtPath<BossDefinition>(BossAssetPath).Id, boss.Id, "Hai tầng không được dùng chung một boss.");
+            int count = WithScene(Floor02ScenePath, scene =>
+            {
+                var bosses = Find<BossController>(scene);
+                foreach (var b in bosses) Assert.AreSame(boss, b.Definition, "Boss trong scene Tầng 2 phải dùng Boss_Floor02.");
+                return bosses.Count;
+            });
+            Assert.AreEqual(1, count, "Scene Tầng 2 phải có đúng một boss.");
         }
     }
 }

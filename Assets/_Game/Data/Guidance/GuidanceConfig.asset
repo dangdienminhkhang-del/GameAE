@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d910b0bb658a594d94ffe5104b44371, type: 3}
+  m_Name: GuidanceConfig
+  m_EditorClassIdentifier: Game.Core::Game.Core.Guidance.GuidanceConfig
+  hints:
+  - {fileID: 11400000, guid: 4acf49e87356b1642a19773dbaaa48e2, type: 2}
+  - {fileID: 11400000, guid: d04331a171dc5614bb89c6f5f53a7ffb, type: 2}
+  - {fileID: 11400000, guid: c0a688466ea05fd42bd261bb06c17d51, type: 2}
+  - {fileID: 11400000, guid: 4f5a77e94ae4188408b35304b826712d, type: 2}
+  - {fileID: 11400000, guid: 2dffde9f08e8b8b4e8504184c3701cbb, type: 2}
+  - {fileID: 11400000, guid: 58d93ab937bfe2446b3fb50d298a63a7, type: 2}
+  - {fileID: 11400000, guid: 688f850f94a778f49bf49cb160823048, type: 2}
+  - {fileID: 11400000, guid: cebb6f9933938ef45b8a0d28ef94911f, type: 2}
+  - {fileID: 11400000, guid: 37f3bcc5891f8374b979e9bda6fcd494, type: 2}
+  maxQueued: 2
+  minGapSeconds: 1.5
+  blockedTimeoutSeconds: 10
+  sensorHz: 4
+  moveConfirmTicks: 2
+  moveMinSpeed: 0.3
+  lowHealthRatio: 0.35
+  lowHealthRearmRatio: 0.5
+  toastFadeSeconds: 0.25
+  toastTopOffset: 260
+  toastWidth: 960
+  toastHeight: 90
+  toastFontSize: 36
+  arrowEdgeMarginPixels: 96
+  arrowViewMarginPixels: 48
+  arrowArrivalRadius: 3
+  arrowSizePixels: 64
+  arrowColor: {r: 1, g: 0.85, b: 0.2, a: 0.95}

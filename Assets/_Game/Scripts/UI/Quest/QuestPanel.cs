@@ -3,6 +3,7 @@ using Game.Core.Events;
 using Game.Core.NPC;
 using Game.Core.Quest;
 using Game.PvE.Quest;
+using Game.UI.Pause;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -20,8 +21,11 @@ namespace Game.UI.Quest
     ///
     /// Touch path: các Button trong prefab có thể gán OnClick → HandleAccept / HandleTurnIn / Close.
     /// </summary>
-    public class QuestPanel : MonoBehaviour
+    public class QuestPanel : MonoBehaviour, IBackHandler
     {
+        /// <summary>Nút Back: Quest nằm trên Chọn Tầng, dưới Túi và Settings.</summary>
+        public const int Priority = 20;
+
         [Header("Refs")]
         [SerializeField] private PlayerQuestLog questLog;
 
@@ -37,6 +41,10 @@ namespace Game.UI.Quest
 
         private NPCDefinition _currentNpc;
 
+        public bool IsOpen => panelRoot != null && panelRoot.activeSelf;
+        public int BackPriority => Priority;
+        public void CloseFromBack() => Close();
+
         // ── Lifecycle ──────────────────────────────────────────────────────
 
         private void Awake()
@@ -51,12 +59,14 @@ namespace Game.UI.Quest
 
         private void OnEnable()
         {
+            BackKeyRouterHost.Router.Register(this);
             GameEvents.OnNpcDialogue   += HandleDialogue;
             GameEvents.OnQuestChanged  += HandleQuestChanged;
         }
 
         private void OnDisable()
         {
+            BackKeyRouterHost.Router.Unregister(this);
             GameEvents.OnNpcDialogue   -= HandleDialogue;
             GameEvents.OnQuestChanged  -= HandleQuestChanged;
         }

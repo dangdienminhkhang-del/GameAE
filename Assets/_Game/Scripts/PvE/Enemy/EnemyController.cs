@@ -2,6 +2,12 @@ using System;
 using Game.Core.AI;
 using Game.Core.Combat;
 using Game.Core.Events;
+using Game.Core.Presentation;
+using Game.PvE.Enemy.Behaviors;
+using Game.PvE.Enemy.Projectile;
+using Game.PvE.Presentation;
+using Game.PvE.SafeZone;
+using Game.PvE.Zones;
 using UnityEngine;
 
 namespace Game.PvE.Enemy
@@ -26,8 +32,44 @@ namespace Game.PvE.Enemy
         private float _hurtTimer;
         private float _deathTimer;
         private bool _returned;
+        private IEnemyBehavior _behavior;
+        private EnemyDefinition _behaviorDefinition;
+        // Dây xích với Safe Zone (Phase 9.7a): vị trí gốc, mục tiêu có đang trong Safe Zone không (kiểm theo chu kỳ), đang quay về.
+        private Vector2 _home;
+        private bool _targetInSafeZone;
+        private bool _returningHome;
+        private readonly SafeZoneCheckThrottle _safeZoneThrottle = new SafeZoneCheckThrottle();
 
         public event Action<EnemyController> Died;
+
+        /// <summary>
+        /// Máu đổi: (hiện tại, tối đa, delta). delta &lt; 0 = bị trúng; delta = 0 và đầy máu = vừa hồi sinh/reset.
+        /// Thanh máu nghe sự kiện này thay vì poll mỗi frame (docs/05 Phase 9.5).
+        /// </summary>
+        public event Action<double, double, double> HealthChanged;
+
+        /// <summary>
+        /// Một quái vừa bắt đầu báo đòn (telegraph). Static để hệ hướng dẫn (Phase 9.9) nghe chung mọi quái;
+        /// được xóa khi vào Play (Enter Play Mode Options có thể tắt Domain Reload).
+        /// </summary>
+        public static event Action<EnemyController> WindupStarted;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticEvents()
+        {
+            WindupStarted = null;
+        }
+
+        // Màu/nháy/tan của sprite: mọi thay đổi màu đi qua SpriteTint để nháy không phá màu báo đòn.
+        private static readonly Color TelegraphColor = new Color(1f, 0.55f, 0.55f, 1f);
+        private SpriteTint _tint;
+        private float _deathDuration;
+
+        private void EnsureTint()
+        {
+            if (_tint != null || spriteRenderer == null) return;
+            _tint = new SpriteTint(spriteRenderer, transform);
+        }
 
         public EnemyDefinition Definition => definition;
 
@@ -52,6 +94,14 @@ namespace Game.PvE.Enemy
 
         public float FloorPower => _floorPower;
         public Transform Target => _target;
+
+        /// <summary>Mục tiêu đang đứng trong Safe Zone (cập nhật mỗi ~0.2 giây). Khi true quái không đuổi và quay về.</summary>
+        public bool TargetInSafeZone => _targetInSafeZone;
+
+        /// <summary>Vị trí quái xuất hiện lần gần nhất (ghi nhận trong ResetForSpawn).</summary>
+        public Vector2 HomePosition => _home;
+
+        public bool IsReturningHome => _returningHome;
         public bool IsDead => _health <= 0.0;
         public double CurrentHealth => _health;
         public double MaxHealth => definition != null ? ScaleStat(definition.MaxHealth, _floorPower) : 1.0;
@@ -95,6 +145,7 @@ namespace Game.PvE.Enemy
             _windupTimer = definition != null ? Mathf.Max(0f, definition.AttackWindupSeconds) : 0.35f;
             StopMoving();
             SetTelegraph(true);
+            WindupStarted?.Invoke(this);
         }
 
         public void EndWindup()
@@ -117,8 +168,9 @@ namespace Game.PvE.Enemy
 
         private void SetTelegraph(bool on)
         {
-            if (spriteRenderer == null) return;
-            spriteRenderer.color = on ? new Color(1f, 0.55f, 0.55f, 1f) : Color.white;
+            EnsureTint();
+            if (_tint == null) return;
+            _tint.SetStateTint(on ? TelegraphColor : Color.white, on ? TintKind.DangerTelegraph : TintKind.Base);
         }
 
         private void Awake()
@@ -127,6 +179,7 @@ namespace Game.PvE.Enemy
             _rigidbody.gravityScale = 0f;
             _rigidbody.freezeRotation = true;
             if (spriteRenderer == null) TryGetComponent(out spriteRenderer);
+            EnsureTint();
 
             _machine = new StateMachine();
             _machine.Register(new IdleState(this));
@@ -154,11 +207,21 @@ namespace Game.PvE.Enemy
             _hurtTimer = 0f;
             _deathTimer = 0f;
             _returned = false;
+            _home = transform.position;
+            _targetInSafeZone = false;
+            _returningHome = false;
+            _safeZoneThrottle.Reset();
+            EnsureBehavior();
+            _behavior.Reset();
             if (definition != null && spriteRenderer != null)
             {
                 spriteRenderer.sprite = definition.Sprite;
-                spriteRenderer.color = Color.white;
             }
+
+            // Đưa màu, độ mờ, scale và nháy về trạng thái sạch (quái dùng lại từ pool không còn mờ/nhỏ/đang nháy).
+            EnsureTint();
+            if (_tint != null) _tint.ResetAll(Color.white);
+            HealthChanged?.Invoke(_health, MaxHealth, 0.0);
             _machine.ChangeTo<IdleState>();
         }
 
@@ -169,6 +232,7 @@ namespace Game.PvE.Enemy
 
             AcquireTarget();
             TickTimers();
+            UpdateSafeZoneCache();
             _machine.Tick();
         }
 
@@ -185,23 +249,112 @@ namespace Game.PvE.Enemy
             if (player != null) _target = player.transform;
         }
 
+        /// <summary>Kiểm mục tiêu có trong Safe Zone không, mỗi ~0.2 giây thay vì mỗi frame.</summary>
+        private void UpdateSafeZoneCache()
+        {
+            if (!_safeZoneThrottle.Tick(Time.deltaTime)) return;
+            _targetInSafeZone = _target != null && SafeZoneProvider.GetOrCreate().IsSafeZoneAt(_target.position);
+        }
+
+        /// <summary>Người chơi vào Safe Zone: bỏ mục tiêu, hủy báo đòn, quay về vị trí gốc rồi về Idle.</summary>
+        private void DropTargetAndReturn()
+        {
+            _returningHome = true;
+            EndWindup();
+            _machine.ChangeTo<IdleState>();
+        }
+
+        private void StepReturnHome()
+        {
+            if (EnemyLeashRules.HasArrivedHome(transform.position, _home))
+            {
+                _returningHome = false;
+                StopMoving();
+                return;
+            }
+            MoveToward(_home);
+        }
+
         private void TickTimers()
         {
             if (_attackTimer > 0f) _attackTimer -= Time.deltaTime;
             if (_hurtTimer > 0f) _hurtTimer -= Time.deltaTime;
+            // Nháy chạy bằng thời gian THẬT để dừng hình không kéo dài nháy.
+            if (_tint != null) _tint.Tick(UnityEngine.Time.unscaledDeltaTime);
             if (IsDead && _deathTimer > 0f)
             {
                 _deathTimer -= Time.deltaTime;
+                if (_tint != null && _deathDuration > 0f)
+                {
+                    _tint.SetDeathProgress(1f - Mathf.Clamp01(_deathTimer / _deathDuration));
+                }
                 if (_deathTimer <= 0f) ReturnToPool();
             }
         }
 
         public void MoveToward(Vector2 destination)
         {
+            MoveInDirection((destination - (Vector2)transform.position).normalized);
+        }
+
+        /// <summary>Di chuyển theo hướng đơn vị (zero = đứng yên). Dùng chung cho mọi vai trò.</summary>
+        public void MoveInDirection(Vector2 direction)
+        {
             if (definition == null) return;
-            Vector2 direction = (destination - (Vector2)transform.position).normalized;
             _rigidbody.linearVelocity = direction * definition.MoveSpeed;
             if (spriteRenderer != null && Mathf.Abs(direction.x) > 0.01f) spriteRenderer.flipX = direction.x < 0f;
+        }
+
+        // ── Điểm nối hành vi theo vai trò (Phase 9.8) ──
+
+        private void EnsureBehavior()
+        {
+            if (_behavior != null && ReferenceEquals(_behaviorDefinition, definition)) return;
+            _behaviorDefinition = definition;
+            _behavior = EnemyBehaviorFactory.Create(EnemyRoleConfig.From(definition));
+        }
+
+        private IEnemyBehavior Behavior
+        {
+            get
+            {
+                EnsureBehavior();
+                return _behavior;
+            }
+        }
+
+        private BehaviorInput BuildInput()
+        {
+            Vector2 target = _target != null ? (Vector2)_target.position : (Vector2)transform.position;
+            return new BehaviorInput(transform.position, target, DistanceToTarget, Time.deltaTime);
+        }
+
+        /// <summary>Đòn đánh khi hết lấy đà: cận chiến hay bắn đạn tùy vai trò.</summary>
+        private void PerformStrike()
+        {
+            Behavior.Strike(this);
+        }
+
+        /// <summary>Bắt đầu hồi chiêu (behavior gọi sau khi bắn).</summary>
+        public void StartAttackCooldown()
+        {
+            if (definition != null) _attackTimer = definition.AttackCooldownSeconds;
+        }
+
+        /// <summary>
+        /// Tính damage lên mục tiêu hiện tại theo đúng công thức đòn cận chiến, nhân hệ số <paramref name="scale"/>
+        /// (đạn: projectileDamageScale). Trả null nếu không có mục tiêu còn sống.
+        /// </summary>
+        public DamageInfo CreateAttackDamage(float scale)
+        {
+            if (definition == null || _target == null) return null;
+            var damageable = _target.GetComponentInParent<IDamageable>();
+            if (damageable == null || damageable.IsDead) return null;
+
+            double defense = AttackExecutor.ResolveDefense(damageable);
+            DamageInfo damage = AttackExecutor.ResolveDamage(this, defense, null, UnityEngine.Random.value, definition.Id);
+            damage.Amount = ProjectileMath.ScaleDamage(damage.Amount, scale);
+            return damage;
         }
 
         public void StopMoving()
@@ -232,8 +385,15 @@ namespace Game.PvE.Enemy
         {
             if (damage == null || IsDead) return;
 
+            double healthBefore = _health;
             _health = Math.Max(0.0, _health - damage.Amount);
             EndWindup();
+            if (!IsDead)
+            {
+                EnsureTint();
+                if (_tint != null) _tint.Flash();
+            }
+            HealthChanged?.Invoke(_health, MaxHealth, _health - healthBefore);
             if (logHits) Debug.Log($"[Enemy:{definition?.DisplayName}] nhận {damage.Amount:0.#} → {_health:0.#}", this);
 
             if (IsDead) _machine.ChangeTo<DeadState>();
@@ -243,7 +403,9 @@ namespace Game.PvE.Enemy
         public void Heal(double amount)
         {
             if (amount <= 0.0 || IsDead) return;
+            double healthBefore = _health;
             _health = Math.Min(MaxHealth, _health + amount);
+            if (_health > healthBefore) HealthChanged?.Invoke(_health, MaxHealth, _health - healthBefore);
         }
 
         public void SetMaxHealth(double maxHp, bool resetCurrent = false)
@@ -255,7 +417,15 @@ namespace Game.PvE.Enemy
         public void OnDeath()
         {
             _deathTimer = definition != null ? definition.DeathSeconds : 0.5f;
-            if (spriteRenderer != null) spriteRenderer.color = new Color(0.4f, 0.4f, 0.4f, 0.9f);
+            _deathDuration = _deathTimer;
+            EnsureTint();
+            if (_tint != null)
+            {
+                // Xám rồi mờ dần + thu nhỏ trong deathSeconds (tiến độ do TickTimers đẩy); ResetForSpawn trả lại như mới.
+                CombatFeelConfig feel = CombatFeelConfig.Active;
+                Color gray = feel.DeadTint;
+                _tint.SetDead(new Color(gray.r, gray.g, gray.b, feel.DeathStartAlpha), true);
+            }
             StopMoving();
 
             GameEvents.RaiseEnemyDefeated(this);
@@ -283,7 +453,14 @@ namespace Game.PvE.Enemy
             public override void Enter() => _owner.StopMoving();
             public override void Tick()
             {
-                if (_owner.Target != null && _owner.DistanceToTarget <= _owner.Definition.DetectionRange)
+                bool shouldChase = EnemyLeashRules.ShouldChase(
+                    _owner.Target != null, _owner._targetInSafeZone, _owner.DistanceToTarget, _owner.Definition.DetectionRange);
+                if (_owner._returningHome && !shouldChase)
+                {
+                    _owner.StepReturnHome();
+                    return;
+                }
+                if (shouldChase)
                     _owner._machine.ChangeTo<ChaseState>();
             }
             public override void Exit() { }
@@ -294,12 +471,15 @@ namespace Game.PvE.Enemy
             private readonly EnemyController _owner;
             public ChaseState(EnemyController owner) { _owner = owner; }
 
-            public override void Enter() { }
+            public override void Enter() { _owner._returningHome = false; }
             public override void Tick()
             {
                 if (_owner.Target == null) { _owner._machine.ChangeTo<IdleState>(); return; }
+                if (EnemyLeashRules.ShouldDropTarget(_owner._targetInSafeZone)) { _owner.DropTargetAndReturn(); return; }
                 float distance = _owner.DistanceToTarget;
-                if (distance <= _owner.Definition.AttackRange)
+                BehaviorInput input = _owner.BuildInput();
+                IEnemyBehavior behavior = _owner.Behavior;
+                if (behavior.ShouldEngage(input))
                 {
                     _owner._machine.ChangeTo<AttackState>();
                     return;
@@ -309,7 +489,7 @@ namespace Game.PvE.Enemy
                     _owner._machine.ChangeTo<IdleState>();
                     return;
                 }
-                _owner.MoveToward(_owner.Target.position);
+                _owner.MoveInDirection(behavior.ChaseDirection(input));
             }
             public override void Exit() => _owner.StopMoving();
         }
@@ -328,7 +508,12 @@ namespace Game.PvE.Enemy
                     _owner._machine.ChangeTo<IdleState>();
                     return;
                 }
-                if (_owner.DistanceToTarget > _owner.Definition.AttackRange)
+                if (EnemyLeashRules.ShouldDropTarget(_owner._targetInSafeZone))
+                {
+                    _owner.DropTargetAndReturn();
+                    return;
+                }
+                if (_owner.Behavior.ShouldDisengage(_owner.BuildInput()))
                 {
                     _owner.EndWindup();
                     _owner._machine.ChangeTo<ChaseState>();
@@ -349,7 +534,7 @@ namespace Game.PvE.Enemy
                     return;
                 }
 
-                if (_owner.TickWindup(UnityEngine.Time.deltaTime)) _owner.TryAttackTarget();
+                if (_owner.TickWindup(UnityEngine.Time.deltaTime)) _owner.PerformStrike();
             }
             public override void Exit() => _owner.EndWindup();
         }

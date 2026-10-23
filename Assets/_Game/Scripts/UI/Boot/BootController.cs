@@ -5,7 +5,9 @@ using Game.Services;
 using Game.Services.Config;
 using Game.UI.Auth;
 using Game.UI.Common;
+using Game.UI.Loading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Game.UI.Boot
 {
@@ -19,6 +21,8 @@ namespace Game.UI.Boot
 
         public AuthErrorScreen authErrorScreen;
         public GameObject loadingIndicator;
+        [Tooltip("Màn tải nhẹ (P9.6) dùng khi chuyển Boot → MainMenu. Thiếu thì chuyển scene như cũ.")]
+        [SerializeField] private LoadingOverlay loadingOverlay;
 
         private void Awake()
         {
@@ -74,7 +78,7 @@ namespace Game.UI.Boot
                 {
                     initError = ex;
                 }
-            });
+            }, ex => initError = ex);
             if (!initOk)
             {
                 ShowError("Không thể kết nối dịch vụ", initError);
@@ -94,7 +98,7 @@ namespace Game.UI.Boot
                     signInError = ex;
                     signInOk = false;
                 }
-            });
+            }, ex => signInError = ex);
 
             if (loadingIndicator != null) loadingIndicator.SetActive(false);
 
@@ -105,7 +109,15 @@ namespace Game.UI.Boot
             }
 
             Debug.Log($"[Boot] Signed in. PlayerId={_account.PlayerId}");
-            yield return SceneLoader.LoadSceneAsync(SceneLoader.MainMenuSceneName);
+            if (loadingOverlay != null)
+            {
+                loadingOverlay.Show();
+                yield return SceneLoader.LoadSceneAsync(SceneLoader.MainMenuSceneName, LoadSceneMode.Single, loadingOverlay);
+            }
+            else
+            {
+                yield return SceneLoader.LoadSceneAsync(SceneLoader.MainMenuSceneName);
+            }
         }
 
         private void ShowError(string message, Exception ex)
@@ -130,11 +142,14 @@ namespace Game.UI.Boot
         /// Chặn treo vô hạn: UGS có thể không bao giờ trả task (mất mạng, hoặc Editor bật
         /// "Enter Play Mode Options" tắt Domain Reload làm SDK kẹt trạng thái cũ). Không có timeout
         /// thì người chơi chỉ thấy "Đang đăng nhập..." mãi mà không biết vì sao.
-        /// Quá hạn → ném TimeoutException để ShowError hiện AuthErrorScreen kèm nút "Thử lại".
+        /// Quá hạn → gọi onError(TimeoutException) rồi kết thúc iterator bình thường, để caller
+        /// thấy initOk/signInOk == false và gọi ShowError (AuthErrorScreen kèm nút "Thử lại").
+        /// KHÔNG được throw ở đây: Unity không chuyển exception của coroutine con lên coroutine cha,
+        /// nên throw sẽ làm Boot kẹt ở màn loading và không bao giờ hiện màn lỗi.
         /// </summary>
         private const float AuthStepTimeoutSeconds = 20f;
 
-        private static IEnumerator WrapAsync(Func<System.Threading.Tasks.Task> asyncFunc)
+        private static IEnumerator WrapAsync(Func<System.Threading.Tasks.Task> asyncFunc, Action<Exception> onError)
         {
             var task = asyncFunc();
             float deadline = UnityEngine.Time.realtimeSinceStartup + AuthStepTimeoutSeconds;
@@ -146,13 +161,14 @@ namespace Game.UI.Boot
 
             if (!task.IsCompleted)
             {
-                throw new TimeoutException(
-                    $"[Boot] Dịch vụ không phản hồi sau {AuthStepTimeoutSeconds:0}s — kiểm tra mạng rồi thử lại.");
+                onError?.Invoke(new TimeoutException(
+                    $"[Boot] Dịch vụ không phản hồi sau {AuthStepTimeoutSeconds:0}s — kiểm tra mạng rồi thử lại."));
+                yield break;
             }
 
             if (task.IsFaulted && task.Exception != null)
             {
-                throw task.Exception;
+                onError?.Invoke(task.Exception);
             }
         }
     }

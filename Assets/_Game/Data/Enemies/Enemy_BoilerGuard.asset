@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.PvE::Game.PvE.Enemy.EnemyDefinition
   id: enemy.boiler_guard
   displayName: "L\xEDnh G\xE1c L\xF2 H\u01A1i"
-  sprite: {fileID: 21300000, guid: 7ce5fae8c3e23064eb227fbf562140c3, type: 3}
+  sprite: {fileID: 189288547010310628, guid: 6b574b78e5c2ae84a8ad7f69b092af6b, type: 3}
   maxHealth: 70
   attack: 13
   defense: 4

@@ -1,4 +1,6 @@
 using Game.UI.Common;
+using Game.UI.Loading;
+using Game.UI.Settings;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -11,6 +13,12 @@ namespace Game.UI.MainMenu
         [SerializeField] private Button playPvPButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button quitButton;
+        [Tooltip("Panel Cài đặt (P9.6). Thiếu thì nút Cài đặt không làm gì.")]
+        [SerializeField] private SettingsPanel settingsPanel;
+        [Tooltip("Màn tải nhẹ (P9.6). Thiếu thì vào game bằng cách cũ (không có tiến độ).")]
+        [SerializeField] private LoadingOverlay loadingOverlay;
+
+        private bool _loading;
 
         private void Awake()
         {
@@ -30,8 +38,17 @@ namespace Game.UI.MainMenu
 
         private void HandlePlayPvEClicked()
         {
-            // Phase 6.5: nút Play PvE vào thẳng scene gameplay (trước đây chỉ Debug.Log placeholder).
-            SceneManager.LoadScene("PvE_Gameplay");
+            // Phase 6.5: nút Play PvE vào thẳng scene gameplay. Dùng hằng số chung để không lệch tên scene.
+            if (_loading) return;
+            if (loadingOverlay == null)
+            {
+                SceneLoader.Load(SceneLoader.PvESceneName);
+                return;
+            }
+
+            _loading = true;
+            loadingOverlay.Show();
+            StartCoroutine(SceneLoader.LoadSceneAsync(SceneLoader.PvESceneName, LoadSceneMode.Single, loadingOverlay));
         }
 
         private void HandlePlayPvPClicked()
@@ -41,7 +58,7 @@ namespace Game.UI.MainMenu
 
         private void HandleSettingsClicked()
         {
-            Debug.Log("[MainMenu] Settings clicked (placeholder)");
+            if (settingsPanel != null) settingsPanel.Open();
         }
 
         private void HandleQuitClicked()

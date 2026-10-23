@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd47508d3d6bcf4d954746f8926c9af, type: 3}
+  m_Name: Boss_Floor02
+  m_EditorClassIdentifier: Game.PvE::Game.PvE.Boss.BossDefinition
+  id: boss.floor_02
+  displayName: "B\u1ED9 \u0110i\u1EC1u \xC1p C\u1ED5"
+  floorId: floor.02
+  sprite: {fileID: -6970517029366455035, guid: 77f92390afbd15b4fb6c2dea27bac29c, type: 3}
+  maxHealth: 2600
+  attack: 40
+  defense: 7
+  moveSpeed: 1.6
+  detectionRange: 11
+  attackRange: 2
+  attackWindupSeconds: 0.85
+  punishWindowSeconds: 1.2
+  attackCooldownSeconds: 2
+  enrageHpThreshold: 0.4
+  attackHitRadius: 2.4
+  pressureEveryNAttacks: 2
+  pressureWindupSeconds: 0.9
+  pressureDashDistance: 4.5
+  pressureDashSeconds: 0.35
+  pressureHitRadius: 1.7
+  pressureDamageMultiplier: 1.3
+  pressureRecoverySeconds: 1.6
+  experienceReward: 330
+  firstClearRewardItem: {fileID: 11400000, guid: 0991e85c4d863c14f8997f120c0b973c, type: 2}
+  firstClearRewardQuantity: 1
+  drops:
+  - item: {fileID: 11400000, guid: ed645eb8dcb162d40beda14fa499044f, type: 2}
+    chance: 1
+    minCount: 3
+    maxCount: 4
+  rareDrops:
+  - item: {fileID: 11400000, guid: a88a1e6f48e817c48b53fa524ebbd66c, type: 2}
+    chance: 0.1
+    minCount: 1
+    maxCount: 1
+  rematchRareMultiplier: 0.05

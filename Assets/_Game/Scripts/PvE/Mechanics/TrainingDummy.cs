@@ -53,6 +53,11 @@ namespace Game.PvE.Mechanics
 
         private void Update()
         {
+            if (transform.localScale != Vector3.one)
+            {
+                transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.one, Time.deltaTime * 4f);
+            }
+
             if (spriteRenderer == null || _flashTimer <= 0f) return;
 
             _flashTimer -= Time.deltaTime;
@@ -70,6 +75,7 @@ namespace Game.PvE.Mechanics
             _currentHealth = Math.Max(0.0, _currentHealth - damage.Amount);
             _flashTimer = FlashSeconds;
             if (spriteRenderer != null) spriteRenderer.color = hitColor;
+            transform.localScale = new Vector3(1.28f, 0.78f, 1f);
 
             Damaged?.Invoke(this, damage);
 

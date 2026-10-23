@@ -23,7 +23,7 @@ Phạm vi Mốc 1:
 - Một loại vũ khí chính có 2 Technique đầu tiên.
 - Floor 1 hoàn chỉnh và Floor 2 được thêm bằng data, không sửa Core.
 - Ngày/đêm, quest, Safe Zone, permadeath PvE và boss state dùng chung.
-- Duel 1v1 online chỉ Half-Loss; nó không tác động World State, inventory hay death.
+- Không có Duel ở Mốc 1: Duel 1v1 online (Half-Loss) thuộc Mốc 2 (ADR-028 ở `01` §6); khi có, nó không tác động World State, inventory hay death.
 
 Không mở rộng số lượng content nếu loop trên chưa chạy được trên điện thoại thật.
 
@@ -38,10 +38,10 @@ Không mở rộng số lượng content nếu loop trên chưa chạy được 
 
 ## 3. Quy tắc nguyên bản
 
-- Chỉ dùng nguyên lý game chung: leo tầng, mastery vũ khí, combat thời gian thực, ngày/đêm, duel và rủi ro mất nhân vật.
+- Được dùng mọi nguyên lý và cấu trúc chung của thể loại game leo tháp sinh tử: leo tầng, boss tầng mở đường cho mọi người chơi, mastery vũ khí, nối kỹ năng, đội/raid, combat thời gian thực, ngày/đêm, duel, rủi ro mất nhân vật. Càng giống thể loại ở mức cơ chế và cảm giác càng tốt (ADR-031).
 - Không dùng một tác phẩm, nhân vật, cốt truyện, tên, biểu tượng, nhạc, UI, moveset, danh sách kỹ năng, mốc mastery hay công thức của bất kỳ IP nào làm đặc tả.
 - Mọi tên hiển thị, ID content, animation, VFX, thoại và nhịp kỹ năng phải được tạo từ tài liệu này hoặc content brief riêng.
-- Khi một đề xuất có mô tả “giống hệt nguồn tham chiếu”, dừng triển khai và thiết kế lại theo trụ cột ở §2.
+- Khi một đề xuất sao chép biểu đạt cụ thể của nguồn tham chiếu (tên, hình, thoại, UI, moveset, danh sách kỹ năng, cốt truyện), thiết kế lại theo trụ cột ở §2; giống ở cơ chế và cảm giác thì không cần sửa.
 
 ## 4. Vòng lặp phút giây
 

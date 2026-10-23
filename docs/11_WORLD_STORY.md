@@ -29,9 +29,9 @@ Không mô tả permadeath như tổn hại cơ thể thật. Rủi ro là mất
 |---:|---|---|---|---|
 | 1 | Bến Cạn Mù Sương | Cầu tàu mục, dây neo, sương mặn, beacon vàng | Chaser và ranged để dạy reposition | Cỗ máy kéo neo bị kẹt, có telegraph quét và punish window. |
 | 2 | Lò Rèn Ngập Nước | Lò hơi rỉ, băng tải, ống nước nóng | Guard, elite và Skirmisher (từ Phase 9.8) để dạy Technique positioning | Bộ điều áp cổ, thay đổi vùng nguy hiểm theo phase. |
-| 3 | Vườn Muối Âm | Thực vật kết tinh, hồ phản chiếu, gió chói | Time-aware content; dùng lại các role đã có từ Tầng 1–2 | Sinh vật gom tinh thể, có window khi đổi lõi. |
+| 3 | Vườn Muối Âm | Thực vật kết tinh, hồ phản chiếu, gió chói | Time-aware content; dùng lại các role đã có từ Tầng 1–2 (tạm, Tầng 3 sẽ có role riêng ở Mốc 2) | Sinh vật gom tinh thể, có window khi đổi lõi. |
 
-Role Skirmisher và Ranged do Phase 9.8 đưa vào Vùng Farm Tầng 1–2 (`05`, FB-030 ở `10`); cột "Hành vi chính" theo đó. Trước 9.8 mọi quái dùng chung một hành vi.
+Role Ranged do Phase 9.8 đưa vào phần sâu Vùng Farm Tầng 1 và Tầng 2; Skirmisher vào Tầng 2 (ADR-030 ở `01` §6, chốt 2026-10-18; `05` mục 9.8, FB-030 ở `10`). Tầng 3 trở đi (Mốc 2) có role/biến thể riêng, quyết khi tới; cột "Hành vi chính" của Tầng 3 ở bảng trên chỉ là hướng tạm. Trước 9.8 mọi quái dùng chung một hành vi.
 
 Floor N chỉ là data/content. Chất liệu mới không được kéo theo class/logic riêng nếu có thể biểu diễn bằng existing definition.
 

@@ -30,6 +30,24 @@ namespace Game.PvE.Enemy
         [SerializeField] private float hurtSeconds = 0.25f;
         [SerializeField] private float deathSeconds = 0.6f;
 
+        [Header("Vai trò chiến đấu (Phase 9.8)")]
+        [Tooltip("Chaser = hành vi cũ (mặc định). Skirmisher: áp sát, đánh rồi lùi. Ranged: giữ khoảng cách và bắn đạn.")]
+        [SerializeField] private CombatRole role = CombatRole.Chaser;
+        [Tooltip("Ranged: khoảng cách ưa thích tới người chơi. Phải > retreatRange và ≤ shootRange.")]
+        [SerializeField] private float preferredRange = 4.5f;
+        [Tooltip("Người chơi lại gần hơn khoảng này thì quái lùi (Ranged) hoặc lùi tới khoảng này (Skirmisher).")]
+        [SerializeField] private float retreatRange = 2.5f;
+        [Tooltip("Skirmisher: thời gian lùi tối đa sau mỗi đòn (hết giờ là quay lại áp sát dù bị chặn).")]
+        [SerializeField] private float retreatSeconds = 0.8f;
+        [Tooltip("Ranged: trong tầm này thì báo đòn rồi bắn. Phải ≤ detectionRange.")]
+        [SerializeField] private float shootRange = 6.0f;
+        [Tooltip("Đạn phải đủ chậm để né được: thời gian bay từ shootRange tới người chơi >= 0.5 giây.")]
+        [SerializeField] private float projectileSpeed = 8f;
+        [SerializeField] private float projectileLifetime = 1.5f;
+        [SerializeField] private float projectileRadius = 0.25f;
+        [Tooltip("Sát thương đạn = sát thương của quái x hệ số này.")]
+        [SerializeField] private float projectileDamageScale = 1f;
+
         [Header("Thưởng")]
         [SerializeField] private int experienceReward = 60;
 
@@ -63,6 +81,36 @@ namespace Game.PvE.Enemy
         public float HurtSeconds => hurtSeconds;
         public float DeathSeconds => deathSeconds;
         public int ExperienceReward => experienceReward;
+
+        // Vai trò chiến đấu (Phase 9.8). Asset cũ thiếu field này sẽ dùng mặc định: role = Chaser.
+        public CombatRole Role => role;
+        public float PreferredRange => preferredRange;
+        public float RetreatRange => retreatRange;
+        public float RetreatSeconds => retreatSeconds;
+        public float ShootRange => shootRange;
+        public float ProjectileSpeed => projectileSpeed;
+        public float ProjectileLifetime => projectileLifetime;
+        public float ProjectileRadius => projectileRadius;
+        public float ProjectileDamageScale => projectileDamageScale;
+
+        /// <summary>
+        /// Kẹp các field vai trò: retreatRange &lt; preferredRange ≤ shootRange ≤ detectionRange và các số dương.
+        /// OnValidate gọi hàm này; test gọi trực tiếp.
+        /// </summary>
+        public void ClampRoleFields()
+        {
+            Behaviors.EnemyRangeRules.Clamp(detectionRange, ref retreatRange, ref preferredRange, ref shootRange);
+            retreatSeconds = Mathf.Max(0.1f, retreatSeconds);
+            projectileSpeed = Mathf.Max(0.1f, projectileSpeed);
+            projectileLifetime = Mathf.Max(0.1f, projectileLifetime);
+            projectileRadius = Mathf.Max(0.01f, projectileRadius);
+            projectileDamageScale = Mathf.Max(0f, projectileDamageScale);
+        }
+
+        private void OnValidate()
+        {
+            ClampRoleFields();
+        }
 
         private void Reset()
         {

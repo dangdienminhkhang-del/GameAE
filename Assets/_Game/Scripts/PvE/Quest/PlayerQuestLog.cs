@@ -63,6 +63,7 @@ namespace Game.PvE.Quest
             GameEvents.OnItemAcquiredWithPayload += HandleItemAcquiredWithPayload;
             GameEvents.OnPlayerDied += HandlePlayerDied;
             GameEvents.OnPlayerDeathRecorded += HandleDeathRecorded;
+            GameEvents.OnZoneEntered += HandleZoneEntered;
             // Fallback cho OnItemAcquired cũ (không có payload) — không dùng để advance nữa
         }
 
@@ -72,6 +73,7 @@ namespace Game.PvE.Quest
             GameEvents.OnItemAcquiredWithPayload -= HandleItemAcquiredWithPayload;
             GameEvents.OnPlayerDied -= HandlePlayerDied;
             GameEvents.OnPlayerDeathRecorded -= HandleDeathRecorded;
+            GameEvents.OnZoneEntered -= HandleZoneEntered;
         }
 
         private async void Start()
@@ -210,6 +212,16 @@ namespace Game.PvE.Quest
 
         public void NotifyTalk(string npcId)  => Advance(QuestObjectiveType.Talk,  npcId);
         public void NotifyReach(string zoneId) => Advance(QuestObjectiveType.Reach, zoneId);
+
+        /// <summary>
+        /// Người chơi vừa vào một vùng (Phase 9.7a). ZoneTracker chỉ phát khi ĐỔI vùng nên mỗi lần vào đếm một lần;
+        /// quest có đếm hay không do QuestRules.CanAdvance quyết định (Active, đúng loại Reach, đúng zoneId, đúng giờ).
+        /// </summary>
+        private void HandleZoneEntered(object sender, ZoneEnteredArgs args)
+        {
+            if (args == null || string.IsNullOrEmpty(args.ZoneId)) return;
+            NotifyReach(args.ZoneId);
+        }
 
         // ── Event handlers ─────────────────────────────────────────────────
 

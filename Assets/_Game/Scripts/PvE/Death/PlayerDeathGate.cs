@@ -60,6 +60,25 @@ namespace Game.PvE.Death
 
         private async Task VerifyAliveAsync()
         {
+#if UNITY_EDITOR
+            // Tiện ích cho Editor: Nếu Play trực tiếp scene PvE_Gameplay mà chưa qua scene Boot (chưa đăng nhập),
+            // tự động cho phép chơi thử nghiệm mà không bị khóa màn hình "Không thể xác minh".
+            try
+            {
+                if (!ServiceProvider.GetAccountService().IsSignedIn)
+                {
+                    Debug.Log("[Death] Editor Fast-Play: Chưa đăng nhập tài khoản, mở khóa để test trực tiếp trong Editor.");
+                    SetControlsEnabled(true);
+                    return;
+                }
+            }
+            catch
+            {
+                SetControlsEnabled(true);
+                return;
+            }
+#endif
+
             IDeathService deathService = ServiceProvider.CreateDeathService();
 
             for (int attempt = 1; attempt <= MaxVerifyAttempts; attempt++)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Core.Floor;
 using Game.PvE.Bootstrap;
 using Game.PvE.Floor;
+using Game.UI.Pause;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,8 +21,11 @@ namespace Game.UI.Floor
     /// chỉ panelRoot được tắt mặc định.
     /// Tạm dùng UnityEngine.UI.Text thay TMP_Text (asmdef Game.UI chưa ref Unity.TextMeshPro).
     /// </summary>
-    public class FloorSelectPanel : MonoBehaviour
+    public class FloorSelectPanel : MonoBehaviour, IBackHandler
     {
+        /// <summary>Nút Back: Chọn Tầng nằm dưới cùng trong thứ tự đóng (Settings 40, Túi 30, Quest 20, Chọn Tầng 10).</summary>
+        public const int Priority = 10;
+
         [Header("UI refs")]
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private Transform listContainer;
@@ -41,6 +45,11 @@ namespace Game.UI.Floor
         private int _refreshVersion; // bỏ kết quả refresh cũ nếu panel đã đóng/mở lại
 
         public bool IsOpen => panelRoot != null && panelRoot.activeSelf;
+        public int BackPriority => Priority;
+        public void CloseFromBack() => Hide();
+
+        private void OnEnable() => BackKeyRouterHost.Router.Register(this);
+        private void OnDisable() => BackKeyRouterHost.Router.Unregister(this);
 
         // ── Inject ───────────────────────────────────────────────────────────
 

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11c6e7b956fb66b40976037d25abfdbe, type: 3}
+  m_Name: Hint_Pickup
+  m_EditorClassIdentifier: Game.Core::Game.Core.Guidance.TutorialHintDefinition
+  hintId: hint.pickup
+  text: "B\u1EA1n nh\u1EB7t \u0111\u01B0\u1EE3c m\u1ED9t m\xF3n \u0111\u1ED3. M\u1EDF
+    T\xFAi \u0111\u1EC3 xem."
+  speakerLabel: "H\u1EC7 th\u1ED1ng"
+  priority: 30
+  displaySeconds: 4
+  trigger: 7
+  completeKind: 0

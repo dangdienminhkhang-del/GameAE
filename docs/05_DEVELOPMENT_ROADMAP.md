@@ -2,8 +2,10 @@
 ## Game2D Evidence Based Delivery Plan
 
 > Nguồn thứ tự phase và điều kiện đóng phase. Cách hai AI làm song song nằm ở `13_TWO_AGENT_IMPLEMENTATION_PLAN.md`.
-> Một phase chỉ DONE khi có code, tests, Unity Editor wiring, APK evidence và tài liệu khớp nhau.
-> **Cập nhật 2026-10-14 (product owner):** thêm Phase 9.5–9.9 trước Duel để game có cảm giác leo tầng (phản hồi chiến đấu, nền UX, phân vùng tầng, quái đa vai trò, hướng dẫn). Duel (Phase 10) làm sau 9.9; nếu product owner chuyển Duel sang Mốc 2 thì phải cập nhật `01`, `12` §1 và `13` qua ADR. Art Track (cuối §3) vẫn là đề xuất.
+> Một phase "xong để làm tiếp" khi có code, test xanh, Unity wiring và chơi thử nhanh trong Editor; "DONE để nộp" khi có thêm APK evidence và tài liệu khớp nhau. Evidence máy thật gom ở các mốc ghi trong `STATUS.md` (ADR-031).
+> **Cập nhật 2026-10-14 (product owner):** thêm Phase 9.5–9.9 trước Duel để game có cảm giác leo tầng (phản hồi chiến đấu, nền UX, phân vùng tầng, quái đa vai trò, hướng dẫn). Duel (Phase 10) lúc đó dự kiến làm sau 9.9 (đã đổi, xem dòng 2026-10-18 bên dưới). Art Track (cuối §3) vẫn là đề xuất.
+> **Cập nhật 2026-10-18 (product owner):** Duel (Phase 10) chuyển sang **Mốc 2** (ADR-028 ở `01` §6). Mốc 1 kết thúc ở Phase 11 (kiểm tổng). Thứ tự làm: 9.5 → 9.9 → 11 → 10; giữ số "Phase 10" để không vỡ tham chiếu. Cùng ngày đã chốt ưu tiên màu sprite (ADR-029, mục 9.5) và vai trò quái theo tầng (ADR-030, mục 9.8).
+> **Cập nhật 2026-10-20 (product owner):** ADR-031: AI được làm liền nhiều gói và tự thêm tính năng; các luật 3, 6, 9 bên dưới được nới (xem từng luật). Trạng thái 9.5–9.9 ghi theo repo: code + test đã có, chờ evidence máy thật.
 
 ---
 
@@ -11,13 +13,13 @@
 
 1. Một phase tạo được giá trị chơi trên điện thoại, với account/mạng thật khi feature cần backend.
 2. `Compiled` không phải `Done`.
-3. Không thêm feature Mốc 2 để che giấu một loop Mốc 1 chưa hoàn chỉnh.
+3. Không thêm feature Mốc 2 để che giấu một loop Mốc 1 chưa hoàn chỉnh. Khi loop Mốc 1 đã chơi được, AI được làm sớm tính năng Mốc 2 nếu tốt cho game (ADR-031).
 4. Mỗi feature persistence phải có save/load test; mỗi feature World State phải có test hai account.
 5. Mỗi feature player intent phải có touch path. Keyboard Editor không đủ.
-6. Phase song song chỉ được mở theo ownership/document contract ở `13`.
+6. Phase song song (nhiều AI) chỉ khi chia path rõ ràng, theo `archive/13`; mặc định làm tuần tự.
 7. Mỗi phase từ 9.5 trở đi (trừ Phase 11) phải có ít nhất một thay đổi người chơi nhìn thấy, nghe thấy hoặc chạm được. "Đúng dữ liệu" chưa đủ để đóng phase nếu người chơi không cảm nhận được gì mới.
-8. Phase Regression (11) chỉ kiểm tra và sửa lỗi, không thêm tính năng. Tính năng người chơi chạm hằng giây (pause, settings, joystick, nút bình) thuộc phase trước Duel (xem `10_FEATURE_BACKLOG.md`).
-9. Phase 9.5–9.9 thuộc **Mốc 1** (hoàn thiện loop chơi), không phải Mốc 2, nên không vi phạm luật 3. Mỗi phase phải có work package (path sở hữu, path chỉ đọc, test bắt buộc) trước khi giao việc; đưa vào `13` khi product owner duyệt.
+8. Phase Regression (11) chỉ kiểm tra và sửa lỗi, không thêm tính năng. Tính năng người chơi chạm hằng giây (pause, settings, joystick, nút bình) thuộc phase trước Phase 11 (xem `10_FEATURE_BACKLOG.md`).
+9. Phase 9.5–9.9 thuộc **Mốc 1** (hoàn thiện loop chơi), không phải Mốc 2, nên không vi phạm luật 3. Mỗi phase có phạm vi ngắn (làm gì, test cần có, điều kiện dừng) trong prompt hoặc `STATUS.md`; AI được mở rộng phạm vi theo mục "Tự chủ của AI" ở `AGENTS.md` (ADR-031).
 10. Thứ tự 9.5 → 9.9 do product owner chọn theo giá trị cảm giác leo tầng và phụ thuộc kỹ thuật (9.5 dựng `PlaySpeedState` và âm thanh cho 9.6 và 9.7; 9.9 chạy cuối để dạy đúng điều khiển cuối cùng). Đổi thứ tự hoặc cắt phase thì ghi vào `10`.
 
 ## 2. Trạng thái baseline
@@ -37,11 +39,11 @@
 | 7.5 | Blade Techniques + Dodge | DONE (Wave 2A) | Code + tests + Editor wiring + device evidence. |
 | 8 | Boss + World State | Code + tests đã có; device evidence chờ điền | Chạy bảng P8-5 trên máy thật; không tự điền `Pass`. |
 | 9 | Data-only Floor 2 | Code + tests đã có; device evidence chờ điền | Chạy bảng P9-3 trên máy thật; không tự điền `Pass`. |
-| 9.5 | Cảm giác chiến đấu + Âm thanh | Đã duyệt 2026-10-14, chưa làm | Bảng P9.5. |
-| 9.6 | Nền UX | Đã duyệt 2026-10-14, chưa làm | Bảng P9.6. |
-| 9.7 | Phân vùng Tầng (9.7a, 9.7b) | Đã duyệt 2026-10-14, chưa làm | Bảng P9.7a, P9.7b. |
-| 9.8 | Quái đa vai trò | Đã duyệt 2026-10-14, chưa làm | Bảng P9.8. |
-| 9.9 | Hướng dẫn + Mũi tên quest | Đã duyệt 2026-10-14, chưa làm | Bảng P9.9. |
+| 9.5 | Hướng 8 hướng + Cảm giác chiến đấu + Âm thanh | Code + test + nối scene đã có (9.5a hướng 8 hướng; 9.5b/c cảm giác + âm thanh), kiểm 2026-10-20; evidence chờ điền | Bảng P9.5. |
+| 9.6 | Nền UX | Code + test + nối scene đã có (kiểm 2026-10-20); evidence chờ điền | Bảng P9.6. |
+| 9.7 | Phân vùng Tầng (9.7a, 9.7b) | Code + test đã có (Zones, ZoneBanner, EnemyLeashRules); product owner báo gần xong (2026-10-20); evidence chờ điền | Bảng P9.7a, P9.7b. |
+| 9.8 | Quái đa vai trò | Code + test đã có (CombatRole, Ranged, Skirmisher, Projectile); gần xong (2026-10-20); evidence chờ điền | Bảng P9.8. |
+| 9.9 | Hướng dẫn + Mũi tên quest | Code + test đã có (Guidance: Tutorial, QuestArrow); gần xong (2026-10-20); evidence chờ điền | Bảng P9.9. |
 
 “Code baseline có” không đồng nghĩa phase đã đóng. Không sửa bảng thành DONE nếu evidence vẫn thiếu.
 
@@ -149,17 +151,28 @@ Done:
 ### Phase 9.5 Cảm giác chiến đấu và Âm thanh
 
 - Mục tiêu: đánh quái phải nhìn thấy, nghe thấy và cảm nhận được từng đòn. Hiện đòn trúng chưa có số sát thương, chưa nháy, chưa có tiếng, chưa có nhạc nền.
-- Nguồn: FB-022, FB-023 trong `10`.
+- Nguồn: FB-022, FB-023, FB-032, FB-033 trong `10`. Work package: `13` (9.5a hướng 8 hướng, 9.5b phản hồi trúng đòn, 9.5c âm thanh), làm tuần tự.
 - Phạm vi:
+  0. Hướng nhìn 8 hướng (kiểu game MOBA di động, product owner chọn 2026-10-16): hướng mặt là vector theo joystick; đòn thường, Né và Kỹ thuật đi theo hướng đó (hiện chỉ trái/phải, đã gây lỗi 'lướt chỉ ngang'); Animator nhận `FaceX`, `FaceY`; tự nhắm quái gần nhất là tùy chọn, mặc định tắt (gói 9.5a trong `13`). Quái và boss 8 hướng làm ở gói hook art (`14` §7), không thuộc 9.5.
   1. Số sát thương nổi (pool) cho đòn người chơi gây ra và đòn người chơi nhận; màu phân biệt hai loại.
-  2. Nháy khi trúng (quái, boss, người chơi); không được xóa màu telegraph đang hiển thị.
+  2. Nháy khi trúng (quái, boss, người chơi) bằng lớp phủ trắng riêng `HitFlash` (ADR-029); không được xóa màu telegraph đang hiển thị.
   3. Dừng hình ngắn (tối đa 0.06 giây thời gian thực) chỉ cho đòn xác nhận của người chơi, có giới hạn tần suất. Mọi thay đổi `timeScale` đi qua một điểm duy nhất (`PlaySpeedState`) để Pause ở 9.6 dùng lại; không nơi nào khác ghi `Time.timeScale`.
   4. Hiệu ứng tan khi quái chết (trong `deathSeconds`), reset đúng khi quái được dùng lại từ pool.
   5. Thanh máu trên đầu quái; thanh máu boss trên HUD.
   6. Âm thanh: dịch vụ phát âm (pool AudioSource), nhạc nền gameplay và nhạc boss, SFX (vung đòn, trúng, bị trúng, kỹ thuật, né, nhặt, lên cấp, UI). Âm lượng nhạc/SFX lưu local (PlayerPrefs); màn Settings làm ở 9.6.
 - Không làm: hệ chí mạng mới, particle nặng, âm thanh 3D, mixer phức tạp, nhạc/SFX không rõ nguồn.
 - Ràng buộc: pool, không Instantiate/Destroy trong combat; chỉ nghe event (`OnHitResolved`, `OnHealthChanged` đã lọc theo người chơi, `OnEnemyDefeated`...) và không tự trừ máu; PvE không tham chiếu UI; không tạo asmdef mới (`13` §3); asset âm thanh có nguồn và giấy phép ghi trong `ASSET_SOURCES.md` (`11` §5, §7).
-- Done: đánh quái thường, Elite và boss đều có số, nháy, dừng hình ngắn và tiếng; quái chết có hiệu ứng; có nhạc nền; màu telegraph không bị phá; mọi case P7.5/P8/P9 đã Pass vẫn Pass.
+- Ghi chú kỹ thuật (K1, phần 9.5b + 9.5c đã viết code, chưa có evidence thiết bị; đã biên dịch được trong Unity và toàn bộ test EditMode xanh (766/766, kiểm 2026-10-18)):
+  - `Core/Presentation`: `PlaySpeedState` (điểm duy nhất ghi `Time.timeScale`, có `Shared`, `PushPause`/`PopPause`, `RequestHitStop`, `Tick`, `ForceReset`; test `TimeScaleWriteScanTests` canh luật này), `HitStopRules`, `TintResolver` (ưu tiên màu: xem hai dòng ngay dưới), `DamageNumberRules`, `HealthBarRules`, `CombatFeelConfig` (mọi số ở đây; `Active` do `PlaySpeedTicker` đăng ký).
+  - Ưu tiên màu (ADR-029, chốt 2026-10-18): **Chết > màu theo state hiện tại > gốc**. Màu state: báo đòn quái hồng nhạt; boss Telegraph vàng/cam, PressureWindup/Dash tím, Punish/Recovery xanh nhạt; Cuồng nộ. Giá trị màu giữ nguyên theo `14` §2. Nháy khi trúng KHÔNG còn là lớp màu nhân: nó là lớp phủ trắng riêng (child SpriteRenderer `HitFlash`), alpha 0.85 → 0 trong 0.08 s; khi đang có báo đòn nguy hiểm (quái windup, boss Telegraph/Pressure) thì alpha tối đa 0.5 để màu báo đòn vẫn đọc được.
+  - Cập nhật 2026-10-18 (P9.5-fix-tint, đã đọc code thật; đã biên dịch và chạy toàn bộ EditMode trong Unity: 870/870 xanh, chưa có evidence trên máy thật): code đã theo ADR-029. `TintResolver.Resolve(TintState)` chỉ còn hai lớp (chết > màu state), `TintState` chỉ có `StateTint`, `IsDead`, `DeadTint` (không có trường flash; test `TintState_HasNoFlashLayer_...` canh điều này). `SpriteTint` nhận loại màu `TintKind` (`Base`, `DangerTelegraph`, `Window`, `Enrage`; file `PvE/Presentation/TintKind.cs`) qua `SetStateTint(color, kind)`, do `EnemyController`/`BossController` truyền; chỉ `DangerTelegraph` làm lớp phủ nhạt đi. Đổi state giữa lúc đang nháy thì alpha được kẹp lại ngay.
+  - Nháy khi trúng = `PvE/Presentation/HitFlashOverlay` (child SpriteRenderer `HitFlash`, tự dựng một lần ở Awake qua `SpriteTint`, **không sửa prefab**; material `Universal Render Pipeline/2D/Sprite-Unlit-Default`, thiếu thì `Sprites/Default`; `sortingOrder` = renderer chính + 1; chép sprite, `flipX`, `flipY` từ renderer chính trong `LateUpdate` chỉ khi đang nháy; thời gian THẬT do `SpriteTint.Tick(unscaledDeltaTime)` đẩy vào). Luật alpha thuần ở `HitFlashRules` (0.85 → 0 tuyến tính trong 0.08 s; trần 0.5 khi `DangerTelegraph`; luôn trong [0, 1], không NaN). `ResetAll`, `SetDead` và `OnDisable` đều trả lớp phủ về ẩn hoàn toàn (quái dùng pool không rò trạng thái). Dùng cho quái, boss và người chơi (`PlayerHitFeedback`). Scale punch chỉ áp cho quái (scaleTarget); lớp phủ là child nên to theo. Chỉ `DangerTelegraph` bị kẹp alpha; Punish/Recovery (`Window`) và Cuồng nộ nháy đầy đủ (chủ ý, product owner đổi được bằng `HitFlashRules.IsDanger`). Lưu ý: `EnemyController.TakeDamage` luôn gọi `EndWindup` trước khi nháy (luật cũ, không đổi), nên đòn trúng quái đang báo đòn HỦY báo đòn (màu hồng mất vì windup bị hủy, không phải do nháy); trần alpha 0.5 có tác dụng thực với boss (Telegraph/Pressure không bị hủy khi trúng đòn).
+  - `CombatFeelConfig` có thêm: `flashColor` (mặc định trắng; alpha của màu này bị bỏ qua), `flashStartAlpha` 0.85, `flashMaxAlphaUnderDanger` 0.5 (cạnh `flashSeconds` 0.08, `punchScale` 1.08). Asset `Data/Presentation/CombatFeelConfig.asset` đã lưu `flashColor` ĐỎ (1, 0.2, 0.2) từ trước và Unity không đổi giá trị đã lưu khi mặc định trong code đổi, nên phải đặt `flashColor` = trắng (1, 1, 1) trong Inspector (việc Unity, xem báo cáo P9.5-fix-tint); hai trường mới thiếu trong asset sẽ tự lấy mặc định 0.85 và 0.5.
+  - `Core/Audio`: `IAudioService` (+ `NullAudioService`), `AudioIds`, `AudioVolumes` (khóa `settings.audio.music`/`settings.audio.sfx`, mặc định 0.7/0.9), `SfxThrottleRules`, `MusicRules`. `Services/Audio`: `AudioService`, `AudioCatalog`, `AudioServiceLocator`, kho PlayerPrefs; lấy qua `ServiceProvider.GetAudioService()` (chưa có service thì trả bản im lặng, không bao giờ null).
+  - `PvE/Presentation`: `SpriteTint`, `PlaySpeedTicker`, `HitStopController`, `CombatSfxRouter`, `CombatMusicRouter`, `PlayerHitFeedback`, `EnemyHealthBar`. `UI/Combat/DamageNumberPresenter`, `UI/HUD/BossHealthBar`, `UI/Audio/UiSfxRouter`.
+  - Sự kiện mới (C# event trên class PvE, không thêm vào `GameEvents`): `EnemyController.HealthChanged`, `EnemyController.WindupStarted` (static), `BossController.HealthChanged`, `BossController.EngagedChanged`, `PlayerAttack.AttackPerformed`.
+  - Lệch `13` cần Integrator xử lý: `13` chia 9.5 thành 9.5a (8 hướng) → 9.5b → 9.5c với tên/đường dẫn khác (`PvE/Audio/**`, `SpriteTintController`...). K1 được làm theo prompt của product owner (gộp 9.5b + 9.5c, audio ở `Services/Audio/**`, `ASSET_SOURCES.md` ở `Assets/_Game/Audio/`) và chạy trước 9.5a; `PlayerAttack.cs` (thuộc 9.5a) được thêm đúng một event.
+- Done: đánh quái thường, Elite và boss đều có số, nháy, dừng hình ngắn và tiếng; quái chết có hiệu ứng; có nhạc nền; màu telegraph không bị phá; đánh, né và kỹ thuật đi theo hướng nhân vật nhìn ở cả 8 hướng; mọi case P7.5/P8/P9 đã Pass vẫn Pass.
 - Evidence (Task P9.5). Cột `Actual`, `Pass`, `Ngày` để trống cho tới khi chạy thật; không tự điền `Pass`.
 
 | Case | Thiết bị/account/network | Bước | Expected | Actual | Pass | Ngày |
@@ -170,7 +183,9 @@ Done:
 | (d) Thanh máu quái và boss | Android, Guest | Đánh quái thường, Elite, boss | Thanh máu giảm đúng; quái chết thì thanh máu ẩn; boss có thanh trên HUD |  |  |  |
 | (e) Nhạc và SFX | Android, Guest | Chơi gameplay, vào trận boss, bấm UI, nhặt đồ, lên cấp; bấm Home rồi quay lại app | Có nhạc nền và nhạc boss; SFX đúng sự kiện; ra nền thì tắt tiếng, quay lại tiếp tục đúng |  |  |  |
 | (f) Hiệu năng | Android máy mục tiêu, 10 phút | Giao tranh liên tục với nhiều quái | Ghi FPS trung bình/thấp nhất và bộ nhớ; không rò rỉ rõ rệt. Ngưỡng FPS do product owner đặt (đề xuất ≥30) |  |  |  |
-| (g) Không hồi quy | Android, Guest | Chạy lại các case P7.5, P8, P9 đã Pass; chạy toàn bộ test EditMode | Vẫn Pass; test xanh |  |  |  |
+| (g) Đánh, Né, Kỹ thuật theo 8 hướng | Android, Guest | Đứng sao cho quái ở ngay trên, dưới, hai chéo rồi bấm đánh; Né và dùng Traverse khi đang giữ joystick ở 8 hướng; thả joystick rồi bấm đánh | Đòn trúng quái ở mọi hướng; Né và Traverse đi đúng hướng, không xuyên tường; thả joystick thì hướng nhìn giữ nguyên và đòn đi theo hướng đó |  |  |  |
+| (h) Tự nhắm (nếu bật) | Android, Guest | Bật `autoAim` trên PlayerAttack; đứng cách quái khoảng 2 ô rồi bấm đánh mà không hướng joystick về phía quái; tắt `autoAim` rồi làm lại | Bật: nhân vật quay về quái gần nhất và đòn trúng; tắt: đòn đi theo hướng đang nhìn; không có quái trong bán kính thì dùng hướng đang nhìn |  |  |  |
+| (i) Không hồi quy | Android, Guest | Chạy lại các case P7.5, P8, P9 đã Pass; chạy toàn bộ test EditMode | Vẫn Pass; test xanh |  |  |  |
 
 ### Phase 9.6 Nền UX
 
@@ -226,6 +241,7 @@ Done:
 - Phạm vi: boss chỉ kích hoạt khi người chơi vào phòng boss (không còn kích hoạt chỉ theo `DetectionRange`); hành lang và tiền sảnh không kích hoạt boss; banner khi vào Hầm Boss.
 - Mặc định: không khóa cửa phòng boss. Người chơi rời phòng thì trận kết thúc: hủy telegraph và đòn lao đang chạy, boss về vị trí gốc, giữ nguyên máu và trạng thái enrage. Muốn khóa cửa trong trận thì phải có quyết định của product owner (permadeath cần đường lui rõ ràng) và ACR.
 - Không đổi luật Phase 8: boss chết vẫn gửi request lên server; chết trong phòng boss ghi nguyên nhân Boss; `ResetEncounter` khi đổi tầng giữ nguyên; rematch không EXP.
+- Ghi chú kỹ thuật (K3b, cập nhật 2026-10-18; đã biên dịch và test EditMode liên quan Boss/Zone xanh, chưa có evidence thiết bị): `BossController` nhận field `encounterZone` (ZoneVolume loại BossRoom; để trống = hành vi cũ chỉ theo `DetectionRange`). Luật thuần ở `PvE/Boss/BossEncounterRules.cs` (`Decide` theo giai đoạn Idle/Combat/ReturningHome/Dead) và `ZonePresenceFilter` (VÀO phòng tính ngay; RA khỏi phòng phải ở ngoài liên tục 0.5 s mới tính, chống chớp ở biên). Dùng `ZoneVolume.Contains` trực tiếp, KHÔNG dùng `ZoneTracker.CurrentZoneId`, vì tracker giữ vùng cũ khi người chơi đứng ngoài mọi vùng nên không bao giờ báo "đã rời phòng". State mới `ReturnHomeState`: hủy báo đòn và lao, reset cổng đòn lao, về `_homePosition`, rồi Idle; GIỮ máu và enrage, không gọi `ResetHealth`/`ResetEncounter`; vào lại phòng thì Chase ngay. Hai lựa chọn: (1) ngắt đúng lúc báo đòn hoặc đang lao Pressure thì trả bộ đếm về "đến lượt Pressure" (rời phòng không hoãn được Pressure); (2) sau khi ngắt, thời gian chờ giữa hai đòn không ngắn hơn một chu kỳ đòn thường (vào lại không bị đánh ngay). Quá 12 s chưa về tới nhà (kẹt vật cản) thì về Idle tại chỗ. Tầng 1 trong scene (thiết kế lại 2026-10-18 vì camera bị dịch hai lần khi vào phòng): `Zone_BossApproach` (x 58→62) và `Zone_BossRoom` (x 62→90), cùng y −22.5→−0.5, không có khe hở giữa hai vùng; cả hai trỏ `cameraBoundsCollider` vào cùng một object `BossArea_CameraBounds` (x 50→90) nên đi từ hành lang vào phòng camera không đổi bounds; boss ở giữa phòng (76, −11.5). Nếu một vùng có camera bounds hẹp hơn khung nhìn (hành lang cũ rộng 6) thì camera bị căn giữa trục đó và dịch mỗi lần đổi vùng. Phòng cần priority cao hơn hành lang nếu hai vùng chồng nhau.
 - Done: boss không kích hoạt từ ngoài phòng; rời phòng thì boss về và giữ máu; vào lại thì đánh tiếp đúng trạng thái; mọi case P8 (a)–(h) đã Pass vẫn Pass.
 - Evidence (Task P9.7b). Cột `Actual`, `Pass`, `Ngày` để trống cho tới khi chạy thật; không tự điền `Pass`.
 
@@ -242,16 +258,17 @@ Done:
 - Mục tiêu: Vùng Farm có quái cư xử khác nhau, người chơi phải đổi cách đánh. Hiện mọi quái dùng chung một hành vi (đuổi → báo đòn → cận chiến) vì `EnemyDefinition` chưa có role; `12` §7.1, `07` §5 và `11` §3 đã mô tả role nhưng code chưa có.
 - Nguồn: FB-030 trong `10`.
 - Phạm vi: `CombatRole` (Chaser, Skirmisher, Guard, Ranged, Elite theo `12` §7.1) là field trong `EnemyDefinition`, mặc định Chaser nên asset hiện có không đổi hành vi; hành vi mới cho Skirmisher (áp sát, đánh, lùi) và Ranged (giữ khoảng cách, báo đòn rõ, bắn đạn pool theo hướng đã khóa cuối windup nên né được). Guard và Elite tạm dùng hành vi Chaser cho tới khi có thiết kế riêng.
+- Chỗ đặt theo tầng (ADR-030, chốt 2026-10-18): Skirmisher vào Tầng 2; Ranged ở phần sâu Vùng Farm Tầng 1 và ở Tầng 2; Tầng 3 trở đi (Mốc 2) có role/biến thể riêng, quyết khi tới (`11` §3).
 - Hai định nghĩa quái mới (tên tạm, product owner đổi sau) tạo bằng data; đạn đi qua đường damage chung (Safe Zone chặn damage trước `IDamageable`, `02` §8) và biến mất khi vào Safe Zone. Dodge không có i-frames (`07` §4.4) nên người chơi né đạn bằng cách di chuyển hoặc lướt ra khỏi đường đạn; đạn phải chậm đủ để làm được việc đó trên màn hình điện thoại.
 - Cân bằng theo `07` §5 (Ranged/Skirmisher hạ trong 8–14 giây ở level đề xuất); số đặt trong ScriptableObject; cập nhật bảng và test cân bằng.
 - Ràng buộc: role chọn hành vi qua cấu trúc nhỏ (không nhồi vào `EnemyController`); không `if floor == N`; pool cho đạn; không asmdef mới; tên và art không lấy từ tác phẩm có bản quyền.
 - Không làm: quái theo pha giờ (FB-031), AI nhóm, boss mới.
-- Done: Vùng Farm Tầng 1–2 có ít nhất ba hành vi nhìn thấy khác nhau; đạn né được bằng di chuyển hoặc Dodge; số cân bằng khớp `07` §5; mọi case P9.5–P9.7 đã Pass vẫn Pass.
+- Done: Vùng Farm Tầng 1–2 gộp lại có ít nhất ba hành vi nhìn thấy khác nhau (Tầng 1: Chaser và Ranged; Tầng 2: thêm Skirmisher); đạn né được bằng di chuyển hoặc Dodge; số cân bằng khớp `07` §5; mọi case P9.5–P9.7 đã Pass vẫn Pass.
 - Evidence (Task P9.8). Cột `Actual`, `Pass`, `Ngày` để trống cho tới khi chạy thật; không tự điền `Pass`.
 
 | Case | Thiết bị/account/network | Bước | Expected | Actual | Pass | Ngày |
 |---|---|---|---|---|---|---|
-| (a) Ba hành vi khác nhau | Android, Guest | Đi qua Vùng Farm, quan sát quái cận chiến, quái áp sát rồi lùi, quái bắn xa | Nhận ra được ba hành vi khác nhau mà không cần đọc tài liệu |  |  |  |
+| (a) Ba hành vi khác nhau | Android, Guest | Đi qua Vùng Farm Tầng 1 rồi Tầng 2, quan sát quái cận chiến, quái áp sát rồi lùi (Tầng 2), quái bắn xa | Nhận ra được ba hành vi khác nhau mà không cần đọc tài liệu |  |  |  |
 | (b) Đạn né được | Android, Guest | Bị quái Ranged ngắm; sau khi thấy báo đòn thì di chuyển hoặc bấm Dodge ra khỏi đường đạn; lần khác đứng yên | Có báo đòn rõ trước khi bắn; ra khỏi đường đạn kịp thì không mất máu; đứng yên thì mất máu đúng giá trị; Dodge không miễn sát thương nếu vẫn nằm trong đường đạn |  |  |  |
 | (c) Đạn và Safe Zone | Android, Guest | Đứng ngay mép Safe Zone khi quái Ranged bắn | Không mất máu trong Safe Zone; đạn biến mất, không kẹt lại |  |  |  |
 | (d) Thời gian hạ quái | Android, Guest, level đề xuất | Bấm giờ hạ Ranged và Skirmisher | Mỗi con 8–14 giây; số đo thật thắng ước lượng |  |  |  |
@@ -267,6 +284,7 @@ Done:
 - Không làm: mini-map, khóa input bắt buộc làm theo, video hướng dẫn, nút Reset Guest hay xóa tài khoản. "Xem lại hướng dẫn" chỉ xóa cờ gợi ý local.
 - Cắt từ dưới lên khi thiếu thời gian: mũi tên quest trước, rồi các gợi ý ít quan trọng. Giữ gợi ý di chuyển, đánh, né và bình.
 - Done: Guest mới không đọc tài liệu vẫn làm được di chuyển, đánh, né, dùng kỹ thuật, dùng bình, vào Safe Zone trong khoảng 3 phút; mọi case P9.5–P9.8 đã Pass vẫn Pass.
+- Ghi chú kỹ thuật (gói K5, đã biên dịch; 144 test EditMode riêng của gói đều xanh, **chưa có evidence trên máy thật**): luật thuần ở `Core/Guidance` (`TutorialRules`: một lần mỗi hint và playerId, chỉ đánh dấu khi toast THỰC SỰ hiện, hàng đợi tối đa 2 theo priority, cách nhau 1.5 s, bị chặn thì chờ 10 s rồi bỏ và không đánh dấu; `TutorialSignalRules`: bắt cạnh Safe Zone, máu thấp có trễ 35%/50%, di chuyển liên tục, mở khóa kỹ thuật từ lý do `IsSlotReady`, cổng `floor_select`; `QuestArrowMath`, `QuestTargetRules`); hằng số ở `GuidanceConfig`. Cờ local do `PlayerPrefsTutorialStore` giữ (khóa `tutorial.{playerId}.{hintId}`, chỉ mục `tutorial.{playerId}._index`); công tắc dùng khóa riêng `settings.tutorial_hints` nên KHÔNG đổi hợp đồng `ISettingsStore`/`PlayerSettings` của P9.6; mọi truy cập PlayerPrefs bọc try/catch và vẫn nhớ trong phiên khi kho hỏng. `UI/Guidance/TutorialRuntime` là điểm nối tĩnh (reset khi vào Play) cho Settings: công tắc có hiệu lực ngay qua `EnabledChanged`; "Xem lại hướng dẫn" chỉ xóa cờ tutorial của người chơi hiện tại. Không thêm event vào `GameEvents`; cảm biến (`TutorialSensors`) chạy 4 lần/giây; mũi tên quest tra NPC qua danh sách static `NPCInteractable.Registered` và chọn quest đầu tiên đang Active hoặc ReadyToTurnIn theo thứ tự danh sách của `PlayerQuestLog`. Chữ bảng báo boss P8-5 được khóa bằng test (`BossReportPanelStringLockTests`). Hint `hint.dodge` hoàn thành theo `DodgeController.OnDodgeStarted`; `hint.floor_select` chỉ phát khi boss hạ + máy chủ xác nhận + bảng báo boss đã đóng. `hint.dodge` và `hint.potion` chỉ nhắc, không hứa miễn sát thương hay dùng bình giữa trận (đúng 07 §4.4 và `ConsumableRules`). Mũi tên dùng `Camera.main` nếu chưa gán `worldCamera`. Chưa kiểm trên thiết bị: vị trí toast không che nút điều khiển, mũi tên ở 16:9 và 20:9 có tai thỏ.
 - Evidence (Task P9.9). Cột `Actual`, `Pass`, `Ngày` để trống cho tới khi chạy thật; không tự điền `Pass`.
 
 | Case | Thiết bị/account/network | Bước | Expected | Actual | Pass | Ngày |
@@ -278,28 +296,28 @@ Done:
 | (e) Giọng hệ thống không đổi bảng boss | Android, Guest, Wi-Fi | Hạ boss Tầng 1 | Bảng P8-5 giữ nguyên chữ "Máy chủ đã ghi nhận. Tầng kế đã mở."; toast riêng hiện sau bảng, không thay chữ |  |  |  |
 | (f) Không hồi quy | Android, Guest | Chạy lại P8, P9, P9.5–P9.8 đã Pass; chạy toàn bộ test EditMode | Vẫn Pass; test xanh |  |  |  |
 
-### Phase 10 Duel Online
+### Phase 10 Duel Online — MỐC 2 (chuyển 2026-10-18, ADR-028)
 
 - Lobby code, Relay, transport abstraction, Arena side-view, Half-Loss, cleanup, challenge history.
 - Done: hai thiết bị vào được một room, thấy state đồng bộ, HP dưới 50 phần trăm kết thúc, disconnect không kẹt UI.
-- Làm sau Phase 9.9 theo thứ tự product owner chọn (2026-10-14). `01` và `12` §1 vẫn liệt kê Duel trong Mốc 1; nếu product owner chuyển Duel sang Mốc 2 thì phải cập nhật hai tài liệu đó và `13` qua ADR. Art Track lớp A2 chạy song song với phase này.
+- Thuộc **Mốc 2** (ADR-028 ở `01` §6, product owner chốt 2026-10-18). Thứ tự làm: 9.9 → 11 → 10, tức làm sau Phase 11. Mục này giữ vị trí và số cũ để không vỡ tham chiếu dù nằm trong §3 Mốc 1. `01` và `12` §1 đã cập nhật; các nhãn "Mốc 1" còn lại trong `04` và `09` đọc là Mốc 2. Art Track lớp A2 chạy song song với phase này.
 - Các interface `ILobbyService`, `IRelayService`, `INetworkTransport` (`04` §2.2) không hard-code số người chơi bằng 2; Duel vẫn chỉ 2 người. Việc này giữ đường cho Phòng Boss hợp tác ở Mốc 2 (FB-027, cần ADR vì `04` §44–45) mà không phải đổi interface.
 
 ### Phase 11 Mốc 1 Regression
 
 - Android performance, offline/error states, tests, evidence table, documentation alignment.
-- Done: Floor 1 loop, world time, death, Floor 2 data-only và Duel đều pass theo device evidence.
-- Regression cho Phase 9.5–9.9 (cảm giác, UX, vùng, role quái, hướng dẫn) và Art Track lớp A3. Phase này chỉ kiểm tra và sửa lỗi, không thêm tính năng (luật 8).
+- Done: Floor 1 loop, world time, death và Floor 2 data-only đều pass theo device evidence (Duel thuộc Mốc 2, không kiểm ở đây).
+- Regression cho Phase 9.5–9.9 (cảm giác, UX, vùng, role quái, hướng dẫn) và Art Track lớp A3. Phase này chỉ kiểm tra và sửa lỗi, không thêm tính năng (luật 8). Là phase cuối của Mốc 1; làm sau 9.9 và trước Phase 10 (ADR-028).
 
-### Art Track — chạy song song, không phải phase — ĐỀ XUẤT
+### Art Track — chạy song song, không phải phase — ĐÃ CHỐT 2026-10-16
 
-Đồ họa và âm thanh làm theo lớp, song song với các phase; không dồn đến sau Phase 11. Code không chờ art: greybox/placeholder hiện tại giữ nguyên cho tới khi asset sẵn sàng, rồi thay bằng data (sprite, animator, prefab variant), không sửa logic.
+Đồ họa và âm thanh làm theo lớp, song song với các phase; không dồn đến sau Phase 11. Hợp đồng chi tiết: `14_ART_CONTRACT.md`. Bàn giao cho AI làm đồ họa: `15_ART_HANDOFF.md`. (Đã ghi ADR-026 và ADR-027 ở `01` §6, 2026-10-16.) Code không chờ art: greybox/placeholder hiện tại giữ nguyên cho tới khi asset sẵn sàng, rồi thay bằng data (sprite, animator, prefab variant), không sửa logic.
 
 | Lớp | Chạy song song với | Phạm vi | Cổng qua |
 |---|---|---|---|
 | A0 Art Contract | Trước khi vẽ hoặc nhập asset | Palette (`11` §5), PPU và kích thước sprite, pivot, bộ animation chuẩn (idle, walk, attack, hit, die), sorting layers, màu telegraph đã dành (vàng/cam đòn thường, tím Pressure, hồng enrage, xanh nhạt punish, đỏ nhạt báo đòn quái), thư mục `Assets/_Game/Art` và `Audio`, file `ASSET_SOURCES.md` ghi nguồn và giấy phép | Một trang contract; một asset mẫu nhập đúng contract chạy được trong game |
 | A1 | Phase 9.5–9.9 (tileset sau 9.7a) | Tileset Floor 1–2 theo các vùng, nhân vật người chơi, quái đang có và quái mới của 9.8, boss Tầng 1, icon item chính, UI skin tối thiểu, nhạc và SFX thay placeholder | Không thiếu sprite/animator; FPS đo thật không tụt dưới ngưỡng product owner đặt ở P9.5 (f) |
-| A2 | Phase 10 | Arena Duel (side-view), UI Duel, hiệu ứng kỹ thuật dùng chung | Như A1, thêm kiểm tra hai thiết bị |
+| A2 | Phase 10 (Mốc 2, sau Phase 11) | Arena Duel (side-view), UI Duel, hiệu ứng kỹ thuật dùng chung | Như A1, thêm kiểm tra hai thiết bị |
 | A3 | Phase 11 | Dọn placeholder còn sót, atlas và nén, kiểm tra máy yếu | Không còn placeholder trong luồng Mốc 1 |
 | Mốc 2–3 | Theo Floor mới | Art Floor 3–10, quái mới, boss mới, VFX kỹ thuật | Cùng cổng A1 |
 
@@ -309,7 +327,7 @@ Luật: (1) mọi asset có nguồn và giấy phép hợp lệ (`11` §5); (2) 
 
 | Mốc | Chỉ làm sau khi Mốc 1 ổn định |
 |---|---|
-| Mốc 2 | Control/Signature Technique, các Weapon Discipline khác, dungeon đầy đủ (nhiều phòng, cơ cấu, mini-boss), Floor 3–10, PvP bot/notification. Đề xuất, chờ quyết: Phòng Boss hợp tác 2–4 người bằng mã phòng, tái dùng Lobby/Relay/NGO của Phase 10 (FB-027); Bảng Nhổ Neo và hiện diện thế giới (FB-028); nhãn độ hiếm item (FB-025); quái theo pha giờ (FB-031). |
+| Mốc 2 | Duel online (Phase 10: Lobby, Relay, Arena nhìn ngang, Half-Loss, lịch sử thách đấu; làm ngay sau Phase 11, ADR-028), Control/Signature Technique, các Weapon Discipline khác, dungeon đầy đủ (nhiều phòng, cơ cấu, mini-boss), Floor 3–10, PvP bot/notification. Đề xuất, chờ quyết: Phòng Boss hợp tác 2–4 người bằng mã phòng, tái dùng Lobby/Relay/NGO của Phase 10 (FB-027); Bảng Nhổ Neo và hiện diện thế giới (FB-028); nhãn độ hiếm item (FB-025); quái theo pha giờ (FB-031). |
 | Mốc 3 | Nhiều người trong Floor, dedicated world backend, ranked/matchmaking, Floor 11–100. |
 
 Khi thiếu thời gian, cắt content mở rộng từ dưới lên. Không cắt authentication, Cloud Save, Time, Death, touch input, APK tests hoặc documentation evidence.

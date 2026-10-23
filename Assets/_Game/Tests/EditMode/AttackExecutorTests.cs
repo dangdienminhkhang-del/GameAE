@@ -9,10 +9,15 @@ namespace Game.Tests.EditMode
     public class AttackExecutorTests
     {
         private AttackDefinition _definition;
+        private double _previousDefenseWeight;
 
         [SetUp]
         public void SetUp()
         {
+            // CombatBalance là biến static: scene PvE có thể để lại giá trị khác 1.0 (tắt Domain Reload). Đặt rõ 1.0 để test không phụ thuộc lần chạy trước.
+            _previousDefenseWeight = CombatBalance.DefenseWeight;
+            CombatBalance.DefenseWeight = 1.0;
+
             // Asset mặc định: multiplier 1.0, crit -1 (dùng chỉ số nhân vật)
             _definition = AttackDefinition.CreateDefault();
         }
@@ -20,6 +25,7 @@ namespace Game.Tests.EditMode
         [TearDown]
         public void TearDown()
         {
+            CombatBalance.DefenseWeight = _previousDefenseWeight;
             UnityEngine.Object.DestroyImmediate(_definition);
         }
 

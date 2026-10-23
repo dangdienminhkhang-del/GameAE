@@ -26,10 +26,13 @@ MonoBehaviour:
   - enemy.boiler_guard
   - enemy.pressure_warden
   - enemy.bat
+  - enemy.pipe_spitter
+  - enemy.wire_stalker
   npcIds:
   - npc.cartographer
+  - npc.merchant_bac_to
   questIds:
   - quest.floor2_valve_check
-  bossId: 
+  bossId: boss.floor_02
   safeZoneConfigIds: []
   requiredBossDefeatedId: boss.floor_01

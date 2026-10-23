@@ -25,6 +25,7 @@ MonoBehaviour:
   spawnEnemyIds:
   - enemy.slime
   - enemy.bat
+  - enemy.pipe_spitter
   npcIds: []
   questIds: []
   bossId: boss.floor_01

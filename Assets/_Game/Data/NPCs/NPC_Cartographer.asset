@@ -13,17 +13,22 @@ MonoBehaviour:
   m_Name: NPC_Cartographer
   m_EditorClassIdentifier: Game.Core::Game.Core.NPC.NPCDefinition
   id: npc.cartographer
-  displayName: "Ng\u01B0\u1EDDi V\u1EBD H\u1EA3i \u0110\u1ED3"
+  displayName: "Nh\xE0 V\u1EBD B\u1EA3n \u0110\u1ED3"
   dialogueLines:
-  - "Tuy\u1EBFn n\xE0y v\u1EEBa m\u1EDF. Ta \u0111ang v\u1EBD l\u1EA1i h\u1EA3i \u0111\u1ED3
-    t\u1EEBng van m\u1ED9t."
-  - "Ngo\xE0i v\xF9ng \u0111\xE8n th\xEC t\u1EF1 lo l\u1EA5y th\xE2n."
-  questOfferLine: "Van \xE1p \u1EDF \u0111\xE2y c\xF2n r\u1EC9 h\u01A1i. H\u1EA1
-    gi\xFAp ta 3 L\xEDnh G\xE1c L\xF2 H\u01A1i, ta s\u1EBD \u0111\xE1nh d\u1EA5u
-    tuy\u1EBFn an to\xE0n."
-  questInProgressLine: "Ch\u01B0a \u0111\u1EE7 ba t\xEAn. \u0110\u1EEBng \u0111\u1EE9ng
-    y\xEAn khi ch\xFAng nh\u1EA5c tay."
-  questCompletedLine: "Van \u0111\xE3 y\xEAn. Tuy\u1EBFn n\xE0y ta v\u1EBD xong r\u1ED3i."
+  - "T\u1EA7ng 2 l\xE0 x\u01B0\u1EDFng h\u01A1i c\u0169: \u1ED1ng ch\u1EA1y kh\u1EAFp
+    n\u01A1i, van \xE1p kh\xF4ng ai b\u1EA3o tr\xEC. \u0110i \u0111\xE2u c\u0169ng
+    nghe ti\u1EBFng x\xEC."
+  - "L\xEDnh G\xE1c L\xF2 H\u01A1i canh c\xE1c van. Ch\xFAng nh\xE1y \u0111\u1ECF
+    tr\u01B0\u1EDBc khi ra \u0111\xF2n \u2014 th\u1EA5y l\xE0 l\u01B0\u1EDBt ra kh\u1ECFi
+    \u0111\u01B0\u1EDDng \u0111\xF2n ngay."
+  - "B\xE1c T\xF4 c\u0169ng d\u1EF1ng qu\u1EA7y \u1EDF \u0111\xE2y. C\xF3 ti\u1EC1n
+    th\xEC gh\xE9 mua b\xECnh m\xE1u, \u0111\u1EEBng li\u1EC1u."
+  questOfferLine: "M\u1EA5y c\xE1i van \xE1p c\u1EA7n c\xF3 ng\u01B0\u1EDDi ki\u1EC3m
+    tra. Ng\u01B0\u01A1i h\u1EA1 gi\xFAp ta 3 L\xEDnh G\xE1c ch\u1EE9?"
+  questInProgressLine: "Xong vi\u1EC7c r\u1ED3i h\xE3y quay l\u1EA1i."
+  questCompletedLine: "T\u1ED1t l\u1EAFm. Ph\u1EA7n th\u01B0\u1EDFng c\u1EE7a ng\u01B0\u01A1i
+    \u0111\xE2y."
   offeredQuest: {fileID: 11400000, guid: 34e7a6afaa1bebc46a590c787575ef33, type: 2}
+  shop: {fileID: 0}
   onlyAtSpecificTime: 0
   activeTimeOfDay: 5

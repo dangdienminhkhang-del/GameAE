@@ -56,6 +56,20 @@ namespace Game.UI.Boss
 
         private static BossDefeatReportPanel s_instance;
 
+        /// <summary>
+        /// Trạng thái hiện tại của bảng báo boss, CHỈ ĐỌC (Hidden khi bảng chưa có mặt). Hệ hướng dẫn (Phase 9.9) dùng để không chen toast
+        /// khi bảng còn mở và để biết bảng đã đóng sau khi máy chủ xác nhận. Không đổi chữ, bố cục hay luồng báo server.
+        /// </summary>
+        public static BossDefeatReportPanelState CurrentState =>
+            s_instance != null ? s_instance._model.State : BossDefeatReportPanelState.Hidden;
+
+        /// <summary>Máy chủ vừa xác nhận báo boss (Phase 9.9: hướng dẫn nghe để biết "đã xác nhận"). Chỉ đọc, không đổi luồng.</summary>
+        public static event Action ReportConfirmed;
+
+        /// <summary>Bảng thử lại hoặc dòng "Máy chủ đã ghi nhận" đang hiện. Chỉ đọc (Phase 9.9).</summary>
+        public static bool IsBlockingUiVisible =>
+            s_instance != null && (s_instance._model.IsPanelVisible || s_instance._model.IsConfirmedToastVisible);
+
         private sealed class Registration
         {
             public BossController Boss;
@@ -83,6 +97,7 @@ namespace Game.UI.Boss
         private static void ResetStaticState()
         {
             s_instance = null;
+            ReportConfirmed = null;
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -250,6 +265,7 @@ namespace Game.UI.Boss
 
             if (_activeBoss == boss) _activeBoss = null;
             _model.ReportConfirmed();
+            ReportConfirmed?.Invoke();
         }
 
         // ── Nút bấm: chỉ gửi ý định ─────────────────────────────────────────────────
@@ -340,7 +356,7 @@ namespace Game.UI.Boss
             cardRt.pivot = new Vector2(0.5f, 1f);
             cardRt.anchoredPosition = new Vector2(0f, -CardTopMargin);
             cardRt.sizeDelta = new Vector2(CardWidth, CardHeight);
-            _card.GetComponent<Image>().color = CardColor; // raycastTarget bật: chạm vào bảng không lọt xuống nút chơi bên dưới
+            _card.GetComponent<Image>().color = CardColor; UiSkin.Panel(_card.GetComponent<Image>(), 3); // raycastTarget bật: chạm vào bảng không lọt xuống nút chơi bên dưới
 
             float buttonTop = ButtonBottomMargin + BossDefeatReportPanelModel.ButtonHeightPixels;
 
@@ -373,7 +389,7 @@ namespace Game.UI.Boss
             toastRt.sizeDelta = new Vector2(ToastWidth, ToastHeight);
 
             var background = _toast.GetComponent<Image>();
-            background.color = ToastColor;
+            background.color = ToastColor; UiSkin.Button(background, 2);
             background.raycastTarget = false; // dòng thông báo không được chặn thao tác chơi
 
             Text text = CreateText("Text", _toast.transform, BossDefeatReportPanelModel.ConfirmedMessage, ToastFontSize, TextAnchor.MiddleCenter);
@@ -416,7 +432,7 @@ namespace Game.UI.Boss
             rt.offsetMax = new Vector2(isLeft ? -halfGap : -CardPadding, ButtonBottomMargin + BossDefeatReportPanelModel.ButtonHeightPixels);
 
             var image = go.GetComponent<Image>();
-            image.color = color;
+            image.color = color; UiSkin.Button(image, 3);
 
             var button = go.GetComponent<Button>();
             button.targetGraphic = image;

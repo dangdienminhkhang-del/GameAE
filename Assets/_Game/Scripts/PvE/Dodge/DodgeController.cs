@@ -68,8 +68,7 @@ namespace Game.PvE.Dodge
                 return false;
             }
 
-            int facing     = playerController != null ? playerController.Facing : 1;
-            _dodgeDir      = new Vector2(facing, 0f);
+            _dodgeDir      = playerController != null ? playerController.FacingDirection : Vector2.right;
             float wantDist = definition.DashDistance;
 
             // Cắt khoảng cách tới vật cản gần nhất bằng Rigidbody2D.Cast
@@ -93,7 +92,7 @@ namespace Game.PvE.Dodge
             if (animator != null && !string.IsNullOrEmpty(dodgeTriggerName))
                 animator.SetTrigger(dodgeTriggerName);
 
-            if (logDodge) Debug.Log($"[DodgeController] Né {_dodgeSafeDistance:F2}u dir={facing}");
+            if (logDodge) Debug.Log($"[DodgeController] Né {_dodgeSafeDistance:F2}u dir={_dodgeDir}");
             return true;
         }
 
@@ -124,7 +123,36 @@ namespace Game.PvE.Dodge
             {
                 _dodgeTravelled = targetTravelled;
                 _rb.MovePosition(_rb.position + _dodgeDir * step);
+
+                if (UnityEngine.Time.time - _lastGhostSpawnTime >= 0.04f)
+                {
+                    _lastGhostSpawnTime = UnityEngine.Time.time;
+                    SpawnDodgeGhost();
+                }
             }
+        }
+
+        private float _lastGhostSpawnTime;
+
+        private void SpawnDodgeGhost()
+        {
+            SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
+            if (sr == null || sr.sprite == null) return;
+
+            GameObject ghost = new GameObject("Dodge_Ghost", typeof(SpriteRenderer));
+            ghost.transform.position = transform.position;
+            ghost.transform.rotation = transform.rotation;
+            ghost.transform.localScale = transform.localScale;
+
+            SpriteRenderer ghostSr = ghost.GetComponent<SpriteRenderer>();
+            ghostSr.sprite = sr.sprite;
+            ghostSr.flipX = sr.flipX;
+            ghostSr.flipY = sr.flipY;
+            ghostSr.color = new Color(0.4f, 0.85f, 1f, 0.5f);
+            ghostSr.sortingLayerID = sr.sortingLayerID;
+            ghostSr.sortingOrder = sr.sortingOrder - 1;
+
+            Destroy(ghost, 0.22f);
         }
 
         private void TickDodging()

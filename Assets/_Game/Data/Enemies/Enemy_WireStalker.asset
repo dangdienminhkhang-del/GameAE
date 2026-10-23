@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9e6bb7e6066b524fa95a4a2c4d53fbf, type: 3}
+  m_Name: Enemy_WireStalker
+  m_EditorClassIdentifier: Game.PvE::Game.PvE.Enemy.EnemyDefinition
+  id: enemy.wire_stalker
+  displayName: "D\xE2y R\xECnh"
+  sprite: {fileID: 4141362085858935820, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
+  maxHealth: 230
+  attack: 11
+  defense: 0
+  moveSpeed: 2.4
+  detectionRange: 6
+  attackRange: 1.1
+  attackCooldownSeconds: 1.6
+  attackWindupSeconds: 0.4
+  hurtSeconds: 0.25
+  deathSeconds: 0.6
+  role: 1
+  preferredRange: 3.5
+  retreatRange: 2.5
+  retreatSeconds: 0.8
+  shootRange: 4
+  projectileSpeed: 8
+  projectileLifetime: 1.5
+  projectileRadius: 0.25
+  projectileDamageScale: 1
+  experienceReward: 14
+  drops:
+  - item: {fileID: 11400000, guid: ed645eb8dcb162d40beda14fa499044f, type: 2}
+    chance: 0.3
+    minCount: 1
+    maxCount: 1

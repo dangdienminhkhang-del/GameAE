@@ -49,6 +49,10 @@ namespace Game.Core.Events
         public static event EventHandler OnStatsChanged;
         public static void RaiseStatsChanged(object sender) => OnStatsChanged?.Invoke(sender, EventArgs.Empty);
 
+        /// <summary>Thông báo combat nổi giữa màn hình (UI lắng nghe sự kiện này).</summary>
+        public static event Action<string, UnityEngine.Color> OnCombatNotice;
+        public static void RaiseCombatNotice(string text, UnityEngine.Color color) => OnCombatNotice?.Invoke(text, color);
+
         /// <summary>IDeathService đã ghi nhận + LƯU cái chết → Death Screen hiển thị (docs/09 §1.4).</summary>
         public static event EventHandler<Core.Character.DeathInfo> OnPlayerDeathRecorded;
         public static void RaisePlayerDeathRecorded(object sender, Core.Character.DeathInfo info) =>
@@ -97,6 +101,21 @@ namespace Game.Core.Events
         /// <summary>UI bấm "Nhận nhiệm vụ" → NPC tương ứng xử lý (UI chỉ gửi ý định).</summary>
         public static event EventHandler<NpcDialogueArgs> OnQuestAcceptRequested;
         public static void RaiseQuestAcceptRequested(object sender, NpcDialogueArgs args) => OnQuestAcceptRequested?.Invoke(sender, args);
+
+        /// <summary>
+        /// ZoneEntered (docs/12 §11, Phase 9.7a): người chơi vừa vào một vùng của tầng (Thị trấn, Vùng Farm...).
+        /// Banner, nhạc, camera và quest Reach nghe sự kiện này. Chỉ ZoneTracker phát.
+        /// </summary>
+        public static event EventHandler<ZoneEnteredArgs> OnZoneEntered;
+        public static void RaiseZoneEntered(object sender, ZoneEnteredArgs args) => OnZoneEntered?.Invoke(sender, args);
+    }
+
+    public class ZoneEnteredArgs : EventArgs
+    {
+        /// <summary>ID ổn định của vùng (ví dụ zone.floor_NN_town); khớp QuestDefinition.TargetId của objective Reach.</summary>
+        public string ZoneId;
+        /// <summary>Tên hiển thị cho banner. Phần mở rộng so với docs/12 §11 (chỉ có ZoneId).</summary>
+        public string DisplayName;
     }
 
     public class NpcDialogueArgs : EventArgs

@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using Game.Core.Events;
 using Game.Core.NPC;
 using Game.Core.Quest;
+using Game.Core.Shop;
 using Game.Core.Time;
 using Game.PvE.Quest;
 using UnityEngine;
@@ -33,6 +35,30 @@ namespace Game.PvE.NPC
         private ITimeService _time;
         private float _resolveTimeTimer; // = 0f → gọi ngay frame đầu
         private Collider2D _interactionCollider;
+        private int _lineIndex;
+
+        // Danh sách NPC đang bật (Phase 9.9: mũi tên quest tra NPC theo npcId mà không phải Find). Static: reset khi vào Play.
+        private static readonly List<NPCInteractable> s_registry = new List<NPCInteractable>();
+
+        public static IReadOnlyList<NPCInteractable> Registered => s_registry;
+
+        /// <summary>NPC đang bật có npcId này (null nếu không có). Không tìm trong scene.</summary>
+        public static NPCInteractable FindByNpcId(string npcId)
+        {
+            if (string.IsNullOrEmpty(npcId)) return null;
+            for (int i = 0; i < s_registry.Count; i++)
+            {
+                NPCInteractable npc = s_registry[i];
+                if (npc != null && npc.definition != null && npc.definition.Id == npcId) return npc;
+            }
+            return null;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetRegistry()
+        {
+            s_registry.Clear();
+        }
 
         public NPCDefinition Definition => definition;
         public bool IsAvailable => _isAvailable;
@@ -47,6 +73,7 @@ namespace Game.PvE.NPC
 
         private void OnEnable()
         {
+            if (!s_registry.Contains(this)) s_registry.Add(this);
             GameEvents.OnTimePhaseChanged     += HandlePhaseChanged;
             GameEvents.OnQuestAcceptRequested += HandleAcceptRequested;
             GameEvents.OnQuestTurnInRequested += HandleTurnInRequested;
@@ -55,6 +82,7 @@ namespace Game.PvE.NPC
 
         private void OnDisable()
         {
+            s_registry.Remove(this);
             GameEvents.OnTimePhaseChanged     -= HandlePhaseChanged;
             GameEvents.OnQuestAcceptRequested -= HandleAcceptRequested;
             GameEvents.OnQuestTurnInRequested -= HandleTurnInRequested;
@@ -155,6 +183,13 @@ namespace Game.PvE.NPC
             // Báo "nói chuyện" cho objective Talk (mọi NPC)
             if (questLog != null) questLog.NotifyTalk(definition.Id);
 
+            // NPC thương nhân: mở cửa hàng thay vì hội thoại nhiệm vụ
+            if (definition.Shop != null)
+            {
+                ShopEvents.RaiseShopRequested(this, new ShopRequest { Npc = definition, Shop = definition.Shop });
+                return;
+            }
+
             // Phân loại trạng thái quest để chọn dialogue line
             bool readyToTurnIn = questLog != null && definition.OfferedQuest != null
                 && questLog.IsReadyToTurnIn(definition.OfferedQuest);
@@ -177,7 +212,13 @@ namespace Game.PvE.NPC
             else if (inProgress) line = definition.QuestInProgressLine;
             else if (acceptBlockedByRule) line = PlayerQuestLog.AcceptFailureMessage(acceptResult);
             else if (definition.OfferedQuest != null) line = definition.QuestOfferLine;
-            else line = definition.DialogueLines.Count > 0 ? definition.DialogueLines[0] : "...";
+            else if (definition.DialogueLines.Count > 0)
+            {
+                // Không có quest: mỗi lần nói chuyện đọc câu kế tiếp (xoay vòng).
+                line = definition.DialogueLines[_lineIndex % definition.DialogueLines.Count];
+                _lineIndex++;
+            }
+            else line = "...";
 
             GameEvents.RaiseNpcDialogue(this, new NpcDialogueArgs
             {

@@ -4,15 +4,17 @@
 > Docs 05 là scope TỐI THIỂU mỗi phase. File này ghi tính năng phát sinh khi test.
 > KHÔNG tự thêm vào code. Chỉ ghi lại → quyết định sau.
 > **Cập nhật 2026-10-14 (product owner):** duyệt Phase 9.5–9.9 (xem `05`). Các mục FB-001, 002, 005, 006, 009, 010, 011 chuyển vào Phase 9.6; thêm FB-021 đến FB-031. Mục còn "Chờ quyết" là đề xuất, chưa phải quyết định.
+> **Cập nhật 2026-10-16 (product owner):** chọn hướng nhìn 8 hướng cho PvE (FB-032, vào Phase 9.5); thêm FB-033 (tự nhắm, chờ quyết); FB-026 (Art Track) đã có hợp đồng `14` và bàn giao `15`.
+> **Cập nhật 2026-10-18 (product owner):** chốt ba quyết định đổi thứ tự/cắt phase, ghi ở mục 6 bên dưới (ADR-028 đến ADR-030 ở `01` §6).
 
 ---
 
 ## 1. NGUYÊN TẮC
 
-- **AI không tự sinh tính năng.** Chỉ được phép đề xuất, ghi vào đây, chờ quyết định.
-- **Bạn là product owner.** Bạn quyết cái gì làm, cái gì không.
+- **AI được tự thêm và tự quyết tính năng** (ADR-031, 2026-10-20): thấy tốt cho game và không phạm luật cứng 1–7, 9, 10 thì làm, rồi ghi vào đây một dòng (trạng thái "AI đã làm"). Mục có trạng thái "Chờ quyết" = AI được tự quyết.
+- **Bạn là product owner.** Bạn xem lại sau và có thể yêu cầu bỏ hoặc đổi bất kỳ mục nào; AI làm theo ngay.
 - **Phát hiện = ghi ngay.** Không cần quyết định luôn, chỉ cần không quên.
-- **Cuối mỗi phase:** đọc file này, quyết định thêm gì vào phase tiếp.
+- **Cuối mỗi phase:** AI đọc file này, chọn việc giá trị cao nhất cho phase tiếp (tiêu chí: `AGENTS.md`, mục "Tự chủ của AI").
 
 ---
 
@@ -45,12 +47,16 @@
 | FB-023 | Phản hồi đòn đánh: số sát thương, nháy khi trúng, dừng hình ngắn, hiệu ứng tan khi chết, thanh máu quái và boss | Như trên | Phase 9.5 | Đã quyết 2026-10-14 |
 | FB-024 | Mũi tên chỉ mục tiêu quest (không làm mini-map) | Sau khi phân vùng (người chơi phải đi giữa các vùng) | Phase 9.9 | Đã quyết 2026-10-14 (cắt đầu tiên khi thiếu thời gian) |
 | FB-025 | Nhãn độ hiếm cho item và so sánh trang bị khi nhặt | Rà soát backlog sau Phase 9 | Mốc 2 | Chờ quyết |
-| FB-026 | Art Track chạy song song (A0 hợp đồng → A1 → A2 → A3), xem `05` §3 | Product owner hỏi khi nào làm đồ họa | Song song từ Phase 9.5 (tileset sau 9.7a) | Chờ quyết |
+| FB-026 | Art Track chạy song song (A0 hợp đồng → A1 → A2 → A3), xem `05` §3 | Product owner muốn làm song song (2026-10-16); hợp đồng `14`, bàn giao `15` | Song song từ Phase 9.5 (tileset sau 9.7a) | Đã quyết 2026-10-16 (ADR-027 ở `01` §6) |
 | FB-027 | Phòng Boss hợp tác 2–4 người vào bằng mã phòng, tái dùng Lobby/Relay/NGO của Phase 10 | Product owner: muốn nhiều người cùng đánh boss | Mốc 2, sau Duel | Chờ quyết; cần ADR vì `04` §44–45; luật rematch không EXP (FB-019) phải đổi sang tính theo từng account |
 | FB-028 | Bảng Nhổ Neo / hiện diện thế giới (ai hạ boss đầu, số người đã vượt tầng) | Như trên | Mốc 2 | Chờ quyết; cần Cloud Code + ADR |
 | FB-029 | Hướng dẫn nhập môn khoảng 3 phút: gợi ý một lần theo sự kiện bằng giọng hệ thống, dùng Quest/NPC sẵn có | Chuyển từ mục 3.1 | Phase 9.9 | Đã quyết 2026-10-14 |
 | FB-030 | Quái đa vai trò: `CombatRole` trong `EnemyDefinition` (Chaser, Skirmisher, Ranged) và hành vi Ranged. Hiện mọi quái dùng chung một hành vi (đuổi → báo đòn → cận chiến); `12` §7.1, `07` §5 và `11` §3 đã mô tả role nhưng code chưa có | Rà soát docs với code (2026-10-14) | Phase 9.8 | Đã quyết 2026-10-14 |
 | FB-031 | Quái theo pha giờ: `allowedTimePhases` / `phaseStatModifiers` (`02` §11, `08` §4.2) đã mô tả nhưng chưa có code | Rà soát docs với code (2026-10-14) | Sau Phase 9.8 | Chờ quyết |
+| FB-032 | Hướng nhìn 8 hướng kiểu game MOBA di động: hướng mặt là vector theo joystick; đòn thường, Né, Kỹ thuật đi theo hướng đó; Animator nhận `FaceX`/`FaceY`; hình người chơi vẽ 5 bộ rồi lật (`14`, `15`). Hiện code chỉ trái/phải (`Facing` ±1) nên lướt chỉ ngang và đòn dễ trượt khi quái ở ngay trên hoặc dưới | Product owner muốn góc nhìn như Liên Quân (2026-10-16); xác nhận bằng code `PlayerAttack`, `DodgeController`, `TechniqueController` | Phase 9.5 (gói 9.5a trong `13`) | Đã quyết 2026-10-16; quái và boss 8 hướng làm ở gói hook art; người chơi 5 bộ hình, quái và boss 3 bộ (ADR-026, ADR-027 ở `01` §6) |
+| FB-033 | Tự nhắm quái gần nhất khi bấm đánh (`autoAim`, mặc định tắt) | Như FB-032 | Phase 9.5 (gói 9.5a) | Đã quyết 2026-10-16: làm trong gói 9.5a, mặc định tắt; bật khi product owner báo (ADR-026 ở `01` §6) |
+| FB-034 | Bộ tính năng chiến đấu đỉnh cao: Chuỗi combo đòn đánh 3 nhịp, Rung màn hình, Hệ thống Đẳng cấp Combo D->SSS, Né Hoàn Hảo & Phản Đòn Chí Mạng, Nộ Khí & Tuyệt Kỹ "Vũ Điệu Cuồng Nộ", Trụ Phước Lành Cổ Đại, Thông báo chiến đấu động | Người chơi muốn gameplay có chiều sâu, cuốn hút và đã tay (2026-10-22) | Gameplay Core | AI đã làm (ADR-031) |
+| FB-035 | Bộ 3 Map Thế Giới Phiêu Lưu (Rừng Rậm Cổ Đại, Hầm Mỏ Dung Nham, Lâu Đài Bóng Tối): 21 Pixel Art Sprites & Tileset, Cạm bẫy môi trường (dung nham, bụi gai làm chậm, vực thẳm knockback), Công trình tương tác độc bản (Suối Sinh Mệnh hồi phục, Đe Dung Nham buff +35% sát thương, Bàn Thờ Bóng Tối bất tử 5s), Bộ chuyển map tức thì Runtime Realm Switcher | Người chơi yêu cầu bổ sung 3 thế giới phiêu lưu mới (2026-10-22) | Environment / World | AI đã làm (ADR-031) |
 
 *(Thêm dòng khi phát hiện. Đổi "Trạng thái" thành "Đã làm ở Phase X" hoặc "Bỏ qua — lý do".)*
 
@@ -123,3 +129,15 @@ Danh sách tính năng phổ biến của 2D RPG mobile. Chưa spec, chưa cần
   - Không làm → chuyển xuống mục 4.
 - **Khi AI đề xuất tính năng mới:** bắt AI ghi vào đây, KHÔNG code luôn.
 - **Cuối Mốc:** đọc lại toàn bộ, quyết định lớn cho Mốc tiếp theo.
+
+---
+
+## 6. NHẬT KÝ ĐỔI THỨ TỰ / CẮT PHASE
+
+Quy tắc (`05` §1 luật 10): đổi thứ tự hoặc cắt phase phải ghi ở đây.
+
+| Ngày | Quyết định (product owner) | ADR | Ảnh hưởng |
+|---|---|---|---|
+| 2026-10-18 | D1. Duel (Phase 10) chuyển sang Mốc 2. Mốc 1 kết thúc ở Phase 11 (kiểm tổng), không có Duel. Giữ số "Phase 10" để không vỡ tham chiếu; thứ tự làm: 9.5 → 9.9 → 11 → 10. Thiết kế Duel không đổi. | ADR-028 | `01`, `05`, `12` §1, `04`, `09`, `HANDOFF.md`, `AGENTS.md` |
+| 2026-10-18 | D2. Ưu tiên màu sprite: Chết > màu theo state hiện tại > gốc. Nháy khi trúng là lớp phủ trắng riêng `HitFlash` (alpha 0.85 → 0 trong 0.08 s, trần 0.5 khi đang có báo đòn nguy hiểm), không còn là màu nhân. Giá trị màu báo đòn giữ nguyên. | ADR-029 | `05` mục 9.5, `13` gói 9.5b, `14` §2 và §7 H2 |
+| 2026-10-18 | D3. Skirmisher vào Tầng 2 (khớp `05` 9.8). Ranged ở phần sâu Vùng Farm Tầng 1 và ở Tầng 2. Tầng 3 trở đi (Mốc 2) có role/biến thể riêng, quyết khi tới. | ADR-030 | `05` mục 9.8, `11` §3 |

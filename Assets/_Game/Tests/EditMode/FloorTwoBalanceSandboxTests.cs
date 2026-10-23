@@ -41,7 +41,8 @@ namespace Game.Tests.EditMode
         //  - Guard, Elite: file này;
         //  - Bat: BalanceSandboxTests (Tầng 1–10, gồm Tầng 2).
         // Thêm quái mới vào spawnEnemyIds của floor.02 mà quên test thì test "AllCovered" sẽ đỏ.
-        private static readonly string[] CoveredEnemyIds = { GuardId, EliteId, BatId };
+        //  - PipeSpitter (Ranged), WireStalker (Skirmisher): RangedEnemyBalanceSandboxTests (Phase 9.8).
+        private static readonly string[] CoveredEnemyIds = { GuardId, EliteId, BatId, "enemy.pipe_spitter", "enemy.wire_stalker" };
 
         // Khoảng mục tiêu (docs/07 §4.2, §5, §5.1, §9).
         private const int GuardHitsToKillMin = 4, GuardHitsToKillMax = 7;

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: boss.floor_01
   displayName: "C\u1ED7 M\xE1y K\xE9o Neo"
   floorId: floor.01
-  sprite: {fileID: 21300000, guid: d0fd346617649d348b9f01bbd155f698, type: 3}
+  sprite: {fileID: -8256429368149723438, guid: ca8f71a7cd126d3458650d4d7f00e7b2, type: 3}
   maxHealth: 1500
   attack: 28
   defense: 4

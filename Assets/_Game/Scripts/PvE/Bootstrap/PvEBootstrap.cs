@@ -58,6 +58,10 @@ namespace Game.PvE.Bootstrap
         private DeathRetryLoop _deathRetryLoop;
         private PersonalProgress _progress;
 
+        // Bootstrap nào đã ghi CombatBalance.DefenseWeight thì chính bootstrap đó trả lại 1.0 khi bị hủy.
+        // Không có bước này, thoát Play Mode (tắt Domain Reload) để lại giá trị của scene cho lần Play/test sau.
+        private static PvEBootstrap s_balanceOwner;
+
         // ── Truy cập chỉ-đọc cho UI (UI → PvE; PvE không biết UI) ─────────────
 
         /// <summary>FloorDatabase đã gán trong Inspector (null nếu chưa gán).</summary>
@@ -90,6 +94,13 @@ namespace Game.PvE.Bootstrap
         {
             // Bootstrap bị hủy → dừng vòng tự thử lại (không còn Update nên cũng không còn tick nào).
             _deathRetryLoop?.Stop();
+
+            // Chỉ trả lại nếu chưa có bootstrap khác (scene mới) đã ghi đè giá trị.
+            if (ReferenceEquals(s_balanceOwner, this))
+            {
+                Game.Core.Combat.CombatBalance.DefenseWeight = 1.0;
+                s_balanceOwner = null;
+            }
 
             GameEvents.OnPlayerDied -= HandlePlayerDied;
             GameEvents.OnDeathRetryRequested -= HandleDeathRetryRequested;
@@ -358,6 +369,7 @@ namespace Game.PvE.Bootstrap
 
         private void WireCombatBalance()
         {
+            s_balanceOwner = this;
             if (combatBalanceConfig != null)
             {
                 Game.Core.Combat.CombatBalance.DefenseWeight = combatBalanceConfig.defenseWeight;

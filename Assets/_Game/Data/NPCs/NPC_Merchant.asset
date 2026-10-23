@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f4219f40d50cb44f8c4ef96bafe2c06, type: 3}
+  m_Name: NPC_Merchant
+  m_EditorClassIdentifier: Game.Core::Game.Core.NPC.NPCDefinition
+  id: npc.merchant_bac_to
+  displayName: "B\xE1c T\xF4"
+  dialogueLines:
+  - "Mua b\xE1n g\xEC th\xEC gh\xE9 B\xE1c T\xF4 nh\xE9!"
+  questOfferLine: "Ng\u01B0\u01A1i c\xF3 mu\u1ED1n gi\xFAp ta kh\xF4ng?"
+  questInProgressLine: "Xong vi\u1EC7c r\u1ED3i h\xE3y quay l\u1EA1i."
+  questCompletedLine: "T\u1ED1t l\u1EAFm. Ph\u1EA7n th\u01B0\u1EDFng c\u1EE7a ng\u01B0\u01A1i
+    \u0111\xE2y."
+  offeredQuest: {fileID: 0}
+  shop: {fileID: 11400000, guid: 7069699467bcfec4c94f54d932ee3078, type: 2}
+  onlyAtSpecificTime: 0
+  activeTimeOfDay: 5

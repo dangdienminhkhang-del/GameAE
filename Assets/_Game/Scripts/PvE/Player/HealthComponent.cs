@@ -17,6 +17,7 @@ namespace Game.PvE.Player
         public double CurrentHealth => _currentHealth;
         public double MaxHealth => _stats != null ? _stats.MaxHealth : 0.0;
         public bool IsDead => _stats != null && _currentHealth <= 0.0;
+        public bool IsInvulnerable { get; set; }
 
         private void Start()
         {
@@ -27,6 +28,9 @@ namespace Game.PvE.Player
                 _currentHealth = _stats.MaxHealth;
                 _lastMaxHealth = _stats.MaxHealth;
                 RaiseChanged(0.0);
+
+                // Hồi máu tự nhiên (giống SAO) — tự gắn, không cần sửa scene.
+                if (!TryGetComponent<HealthRegenController>(out _)) gameObject.AddComponent<HealthRegenController>();
             }
         }
 
@@ -77,7 +81,7 @@ namespace Game.PvE.Player
 
         public void TakeDamage(DamageInfo info)
         {
-            if (IsDead) return;
+            if (IsDead || IsInvulnerable) return;
 
             // Vùng an toàn (Trụ Đèn): kiểm tra theo VỊ TRÍ lúc bị đánh — docs/09 §1.3, docs/11 §2.
             if (SafeZone.SafeZoneProvider.GetOrCreate().IsSafeZoneAt(transform.position)) return;

@@ -1,4 +1,5 @@
 using Game.Core.Account;
+using Game.Core.Audio;
 using Game.Core.Character;
 using Game.Core.Network;
 using Game.Core.Time;
@@ -154,6 +155,15 @@ namespace Game.Services
         public static SafeZoneService CreateSafeZoneService()
         {
             return new SafeZoneService();
+        }
+
+        /// <summary>
+        /// Dịch vụ âm thanh đang chạy (AudioService đặt ở scene khởi đầu). Chưa có thì trả bản im lặng — không bao giờ null,
+        /// nên gameplay gọi thẳng mà không cần kiểm tra. Không tạo mới ở đây vì AudioService là MonoBehaviour trong scene.
+        /// </summary>
+        public static IAudioService GetAudioService()
+        {
+            return Audio.AudioServiceLocator.Current;
         }
 
         // Tạm comment để compile. VI PHẠM LUẬT #2: Game.Services không được tham chiếu Game.PvE

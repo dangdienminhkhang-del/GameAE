@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Game.Core.Items;
 using Game.PvE.Items;
+using Game.UI.Pause;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,8 +13,18 @@ namespace Game.UI.Inventory
     /// bodyText (Body) trong scene chỉ dùng làm font source — bị ẩn lúc runtime.
     /// Phím tắt PC: I = bật/tắt, 1..9 = mặc, 0 = tháo hết.
     /// </summary>
-    public class InventoryPanel : MonoBehaviour
+    public class InventoryPanel : MonoBehaviour, IBackHandler
     {
+        /// <summary>Túi nằm dưới Settings (40) và trên Quest (20): Back đóng theo thứ tự trên cùng trước.</summary>
+        public const int Priority = 30;
+
+        public int BackPriority => Priority;
+        public bool IsOpen => panelRoot != null && panelRoot.activeInHierarchy;
+        public void CloseFromBack()
+        {
+            if (panelRoot != null) panelRoot.SetActive(false);
+        }
+
         [SerializeField] private PlayerInventory playerInventory;
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private Text bodyText;   // font source — bị ẩn lúc runtime
@@ -52,6 +63,7 @@ namespace Game.UI.Inventory
 
         private void OnEnable()
         {
+            BackKeyRouterHost.Router.Register(this);
             if (playerInventory != null) playerInventory.Changed += Refresh;
             HideLegacyBodyTexts();
             EnsureDynamicUI();
@@ -60,6 +72,7 @@ namespace Game.UI.Inventory
 
         private void OnDisable()
         {
+            BackKeyRouterHost.Router.Unregister(this);
             if (playerInventory != null) playerInventory.Changed -= Refresh;
         }
 
@@ -342,7 +355,7 @@ namespace Game.UI.Inventory
                 typeof(RectTransform), typeof(HorizontalLayoutGroup),
                 typeof(LayoutElement), typeof(Image));
 
-            row.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.35f);
+            row.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.35f); UiSkin.Inset(row.GetComponent<Image>());
 
             var le = row.GetComponent<LayoutElement>();
             le.minHeight       = RowHeight;
@@ -376,7 +389,7 @@ namespace Game.UI.Inventory
             var btnGo = new GameObject("ActionBtn",
                 typeof(RectTransform), typeof(Button), typeof(Image));
             btnGo.transform.SetParent(row.transform, false);
-            btnGo.GetComponent<Image>().color = new Color(0.2f, 0.5f, 0.9f, 0.95f);
+            btnGo.GetComponent<Image>().color = new Color(0.2f, 0.5f, 0.9f, 0.95f); UiSkin.Button(btnGo.GetComponent<Image>(), 2);
             var btnLe = btnGo.AddComponent<LayoutElement>();
             btnLe.minWidth       = RowButtonWidth;
             btnLe.preferredWidth = RowButtonWidth;
@@ -519,7 +532,7 @@ namespace Game.UI.Inventory
             unequipRt.pivot     = new Vector2(0.5f, 0f);
             unequipRt.offsetMin = new Vector2(12, 8);
             unequipRt.offsetMax = new Vector2(-12, 8 + UnequipAllHeight);
-            unequipGo.GetComponent<Image>().color = new Color(0.85f, 0.25f, 0.25f, 0.95f);
+            unequipGo.GetComponent<Image>().color = new Color(0.85f, 0.25f, 0.25f, 0.95f); UiSkin.Button(unequipGo.GetComponent<Image>(), 2);
 
             var utGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
             utGo.transform.SetParent(unequipGo.transform, false);

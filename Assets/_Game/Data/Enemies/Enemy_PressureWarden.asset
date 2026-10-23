@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.PvE::Game.PvE.Enemy.EnemyDefinition
   id: enemy.pressure_warden
   displayName: "Qu\u1EA3n \xC1p C\u1ED5"
-  sprite: {fileID: 21300000, guid: caecab1aaedd03f4b9a5ff9de9896cce, type: 3}
+  sprite: {fileID: -7409974038716792639, guid: f48b6934f1537f1489823ed8ffc075cf, type: 3}
   maxHealth: 300
   attack: 18
   defense: 6
