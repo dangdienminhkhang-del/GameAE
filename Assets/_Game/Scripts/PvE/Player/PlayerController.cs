@@ -42,6 +42,12 @@ namespace Game.PvE.Player
 
         public CharacterStats Stats => _stats;
 
+        /// <summary>
+        /// Khóa hành động (di chuyển, tấn công, né, kỹ năng).
+        /// Được dùng khi khựng chiêu (PostSkillDelay), bị choáng/tê liệt (Stun/Paralyze), hoặc chết.
+        /// </summary>
+        public bool IsActionLocked { get; set; }
+
         /// <summary>1 = quay phải, -1 = quay trái. PlayerAttack dùng để đặt vùng đánh phía trước.</summary>
         public int Facing { get; private set; } = 1;
 
@@ -79,6 +85,20 @@ namespace Game.PvE.Player
             if (!TryGetComponent<ComboTracker>(out _)) gameObject.AddComponent<ComboTracker>();
             if (!TryGetComponent<Dodge.PerfectDodgeDetector>(out _)) gameObject.AddComponent<Dodge.PerfectDodgeDetector>();
             if (!TryGetComponent<AdrenalineController>(out _)) gameObject.AddComponent<AdrenalineController>();
+            // Cộng điểm STR/AGI khi lên cấp (giống SAO) — tự gắn, không cần sửa scene.
+            if (!TryGetComponent<PlayerStatAllocation>(out _)) gameObject.AddComponent<PlayerStatAllocation>();
+            // Khựng chiêu sau Sword Skill / Weapon Technique (SAO post-motion freeze) — tự gắn, không cần sửa scene.
+            if (!TryGetComponent<Skills.PostSkillDelayController>(out _)) gameObject.AddComponent<Skills.PostSkillDelayController>();
+            // Hiệu ứng trạng thái Độc, Chảy máu, Tê liệt, Choáng (SAO status effects) — tự gắn, không cần sửa scene.
+            if (!TryGetComponent<Combat.StatusEffectController>(out _)) gameObject.AddComponent<Combat.StatusEffectController>();
+            // Kỹ năng phụ Dò Tìm & Ẩn Nấp (Searching & Hiding theo SAO) — tự gắn, không cần sửa scene.
+            if (!TryGetComponent<Skills.SearchingHidingController>(out _)) gameObject.AddComponent<Skills.SearchingHidingController>();
+            // Tinh Thể Dịch Chuyển (Teleport Crystal theo SAO) — tự gắn, không cần sửa scene.
+            if (!TryGetComponent<Items.TeleportCrystalController>(out _)) gameObject.AddComponent<Items.TeleportCrystalController>();
+            // Kỹ năng đời sống: Câu cá & Nấu ăn (theo SAO) — tự gắn, không cần sửa scene.
+            if (!TryGetComponent<LifeSkills.PlayerLifeSkills>(out _)) gameObject.AddComponent<LifeSkills.PlayerLifeSkills>();
+            // Quản lý Tổ Đội / Xã Hội (Party/Social theo SAO) — tự gắn, không cần sửa scene.
+            if (!TryGetComponent<Social.SocialManager>(out _)) gameObject.AddComponent<Social.SocialManager>();
         }
 
         private void Awake()
@@ -126,7 +146,19 @@ namespace Game.PvE.Player
 
         private void FixedUpdate()
         {
-            Vector2 velocity = _currentMove.normalized * (moveSpeed * _speedMultiplier);
+            if (IsActionLocked)
+            {
+                if (_rb != null) _rb.linearVelocity = Vector2.zero;
+                if (animator != null)
+                {
+                    animator.SetBool("IsWalking", false);
+                }
+                return;
+            }
+
+            // AGI cộng thêm % tốc chạy (MoveSpeedBonusFraction), nhân riêng với SpeedMultiplier của các hiệu ứng khác.
+            float agilityBonus = _stats != null ? 1f + (float)_stats.MoveSpeedBonusFraction : 1f;
+            Vector2 velocity = _currentMove.normalized * (moveSpeed * _speedMultiplier * agilityBonus);
             _rb.linearVelocity = velocity;
 
             // Hướng nhìn 8 hướng: thả joystick (vector gần 0) thì giữ hướng cũ.

@@ -27,6 +27,9 @@ namespace Game.UI.Death
         [Tooltip("Nút 'Thử lại' của màn 'BẠN ĐÃ BỊ HẠ GỤC' (chưa lưu được cái chết). Chưa gán thì bỏ qua + log cảnh báo.")]
         [SerializeField] private Button retryButton;
 
+        [Tooltip("Huy hiệu niêm phong tử thần (Icon_Seal).")]
+        [SerializeField] private Image sealEmblem;
+
         private IAccountResetService _resetService;
         private bool _isResetting;
 

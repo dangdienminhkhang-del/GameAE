@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Game.Core.Combat;
 using Game.Core.World;
 
 namespace Game.PvE.Boss
@@ -22,6 +23,10 @@ namespace Game.PvE.Boss
         public FirstClearClaimResult FirstClearResult { get; internal set; }
         public IReadOnlyList<KeyValuePair<Game.Core.Items.ItemDefinition, int>> MainDrops { get; internal set; }
         public IReadOnlyList<KeyValuePair<Game.Core.Items.ItemDefinition, int>> RareDrops { get; internal set; }
+        public bool IsPlayerLastAttack { get; internal set; }
+        public bool LastAttackBonusClaimed { get; internal set; }
+        public Game.Core.Items.ItemDefinition LastAttackItem { get; internal set; }
+        public int LastAttackQuantity { get; internal set; }
     }
 
     /// <summary>
@@ -60,7 +65,8 @@ namespace Game.PvE.Boss
             BossDefinition definition,
             bool isPlayerDead,
             Func<Game.Core.Items.ItemDefinition, int, int> grantItem,
-            bool? knownRematch = null)
+            bool? knownRematch = null,
+            DamageInfo lethalDamage = null)
         {
             if (definition == null) throw new ArgumentNullException(nameof(definition));
 
@@ -108,6 +114,20 @@ namespace Game.PvE.Boss
             result.RareDrops = BossRewardHandler.RollRareDrops(definition, result.IsRematch);
             GrantAll(result.MainDrops, grantItem);
             GrantAll(result.RareDrops, grantItem);
+
+            // Last Attack Bonus (SAO): người tung đòn kết liễu boss nhận vật phẩm hiếm riêng
+            result.IsPlayerLastAttack = LastAttackRules.IsPlayerLastAttack(lethalDamage);
+            if (result.IsPlayerLastAttack && definition.LastAttackRewardItem != null)
+            {
+                result.LastAttackItem = definition.LastAttackRewardItem;
+                result.LastAttackQuantity = definition.LastAttackRewardQuantity;
+                if (grantItem != null)
+                {
+                    grantItem(result.LastAttackItem, result.LastAttackQuantity);
+                    result.LastAttackBonusClaimed = true;
+                }
+            }
+
             return result;
         }
 

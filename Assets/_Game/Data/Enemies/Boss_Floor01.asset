@@ -17,6 +17,7 @@ MonoBehaviour:
   floorId: floor.01
   sprite: {fileID: -8256429368149723438, guid: ca8f71a7cd126d3458650d4d7f00e7b2, type: 3}
   maxHealth: 1500
+  healthBarCount: 4
   attack: 28
   defense: 4
   moveSpeed: 1.8
@@ -37,6 +38,8 @@ MonoBehaviour:
   experienceReward: 150
   firstClearRewardItem: {fileID: 11400000, guid: a88a1e6f48e817c48b53fa524ebbd66c, type: 2}
   firstClearRewardQuantity: 1
+  lastAttackRewardItem: {fileID: 11400000, guid: 7f5e8b09184542d99c4c798a0d4c9f11, type: 2}
+  lastAttackRewardQuantity: 1
   drops:
   - item: {fileID: 11400000, guid: ed645eb8dcb162d40beda14fa499044f, type: 2}
     chance: 1

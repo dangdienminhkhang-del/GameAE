@@ -1,0 +1,181 @@
+-34 -26 144 64
+c39a31c5n29o40
+c40a30c6n28o40
+c42a27c7n28o40
+c42a27c7n28o40
+c42a27c7n28o40
+c42a26c8n28o40
+c35b5d2c1a22c11n28o40
+c33b8d3c2a18c12n28o40
+c32b11d2c1a17c12n29o40
+c32b4e6d3a4d6q1a5c14n29o40
+c31b4e9a4d5b2d3q1c17n28o40
+c10b3q6b1q3b3q4b4e10l2a1l2e4b3d6b3q10b1n4g1n7g5n11o40
+c9b24e4b3e3l6e6b21n3g5i4g2h2g2i1n9o40
+c1a6c1q1b24e3b5d2l5e8b4p10b6n3g5i4h5g2i2n7o22m11o7
+a8q1d1b23e3b5d2a5d2e2b2e1b5p10b7g5h3i2h7i4g1n5o20m15o5
+a9d2b21f5b4d2a5d2b10p10b5g7h11i4g2n5o18m6j7m6o3
+a9d2b21f5b4d2a5d2b25g8h9i5h1g2n1g1n2o17m5j11m5o2
+a9d3b20f5b4d2a5d2b25g8h9i5h2i5o16m4j15m4o1
+a10d4b18f5b4d3a4d2b24g9h9i5h2i5o3m16j17m3o1
+a12d2b18f5b5d2a4d2b24g9h9i5h2i5o3m15j19m3
+a10l2d3b16f7b5d2a3d2b23g10h10i5h6o3m2j32m3
+a9l3a1d1b16f9b4d2a3d2b22g11h10i5h6o3m2j33m2
+a9l3a1d1b15f11b3d2a3d2b18e4g11h12i3h6m5j33m2
+a10l2e1d1b14f13b2d2a4d1b16e6g11h13i2h6m5j33m2
+a11e3b6f24d1a4d3b3e1b7e7b2g11h12i3h6j39m1
+a11d1e2b4e2f24e2l4e18b4g11h11i4h2g4j3k23j13m1
+a10d2e8f24e2l4e16b6g12h5g4l5g6j3k23j13m1
+a10d1e9f24e2l5e3b2e9b7g20l6g6j3k23j13m1
+a10d1e5b4f24d2a4b1d2b6e5b8g20l5g5h2j38m2
+a10e4b14f13b2d2a5b1d2b8e3b10g9h1g6h2i5h7m5j33m2
+a9d1e2b17f11b4d2a5d2b8e3b10g8h10i5h7m5j33m2
+a9e3b18f9b6d1a4d3b9e3b10g9h9i4h7o3m2j32m3
+a9e3b19f7b6d2a4d2b10e3b7p3g8h10i4h2i2h3o3m15j19m3
+c2a4d2e4b20f5b7d2a3d3b11e3b6p3g7i3h9i3h1i4h2o3m16j17m3o1
+c3d5e4b20f5b6d3a3d2b12e4b5p4g5i5h8i3h2i2h2g1o16m4j15m4o1
+c4d3b1e3b21f5b6d2a4d2b12e4b5p4g5i5h9i3h4g1n1o17m5j11m5o2
+c5b2e3b22f5b6d2a4d3p8b4e3b10g6i1h10i4h3g2n1o18m6j7m6o3
+c4q1b2e3b22f5b6d2a4d3p8b5e2b9n2g5h10i5h3g2n1o20m15o5
+c4b3e2b23f5b6d2a5d2p8b5e3b10g5h10i5h4g1n1o22m11o7
+c4b2e3b24e3b7d3a4d2p8b5e3b10g5h9i5h3g2n2o40
+c3b3e3b25e2b7q3a5d1b13e4b8n4g2h9i5g4n3o40
+c3b2e4b3q7b14e4b6q1c1q1a5d2b12e3b8n5g2h6g3i4g1n7o40
+c3b3e2b4c10b10e7b5c2a6d2b10e4b8n6g1h5g3i5n8o40
+c4b7c11b8e5b1e5b3d2a6c3q1b7e5b6q1c1n7g1h3g3h1i4g1n8o40
+c6b4c12b7e5b3e6b1d2a6c6b3p2e4p3q1c6n7g1h1g2n1g3i2n10o40
+c22b7e4b5e6d2a5d2q1c1q1b5p1e4p3c8n7g3n3g4n10o40
+c23b16e7d1a4d1b8e5p3c9b1n6g2n18o40
+c24b12q1b4e6l1a3d1b5e6p4c10b1n26o40
+c25b10c3b6e3l3e12b4c11n27o40
+c28q1b2q1c8b5d2l3e10b6c11n27o40
+c42b2d2a4e8b6c13n27o40
+c44q1a4d3b10c14n28o40
+c44a5d2b8q1c16n28o40
+c43a5c28n28o40
+c42a6c28n28o40
+c42a5c29n28o40
+c42a5c29n28o40
+c41a6c30n27o40
+c41a6c30n27o40
+c41a5c31n27o40
+c41a5c31b1n26o40
+c41a5c31b1n26o40
+c41a5c31b1n26o40
+c41a5c31n27o40
+P House_A 5.6 8.8 0 1 house
+P House_E 9.0 4.9 1 1 house
+P House_F 9.4 10.8 0 1 house
+P House_D -4.8 9.0 0 1 house
+P House_B -9.0 5.0 1 1 house
+P House_C -9.8 10.6 0 1 house
+P House_A -13.0 6.2 0 1 house
+P House_F -5.0 -8.6 1 1 house
+P House_D -9.4 -6.3 0 1 house
+P House_E -12.3 -9.2 0 1 house
+P House_B 5.0 -8.8 1 1 house
+P House_C 8.8 -6.0 0 1 house
+P House_E -18.6 -7.6 0 1 house
+P House_D 24.6 -8.2 1 1 house
+P House_F 22.2 15.4 0 1 house
+P House_B 40.6 13.4 0 1 house
+P House_C -9.6 18.4 1 1 house
+P Tree_C 32.6 -14.5 0 1 woods
+P Tree_C 39.3 -14.0 1 1 woods
+P Tree_A -20.8 15.3 0 1 woods
+P Tree_B -11.6 -14.6 0 1 woods
+P Tree_B -16.3 15.5 1 1 woods
+P Tree_B 38.0 -11.4 0 1 grove
+P Tree_A 31.0 -8.1 0 1 grove
+P Tree_C 26.7 13.3 1 1 grove
+P Tree_C 20.0 -5.3 0 1 grove
+P Tree_B 34.4 -9.6 1 1 grove
+P Tree_C 38.0 16.4 0 1 grove
+P Tree_B 29.4 -13.7 0 1 grove
+P Tree_C 34.9 -13.8 0 1 grove
+P Tree_A 35.1 4.1 1 1 grove
+P Tree_B 28.7 -5.3 0 1 grove
+P Tree_B 25.7 9.3 0 1 grove
+P Tree_C 36.5 7.7 1 1 grove
+P Tree_C -3.3 12.4 0 1 town
+P Tree_A -11.0 -3.8 1 1 town
+P Bush_B 36.8 4.6 1 0 bush
+P Bush_A 17.2 9.2 0 0 bush
+P Bush_B -19.9 7.9 1 0 bush
+P Bush_B -6.1 15.7 1 0 bush
+P Bush_B -13.6 -4.6 0 0 bush
+P Bush_B 34.1 1.7 0 0 bush
+P Bush_A -16.8 -12.2 0 0 bush
+P Bush_A -5.2 -5.2 1 0 bush
+P Bush_A -19.0 11.6 0 0 bush
+P Bush_A -0.9 21.9 0 0 bush
+P Bush_B 25.6 -12.7 0 0 bush
+P Bush_A 18.5 -7.3 0 0 bush
+P Bush_A -7.6 -13.1 0 0 bush
+P Bush_B -9.2 -9.0 1 0 bush
+P Bush_B 30.5 22.5 0 0 bush
+P Bush_A 38.3 11.2 0 0 bush
+P Bush_B -15.3 3.6 1 0 bush
+P Bush_B 25.0 15.8 0 0 bush
+P Bush_B -21.6 12.5 0 0 bush
+P Bush_A 23.0 19.7 1 0 bush
+P Bush_A 6.7 -11.2 0 0 bush
+P Bush_B -17.0 14.1 0 0 bush
+P Bush_A 8.0 23.2 0 0 bush
+P Bush_B -3.3 -10.9 1 0 bush
+P Bush_A 27.5 -2.3 0 0 bush
+P Bush_B 6.4 13.7 0 0 bush
+P Bush_A -6.7 6.6 0 0 bush
+P Bush_A 6.3 -18.1 1 0 bush
+P Bush_A 22.7 -10.4 1 0 bush
+P Bush_B 21.1 -3.5 0 0 bush
+P Bush_B -16.2 10.1 0 0 bush
+P Bush_B -22.2 -9.5 1 0 bush
+P Bush_A 25.9 18.7 0 0 bush
+P Bush_A -29.2 17.1 0 0 bush
+P Bush_B 18.8 -10.0 0 0 bush
+P Bush_B 38.0 14.0 1 0 bush
+P Bush_A -17.1 5.8 1 0 bush
+P Bush_B 32.6 -7.5 0 0 bush
+P Bush_B 28.3 -7.9 0 0 bush
+P Bush_B -13.7 15.2 0 0 bush
+P Bush_A -28.3 10.8 1 0 bush
+P Bush_B -15.5 -9.8 1 0 bush
+P Bush_A -8.4 14.1 1 0 bush
+P Bush_B 18.6 -2.1 0 0 bush
+P Bush_A -4.5 21.2 0 0 bush
+P Bush_B -26.8 18.6 0 0 bush
+P Lamp 6.2 2.9 0 0 lamp
+P Lamp 2.9 6.2 0 0 lamp
+P Lamp -1.9 6.2 0 0 lamp
+P Lamp -5.2 2.9 0 0 lamp
+P Lamp -5.2 -1.9 0 0 lamp
+P Lamp -1.9 -5.2 0 0 lamp
+P Lamp 2.9 -5.2 0 0 lamp
+P Lamp 6.2 -1.9 0 0 lamp
+P Lamp -12.0 3.2 0 0 lamp
+P Lamp -12.0 -2.3 0 0 lamp
+P Lamp 11.0 3.2 0 0 lamp
+P Lamp 11.0 -2.3 0 0 lamp
+P Barrel -4.2 -3.2 0 1 crate
+P Crate -3.4 -3.4 0 1 crate
+P Barrel 7.8 -3.0 0 1 crate
+P Crate 23.0 -5.7 0 1 crate
+P Barrel 26.4 -6.0 0 1 crate
+P Crate 21.2 12.9 0 1 crate
+P Barrel -17.0 -5.5 0 1 crate
+P Sign 10.4 2.4 0 0 sign
+P Sign -14.8 2.5 0 0 sign
+P Sign -1.6 12.8 0 0 sign
+P Sign -1.7 -10.6 0 0 sign
+P Sign 45.2 -0.6 0 0 sign
+P Sign 21.6 -11.2 0 0 sign
+M LifeSpring_HarborTrail -21.0 4.0
+M GlowMushrooms_NorthGrove -4.5 18.5
+M ThornBramble_ForestFork 4.5 -16.0
+M MoltenAnvil_RiftCamp 46.5 5.5
+M OreCart_RiftEdge 47.5 -6.5
+M MagmaVent_DeepRift 58.0 -7.0
+M Candelabra_CitadelGate 80.0 5.0
+M CitadelAltar 93.0 5.0
+M Gargoyle_CitadelWing 99.0 -7.0

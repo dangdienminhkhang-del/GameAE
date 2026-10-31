@@ -294,13 +294,16 @@ namespace Game.Services.Audio
             if (!_initialized || _backgrounded == value) return;
             _backgrounded = value;
 
+            // Khi thoát Play Mode / đóng scene, AudioSource có thể đã bị Unity huỷ trước khi
+            // OnApplicationFocus được gọi → bỏ qua nguồn đã mất để không ném NullReference.
             for (int i = 0; i < _sfxSources.Length; i++)
             {
+                if (_sfxSources[i] == null) continue;
                 if (value) _sfxSources[i].Pause(); else _sfxSources[i].UnPause();
             }
             for (int i = 0; i < _music.Length; i++)
             {
-                if (_music[i].Source.clip == null) continue;
+                if (_music[i] == null || _music[i].Source == null || _music[i].Source.clip == null) continue;
                 if (value) _music[i].Source.Pause(); else _music[i].Source.UnPause();
             }
         }

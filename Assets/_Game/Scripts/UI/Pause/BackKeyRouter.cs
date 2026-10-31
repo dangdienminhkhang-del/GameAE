@@ -14,6 +14,15 @@ namespace Game.UI.Pause
         void CloseFromBack();
     }
 
+    /// <summary>
+    /// Nhóm bảng loại trừ (Túi, Sổ quest, Chọn tầng, Nhân vật, Cửa hàng).
+    /// Mở một bảng trong nhóm thì các bảng còn lại trong nhóm tự đóng.
+    /// </summary>
+    public interface IExclusivePanel : IBackHandler
+    {
+        void CloseExclusive();
+    }
+
     /// <summary>Việc cần làm khi người chơi bấm Back. KHÔNG có giá trị nào là "thoát app": Back không bao giờ thoát app trong gameplay.</summary>
     public enum BackAction
     {
@@ -56,6 +65,20 @@ namespace Game.UI.Pause
                 if (top == null || h.BackPriority > top.BackPriority) top = h;
             }
             return top;
+        }
+
+        /// <summary>Đóng mọi bảng loại trừ khác đang mở ngoại trừ bảng vừa mở (Gói U3).</summary>
+        public void CloseExclusiveOthers(IExclusivePanel opening)
+        {
+            if (opening == null) return;
+            for (int i = 0; i < _handlers.Count; i++)
+            {
+                IBackHandler h = _handlers[i];
+                if (h is IExclusivePanel exclusive && !ReferenceEquals(exclusive, opening) && exclusive.IsOpen)
+                {
+                    exclusive.CloseExclusive();
+                }
+            }
         }
 
         public static BackAction Decide(bool deathScreenShowing, bool hasOpenPanel, bool isPauseOpen, bool canPause)

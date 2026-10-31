@@ -108,6 +108,26 @@ namespace Game.Core.Events
         /// </summary>
         public static event EventHandler<ZoneEnteredArgs> OnZoneEntered;
         public static void RaiseZoneEntered(object sender, ZoneEnteredArgs args) => OnZoneEntered?.Invoke(sender, args);
+
+        /// <summary>Yêu cầu mở giao diện Quán trọ (Inn) khi người chơi tương tác (UI lắng nghe).</summary>
+        public static event Action<InnRequestArgs> OnInnRequested;
+        public static void RaiseInnRequested(InnRequestArgs args) => OnInnRequested?.Invoke(args);
+
+        /// <summary>Yêu cầu mở giao diện Nấu Ăn (Cooking) khi tương tác (UI lắng nghe).</summary>
+        public static event Action OnCookingRequested;
+        public static void RaiseCookingRequested() => OnCookingRequested?.Invoke();
+
+        /// <summary>Yêu cầu mở bảng chọn chế độ Tỉ Thí Duel (UI nghe).</summary>
+        public static event Action OnDuelRequested;
+        public static void RaiseDuelRequested() => OnDuelRequested?.Invoke();
+
+        /// <summary>UI bấm bắt đầu Duel với chế độ đã chọn (Arena nghe).</summary>
+        public static event Action<Game.Core.PvP.DuelMode> OnDuelStartRequested;
+        public static void RaiseDuelStartRequested(Game.Core.PvP.DuelMode mode) => OnDuelStartRequested?.Invoke(mode);
+
+        /// <summary>Yêu cầu mở bảng Tổ Đội / Bang Hội / Bạn Bè (Social Panel - UI nghe).</summary>
+        public static event Action OnSocialPanelRequested;
+        public static void RaiseSocialPanelRequested() => OnSocialPanelRequested?.Invoke();
     }
 
     public class ZoneEnteredArgs : EventArgs
@@ -177,5 +197,16 @@ namespace Game.Core.Events
     {
         public string BossId;
         public string FloorId;
+        public bool IsLastAttack;
+        public string LastAttackItemId;
+        public string LastAttackItemName;
+    }
+
+    public class InnRequestArgs : EventArgs
+    {
+        public string InnName;
+        public int RestCost;
+        public Func<Game.Core.Inn.InnRestResult> OnExecuteRest;
+        public UnityEngine.Vector3 Position;
     }
 }

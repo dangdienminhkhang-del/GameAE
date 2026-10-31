@@ -53,7 +53,17 @@ namespace Game.UI.MainMenu
 
         private void HandlePlayPvPClicked()
         {
-            Debug.Log("[MainMenu] Play PvP clicked (placeholder - Phase 10 implement)");
+            // TODO (Mốc 2 - Phase 10): Đấu mạng thời gian thực (Netcode for GameObjects + UGS Relay/Lobby).
+            // Hiện tại đã hoàn thiện luật Core và chế độ Duel đối kháng cục bộ trong PvE.
+            Debug.Log("[MainMenu] PvP Online (Netcode/Relay) đang trong lộ trình phát triển Phase 10. Chế độ Duel đối kháng đã có sẵn tại Võ Đài trong PvE!");
+            if (playPvPButton != null)
+            {
+                var label = playPvPButton.GetComponentInChildren<Text>();
+                if (label != null)
+                {
+                    label.text = "PvP: Sắp ra mắt!";
+                }
+            }
         }
 
         private void HandleSettingsClicked()

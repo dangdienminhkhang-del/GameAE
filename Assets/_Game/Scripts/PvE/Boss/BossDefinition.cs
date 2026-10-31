@@ -24,6 +24,8 @@ namespace Game.PvE.Boss
 
         [Header("Chỉ số")]
         [SerializeField] private double maxHealth = 250.0;
+        [Tooltip("Số thanh máu boss theo chuẩn SAO (mặc định 4 thanh như Illfang).")]
+        [SerializeField] private int healthBarCount = Game.Core.Combat.BossHealthBarRules.DefaultBarCount;
         [SerializeField] private double attack = 18.0;
         [SerializeField] private double defense = 4.0;
         [SerializeField] private float moveSpeed = 1.8f;
@@ -65,6 +67,11 @@ namespace Game.PvE.Boss
         [SerializeField] private ItemDefinition firstClearRewardItem;
         [SerializeField] private int firstClearRewardQuantity = 1;
 
+        [Header("Last Attack Bonus (SAO)")]
+        [Tooltip("Vật phẩm thưởng riêng khi tung đòn kết liễu boss (Last Attack Bonus - LA).")]
+        [SerializeField] private ItemDefinition lastAttackRewardItem;
+        [SerializeField] private int lastAttackRewardQuantity = 1;
+
         // Giữ chính xác tên serialized "drops" để asset cũ tự trở thành Main Drops.
         [Header("Main Drops (rơi mọi lần hạ boss / rematch)")]
         [SerializeField] private List<BossDrop> drops = new List<BossDrop>();
@@ -101,6 +108,7 @@ namespace Game.PvE.Boss
         public string FloorId => floorId;
         public Sprite Sprite => sprite;
         public double MaxHealth => maxHealth;
+        public int HealthBarCount => healthBarCount > 0 ? healthBarCount : Game.Core.Combat.BossHealthBarRules.DefaultBarCount;
         public double Attack => attack;
         public double Defense => defense;
         public float MoveSpeed => moveSpeed;
@@ -131,6 +139,8 @@ namespace Game.PvE.Boss
         public int ExperienceReward => experienceReward;
         public ItemDefinition FirstClearRewardItem => firstClearRewardItem;
         public int FirstClearRewardQuantity => firstClearRewardQuantity;
+        public ItemDefinition LastAttackRewardItem => lastAttackRewardItem;
+        public int LastAttackRewardQuantity => lastAttackRewardQuantity > 0 ? lastAttackRewardQuantity : 1;
         /// <summary>Main drops. Field serialized cũ <c>drops</c> được giữ để asset hiện có tương thích.</summary>
         public IReadOnlyList<BossDrop> MainDrops => drops;
 
@@ -152,6 +162,7 @@ namespace Game.PvE.Boss
         private void OnValidate()
         {
             rematchRareMultiplier = Mathf.Clamp01(rematchRareMultiplier);
+            healthBarCount = RequirePositive(healthBarCount, Game.Core.Combat.BossHealthBarRules.DefaultBarCount, nameof(healthBarCount));
 
             attackHitRadius = RequirePositive(attackHitRadius, DefaultAttackHitRadius, nameof(attackHitRadius));
             pressureEveryNAttacks = RequirePositive(pressureEveryNAttacks, DefaultPressureEveryNAttacks, nameof(pressureEveryNAttacks));

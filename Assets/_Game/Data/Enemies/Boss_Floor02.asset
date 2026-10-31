@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: "B\u1ED9 \u0110i\u1EC1u \xC1p C\u1ED5"
   floorId: floor.02
   sprite: {fileID: -6970517029366455035, guid: 77f92390afbd15b4fb6c2dea27bac29c, type: 3}
-  maxHealth: 2600
+  maxHealth: 2100
   attack: 40
   defense: 7
   moveSpeed: 1.6

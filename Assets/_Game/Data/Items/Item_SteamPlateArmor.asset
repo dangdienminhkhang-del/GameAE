@@ -22,6 +22,8 @@ MonoBehaviour:
     defense: 10
     maxHealth: 35
   equipmentSlot: 2
+  requiredStrength: 10
+  maxDurability: 0
   stackable: 0
   maxStack: 1
   sellValue: 100

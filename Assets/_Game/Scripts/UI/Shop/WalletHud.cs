@@ -5,36 +5,38 @@ using UnityEngine.UI;
 
 namespace Game.UI.Shop
 {
-    /// <summary>Hiển thị số Col ở góc trên-trái (dưới thanh HP/EXP) + chữ "+N" khi nhặt Col từ quái.</summary>
+    /// <summary>
+    /// Hiển thị số Col ở góc trên-trái (dưới đồng hồ) + chữ "+N Col" khi nhặt Col từ quái.
+    /// Bố cục (huy hiệu tròn + thanh viên thuốc) nằm trong scene PvE_Gameplay → WalletHud;
+    /// script này chỉ cập nhật chữ, không tự đặt lại vị trí lúc chạy.
+    /// </summary>
     public class WalletHud : MonoBehaviour
     {
-        [SerializeField] private PlayerWallet wallet;
-        [SerializeField] private Vector2 anchoredPosition = new Vector2(24f, -150f);
+        private const float GainShowSeconds = 1.6f;
+        private const float GainFadeSeconds = 0.45f;
 
-        private Text _label;
-        private Text _gain;
+        [SerializeField] private PlayerWallet wallet;
+        [Tooltip("Chữ hiện số Col (ví dụ \"1.654 Col\").")]
+        [SerializeField] private Text label;
+        [Tooltip("Chữ hiện \"+N Col\" khi nhận thêm. Để trống = không hiện.")]
+        [SerializeField] private Text gain;
+
         private Coroutine _gainRoutine;
 
         private void Awake()
         {
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _label = MakeText("ColLabel", font, 40, new Color(0.95f, 0.76f, 0.31f), anchoredPosition);
-            _gain = MakeText("ColGain", font, 32, new Color(0.7f, 1f, 0.8f), anchoredPosition + new Vector2(0f, -46f));
-            _gain.text = "";
+            if (label == null) label = FindText("ColLabel");
+            if (gain == null) gain = FindText("ColGain");
+            if (gain != null) gain.text = "";
         }
 
-        private Text MakeText(string name, Font font, int size, Color color, Vector2 pos)
+        private Text FindText(string objectName)
         {
-            var go = new GameObject(name, typeof(RectTransform));
-            go.transform.SetParent(transform, false);
-            var rt = (RectTransform)go.transform;
-            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0, 1);
-            rt.anchoredPosition = pos; rt.sizeDelta = new Vector2(420, 50);
-            var t = go.AddComponent<Text>();
-            t.font = font; t.fontSize = size; t.color = color; t.alignment = TextAnchor.MiddleLeft;
-            t.horizontalOverflow = HorizontalWrapMode.Overflow; t.raycastTarget = false;
-            var sh = go.AddComponent<Shadow>(); sh.effectColor = new Color(0, 0, 0, 0.8f); sh.effectDistance = new Vector2(2, -2);
-            return t;
+            foreach (var t in GetComponentsInChildren<Text>(true))
+            {
+                if (t.name == objectName) return t;
+            }
+            return null;
         }
 
         private void OnEnable()
@@ -55,22 +57,42 @@ namespace Game.UI.Shop
 
         private void Refresh()
         {
-            if (_label != null && wallet != null) _label.text = wallet.Col.ToString("N0") + " Col";
+            if (label != null && wallet != null)
+            {
+                // Số lớn, chữ "Col" nhỏ hơn cho gọn (Text legacy hỗ trợ rich text).
+                label.text = wallet.Col.ToString("N0") + "<size=20> Col</size>";
+            }
         }
 
         private void ShowGain(int amount)
         {
-            if (_gain == null) return;
+            if (gain == null) return;
             if (_gainRoutine != null) StopCoroutine(_gainRoutine);
             _gainRoutine = StartCoroutine(GainRoutine(amount));
         }
 
         private IEnumerator GainRoutine(int amount)
         {
-            _gain.text = "+" + amount + " Col";
-            yield return new WaitForSeconds(1.6f);
-            _gain.text = "";
+            gain.text = "+" + amount + " Col";
+            SetGainAlpha(1f);
+            yield return new WaitForSeconds(GainShowSeconds);
+
+            for (float t = 0f; t < GainFadeSeconds; t += UnityEngine.Time.unscaledDeltaTime)
+            {
+                SetGainAlpha(1f - t / GainFadeSeconds);
+                yield return null;
+            }
+
+            gain.text = "";
+            SetGainAlpha(1f);
             _gainRoutine = null;
+        }
+
+        private void SetGainAlpha(float alpha)
+        {
+            var c = gain.color;
+            c.a = alpha;
+            gain.color = c;
         }
     }
 }

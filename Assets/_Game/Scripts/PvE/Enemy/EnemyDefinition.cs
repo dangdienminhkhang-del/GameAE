@@ -16,6 +16,8 @@ namespace Game.PvE.Enemy
         [SerializeField] private Sprite sprite;
 
         [Header("Chỉ số")]
+        [Tooltip("Cấp độ của quái (dùng tính màu con trỏ/cursor theo SAO).")]
+        [SerializeField] private int level = 1;
         [SerializeField] private double maxHealth = 40.0;
         [SerializeField] private double attack = 6.0;
         [SerializeField] private double defense = 2.0;
@@ -69,6 +71,7 @@ namespace Game.PvE.Enemy
 
         public string Id => id;
         public string DisplayName => displayName;
+        public int Level => Mathf.Max(1, level);
         public Sprite Sprite => sprite;
         public double MaxHealth => maxHealth;
         public double Attack => attack;

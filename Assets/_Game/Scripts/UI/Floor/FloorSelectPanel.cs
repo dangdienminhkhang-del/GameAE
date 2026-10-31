@@ -1,3 +1,4 @@
+using Game.UI.Common;
 using System;
 using System.Collections.Generic;
 using Game.Core.Floor;
@@ -21,7 +22,7 @@ namespace Game.UI.Floor
     /// chỉ panelRoot được tắt mặc định.
     /// Tạm dùng UnityEngine.UI.Text thay TMP_Text (asmdef Game.UI chưa ref Unity.TextMeshPro).
     /// </summary>
-    public class FloorSelectPanel : MonoBehaviour, IBackHandler
+    public class FloorSelectPanel : MonoBehaviour, IExclusivePanel, IPanelRoot
     {
         /// <summary>Nút Back: Chọn Tầng nằm dưới cùng trong thứ tự đóng (Settings 40, Túi 30, Quest 20, Chọn Tầng 10).</summary>
         public const int Priority = 10;
@@ -45,8 +46,10 @@ namespace Game.UI.Floor
         private int _refreshVersion; // bỏ kết quả refresh cũ nếu panel đã đóng/mở lại
 
         public bool IsOpen => panelRoot != null && panelRoot.activeSelf;
+        public GameObject PanelRoot => panelRoot;
         public int BackPriority => Priority;
         public void CloseFromBack() => Hide();
+        public void CloseExclusive() => Hide();
 
         private void OnEnable() => BackKeyRouterHost.Router.Register(this);
         private void OnDisable() => BackKeyRouterHost.Router.Unregister(this);
@@ -63,8 +66,18 @@ namespace Game.UI.Floor
 
         private void Awake()
         {
+            if (panelRoot != null)
+            {
+                var img = panelRoot.GetComponent<Image>();
+                if (img != null) UiSkin.Panel(img);
+            }
+
             if (closeButton != null)
             {
+                var img = closeButton.GetComponent<Image>();
+                if (img != null) UiSkin.Button(img);
+                CloseButtonLayout.Apply(closeButton);
+
                 closeButton.onClick.RemoveListener(Hide);
                 closeButton.onClick.AddListener(Hide);
             }
@@ -86,6 +99,7 @@ namespace Game.UI.Floor
 
             if (visible)
             {
+                BackKeyRouterHost.Router.CloseExclusiveOthers(this);
                 RefreshAsync();
             }
             else

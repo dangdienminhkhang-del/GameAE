@@ -1,3 +1,4 @@
+using Game.Core.Combat;
 using Game.Core.Presentation;
 using Game.PvE.Boss;
 using UnityEngine;
@@ -6,10 +7,12 @@ using UnityEngine.UI;
 namespace Game.UI.HUD
 {
     /// <summary>
-    /// Thanh máu boss trên HUD (docs/05 Phase 9.5): chỉ hiện khi boss đã vào trận (EngagedChanged = true) và chưa chết;
-    /// ẩn lúc đầu, khi boss về Idle/chết/rematch. Cập nhật bằng sự kiện HealthChanged, KHÔNG poll trong Update.
-    /// Component này nằm trên object LUÔN BẬT; phần hiển thị là <c>visualRoot</c> (con) được bật/tắt — nếu tự tắt chính object này
-    /// thì sẽ mất luôn việc nghe sự kiện.
+    /// Thanh máu boss trên HUD (docs/05 Phase 9.5 & SAO Multi-bar HP):
+    /// - Chỉ hiện khi boss đã vào trận (EngagedChanged = true) và chưa chết.
+    /// - Hiển thị nhiều thanh máu theo phong cách SAO (mặc định 4 thanh: Xanh lá -> Vàng -> Cam -> Đỏ thanh cuối).
+    /// - Hiển thị nhãn số thanh còn lại (x4, x3, x2, x1).
+    /// - Lớp màu bên dưới hiển thị màu thanh tiếp theo khi thanh hiện tại tụt dần.
+    /// - Tự gắn runtime các thành phần phụ trợ (UnderlyingFill, BarsCountLabel, BossNameLabel) mà không làm bẩn scene.
     /// </summary>
     public sealed class BossHealthBar : MonoBehaviour
     {
@@ -22,6 +25,8 @@ namespace Game.UI.HUD
         [Tooltip("Tên boss (tuỳ chọn).")]
         [SerializeField] private Text nameLabel;
 
+        private Image _underlyingFill;
+        private Text _barsCountLabel;
         private bool _engaged;
         private bool _dead;
         private bool _subscribed;
@@ -35,18 +40,121 @@ namespace Game.UI.HUD
 
         private void Awake()
         {
+            EnsureRuntimeElements();
             // Ẩn ngay từ đầu (trước cả khi boss kịp báo).
             SetVisible(false);
         }
 
         private void OnEnable()
         {
+            EnsureRuntimeElements();
             Subscribe();
         }
 
         private void OnDisable()
         {
             Unsubscribe();
+        }
+
+        private void EnsureRuntimeElements()
+        {
+            if (visualRoot == null) return;
+
+            // 1. Underlying Fill (hiển thị màu thanh kế tiếp bên dưới fill chính)
+            if (_underlyingFill == null && fill != null)
+            {
+                Transform existing = visualRoot.transform.Find("UnderlyingFill");
+                if (existing != null)
+                {
+                    _underlyingFill = existing.GetComponent<Image>();
+                }
+                else
+                {
+                    GameObject bgObj = new GameObject("UnderlyingFill", typeof(RectTransform), typeof(Image));
+                    bgObj.transform.SetParent(fill.transform.parent, false);
+                    bgObj.transform.SetSiblingIndex(fill.transform.GetSiblingIndex()); // Nằm ngay sau lưng fill
+
+                    RectTransform bgRect = bgObj.GetComponent<RectTransform>();
+                    RectTransform fillRect = fill.rectTransform;
+                    bgRect.anchorMin = fillRect.anchorMin;
+                    bgRect.anchorMax = fillRect.anchorMax;
+                    bgRect.anchoredPosition = fillRect.anchoredPosition;
+                    bgRect.sizeDelta = fillRect.sizeDelta;
+                    bgRect.pivot = fillRect.pivot;
+
+                    _underlyingFill = bgObj.GetComponent<Image>();
+                    _underlyingFill.sprite = fill.sprite;
+                    _underlyingFill.type = fill.type;
+                    if (_underlyingFill.type == Image.Type.Filled)
+                    {
+                        _underlyingFill.fillAmount = 1.0f;
+                    }
+                }
+            }
+
+            // 2. Bar Count Label (hiển thị x4, x3, x2, x1 theo SAO)
+            if (_barsCountLabel == null)
+            {
+                Transform existing = visualRoot.transform.Find("BarsCountLabel");
+                if (existing != null)
+                {
+                    _barsCountLabel = existing.GetComponent<Text>();
+                }
+                else
+                {
+                    GameObject labelObj = new GameObject("BarsCountLabel", typeof(RectTransform), typeof(Text), typeof(Outline));
+                    labelObj.transform.SetParent(visualRoot.transform, false);
+
+                    RectTransform rt = labelObj.GetComponent<RectTransform>();
+                    rt.anchorMin = new Vector2(1f, 0.5f);
+                    rt.anchorMax = new Vector2(1f, 0.5f);
+                    rt.pivot = new Vector2(0f, 0.5f);
+                    rt.anchoredPosition = new Vector2(12f, 0f);
+                    rt.sizeDelta = new Vector2(80f, 36f);
+
+                    _barsCountLabel = labelObj.GetComponent<Text>();
+                    _barsCountLabel.alignment = TextAnchor.MiddleLeft;
+                    _barsCountLabel.fontSize = 24;
+                    UiSkin.ApplyFont(_barsCountLabel, true);
+                    _barsCountLabel.color = Color.white;
+
+                    Outline outline = labelObj.GetComponent<Outline>();
+                    outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+                    outline.effectDistance = new Vector2(1.5f, -1.5f);
+                }
+            }
+
+            // 3. Name Label (nếu chưa gán trong Inspector)
+            if (nameLabel == null)
+            {
+                Transform existing = visualRoot.transform.Find("BossNameLabel");
+                if (existing != null)
+                {
+                    nameLabel = existing.GetComponent<Text>();
+                }
+                else
+                {
+                    GameObject nameObj = new GameObject("BossNameLabel", typeof(RectTransform), typeof(Text), typeof(Outline));
+                    nameObj.transform.SetParent(visualRoot.transform, false);
+
+                    RectTransform rt = nameObj.GetComponent<RectTransform>();
+                    rt.anchorMin = new Vector2(0.5f, 1f);
+                    rt.anchorMax = new Vector2(0.5f, 1f);
+                    rt.pivot = new Vector2(0.5f, 0f);
+                    rt.anchoredPosition = new Vector2(0f, 6f);
+                    rt.sizeDelta = new Vector2(400f, 30f);
+
+                    nameLabel = nameObj.GetComponent<Text>();
+                    nameLabel.alignment = TextAnchor.MiddleCenter;
+                    nameLabel.fontSize = 22;
+                    UiSkin.ApplyFont(nameLabel, true);
+                    nameLabel.color = new Color(0.95f, 0.95f, 0.95f, 1f);
+
+                    Outline outline = nameObj.GetComponent<Outline>();
+                    outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+                    outline.effectDistance = new Vector2(1.5f, -1.5f);
+                }
+            }
         }
 
         private void Subscribe()
@@ -60,7 +168,7 @@ namespace Game.UI.HUD
             _engaged = boss.IsEngaged;
             _dead = boss.IsDead;
             if (nameLabel != null && boss.Definition != null) nameLabel.text = boss.Definition.DisplayName;
-            ApplyRatio(HealthBarRules.Ratio(boss.CurrentHealth, boss.MaxHealth));
+            ApplyMultiBarHealth(boss.CurrentHealth, boss.MaxHealth);
             RefreshVisibility();
         }
 
@@ -79,7 +187,7 @@ namespace Game.UI.HUD
         private void HandleHealthChanged(double current, double max, double delta)
         {
             _dead = current <= 0.0;
-            ApplyRatio(HealthBarRules.Ratio(current, max));
+            ApplyMultiBarHealth(current, max);
             RefreshVisibility();
         }
 
@@ -99,6 +207,52 @@ namespace Game.UI.HUD
         private void SetVisible(bool visible)
         {
             if (visualRoot != null && visualRoot != gameObject) visualRoot.SetActive(visible);
+        }
+
+        private void ApplyMultiBarHealth(double current, double max)
+        {
+            int totalBars = boss != null && boss.Definition != null
+                ? boss.Definition.HealthBarCount
+                : BossHealthBarRules.DefaultBarCount;
+
+            BossHealthBarRules.BarState state = BossHealthBarRules.Calculate(current, max, totalBars);
+
+            // Cập nhật màu và tỉ lệ fill thanh chính
+            if (fill != null)
+            {
+                fill.color = BossHealthBarRules.GetBarColor(state.RemainingBars);
+                ApplyRatio(state.CurrentBarFill);
+            }
+
+            // Cập nhật màu thanh phía dưới
+            if (_underlyingFill != null)
+            {
+                _underlyingFill.color = BossHealthBarRules.GetUnderlyingBarColor(state.RemainingBars);
+                _underlyingFill.enabled = state.RemainingBars > 0;
+            }
+
+            // Cập nhật nhãn x4, x3, x2, x1
+            if (_barsCountLabel != null)
+            {
+                if (state.RemainingBars > 0)
+                {
+                    _barsCountLabel.gameObject.SetActive(true);
+                    _barsCountLabel.text = $"x{state.RemainingBars}";
+                    _barsCountLabel.color = state.IsFinalBar
+                        ? new Color(1f, 0.35f, 0.35f, 1f)
+                        : Color.white;
+                }
+                else
+                {
+                    _barsCountLabel.gameObject.SetActive(false);
+                }
+            }
+
+            // Cập nhật tên boss
+            if (nameLabel != null && boss != null && boss.Definition != null)
+            {
+                nameLabel.text = boss.Definition.DisplayName;
+            }
         }
 
         private void ApplyRatio(float ratio)

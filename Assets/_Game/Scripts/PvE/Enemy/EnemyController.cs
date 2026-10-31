@@ -72,6 +72,9 @@ namespace Game.PvE.Enemy
         }
 
         public EnemyDefinition Definition => definition;
+        private int _overrideLevel;
+        public int Level => _overrideLevel > 0 ? _overrideLevel : (definition != null ? definition.Level : 1);
+        public void SetLevel(int level) => _overrideLevel = Mathf.Max(1, level);
 
         /// <summary>Gán loại quái lúc runtime (spawner dùng một prefab cho mọi loại).</summary>
         public void SetDefinition(EnemyDefinition value)
@@ -103,6 +106,17 @@ namespace Game.PvE.Enemy
 
         public bool IsReturningHome => _returningHome;
         public bool IsDead => _health <= 0.0;
+
+        /// <summary>Quái bị khóa hành động (bị Choáng / Tê Liệt / Stun / Paralyze).</summary>
+        public bool IsActionLocked { get; set; }
+
+        /// <summary>
+        /// Tầm phát hiện hiệu dụng của quái (tự động thu hẹp khi người chơi kích hoạt Ẩn Nấp - Hiding theo SAO).
+        /// </summary>
+        public float EffectiveDetectionRange => Game.Core.Skills.SearchingHidingRules.CalculateEffectiveDetectionRange(
+            definition != null ? definition.DetectionRange : 5.0f,
+            Skills.SearchingHidingController.CurrentPlayerHidingFactor);
+
         public double CurrentHealth => _health;
         public double MaxHealth => definition != null ? ScaleStat(definition.MaxHealth, _floorPower) : 1.0;
         public double Attack => definition != null ? ScaleStat(definition.Attack, _floorPower) : 0.0;
@@ -229,6 +243,12 @@ namespace Game.PvE.Enemy
         {
             // Guard: object có thể tồn tại trong scene mà Awake chưa chạy (rác lưu nhầm trong scene).
             if (_machine == null) return;
+
+            if (IsActionLocked)
+            {
+                if (_rigidbody != null) _rigidbody.linearVelocity = Vector2.zero;
+                return;
+            }
 
             AcquireTarget();
             TickTimers();
@@ -454,7 +474,7 @@ namespace Game.PvE.Enemy
             public override void Tick()
             {
                 bool shouldChase = EnemyLeashRules.ShouldChase(
-                    _owner.Target != null, _owner._targetInSafeZone, _owner.DistanceToTarget, _owner.Definition.DetectionRange);
+                    _owner.Target != null, _owner._targetInSafeZone, _owner.DistanceToTarget, _owner.EffectiveDetectionRange);
                 if (_owner._returningHome && !shouldChase)
                 {
                     _owner.StepReturnHome();
@@ -484,7 +504,7 @@ namespace Game.PvE.Enemy
                     _owner._machine.ChangeTo<AttackState>();
                     return;
                 }
-                if (distance > _owner.Definition.DetectionRange * 1.5f)
+                if (distance > _owner.EffectiveDetectionRange * 1.5f)
                 {
                     _owner._machine.ChangeTo<IdleState>();
                     return;

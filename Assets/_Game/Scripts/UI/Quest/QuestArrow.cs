@@ -1,6 +1,7 @@
 using Game.Core.Events;
 using Game.Core.Guidance;
 using Game.Core.Presentation;
+using Game.UI.Common;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,8 +18,8 @@ namespace Game.UI.Quest
     {
         private const int CanvasSortingOrder = 800;
         private const int GeneratedSpriteSize = 64;
-        private static readonly Vector2 ReferenceResolution = new Vector2(1920f, 1080f);
-        private const float ReferenceHeight = 1080f;
+        private static readonly Vector2 ReferenceResolution = UiLayoutConstants.ReferenceResolution;
+        private const float ReferenceHeight = UiLayoutConstants.ReferenceHeight;
 
         [SerializeField] private GuidanceConfig config;
         [SerializeField] private QuestTargetResolver resolver;
@@ -133,7 +134,7 @@ namespace Game.UI.Quest
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = ReferenceResolution;
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = UiLayoutConstants.MatchWidthOrHeight;
 
             var arrow = new GameObject("Arrow", typeof(RectTransform), typeof(Image));
             arrow.transform.SetParent(_canvasRoot.transform, false);

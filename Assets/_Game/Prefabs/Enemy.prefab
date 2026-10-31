@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3692111653161936446}
   - component: {fileID: 7946046002648335183}
   - component: {fileID: 7741086119465228702}
+  - component: {fileID: 6002623634805988075}
   m_Layer: 8
   m_Name: Enemy
   m_TagString: Untagged
@@ -324,3 +325,15 @@ MonoBehaviour:
     - {fileID: 1226710790002274333, guid: f83893e32bb2e724bafd5d3372d484f0, type: 3}
     fps: 6
   strikeSeconds: 0.22
+--- !u!114 &6002623634805988075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4940644911288997230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c3c8fe0695de3740ac7a3ece49523dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.PvE::Game.PvE.Environment.YSortAgent

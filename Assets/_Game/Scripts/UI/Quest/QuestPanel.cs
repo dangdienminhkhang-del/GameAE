@@ -1,3 +1,4 @@
+using Game.UI.Common;
 using System.Collections.Generic;
 using Game.Core.Events;
 using Game.Core.NPC;
@@ -21,7 +22,7 @@ namespace Game.UI.Quest
     ///
     /// Touch path: các Button trong prefab có thể gán OnClick → HandleAccept / HandleTurnIn / Close.
     /// </summary>
-    public class QuestPanel : MonoBehaviour, IBackHandler
+    public class QuestPanel : MonoBehaviour, IExclusivePanel, IPanelRoot
     {
         /// <summary>Nút Back: Quest nằm trên Chọn Tầng, dưới Túi và Settings.</summary>
         public const int Priority = 20;
@@ -42,8 +43,10 @@ namespace Game.UI.Quest
         private NPCDefinition _currentNpc;
 
         public bool IsOpen => panelRoot != null && panelRoot.activeSelf;
+        public GameObject PanelRoot => panelRoot;
         public int BackPriority => Priority;
         public void CloseFromBack() => Close();
+        public void CloseExclusive() => Close();
 
         // ── Lifecycle ──────────────────────────────────────────────────────
 
@@ -51,10 +54,31 @@ namespace Game.UI.Quest
         {
             if (questLog == null) questLog = FindAnyObjectByType<PlayerQuestLog>();
 
-            if (panelRoot != null) panelRoot.SetActive(false);
-            if (acceptButton  != null) acceptButton.onClick.AddListener(HandleAccept);
-            if (turnInButton  != null) turnInButton.onClick.AddListener(HandleTurnIn);
-            if (closeButton   != null) closeButton.onClick.AddListener(Close);
+            if (panelRoot != null)
+            {
+                var img = panelRoot.GetComponent<Image>();
+                if (img != null) UiSkin.Panel(img);
+                panelRoot.SetActive(false);
+            }
+            if (acceptButton != null)
+            {
+                var img = acceptButton.GetComponent<Image>();
+                if (img != null) UiSkin.Button(img);
+                acceptButton.onClick.AddListener(HandleAccept);
+            }
+            if (turnInButton != null)
+            {
+                var img = turnInButton.GetComponent<Image>();
+                if (img != null) UiSkin.Button(img);
+                turnInButton.onClick.AddListener(HandleTurnIn);
+            }
+            if (closeButton != null)
+            {
+                var img = closeButton.GetComponent<Image>();
+                if (img != null) UiSkin.Button(img);
+                CloseButtonLayout.Apply(closeButton);
+                closeButton.onClick.AddListener(Close);
+            }
         }
 
         private void OnEnable()
@@ -100,6 +124,7 @@ namespace Game.UI.Quest
 
         public void Show(string title, string body, bool showAccept, bool showTurnIn)
         {
+            BackKeyRouterHost.Router.CloseExclusiveOthers(this);
             if (panelRoot != null) panelRoot.SetActive(true);
             if (titleText != null) titleText.text = title;
             if (bodyText  != null) bodyText.text  = body;

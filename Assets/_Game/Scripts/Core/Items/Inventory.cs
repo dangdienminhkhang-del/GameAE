@@ -11,6 +11,10 @@ namespace Game.Core.Items
         public string itemId;
         public int upgradeLevel;
         public ItemStats rolledStats;
+        /// <summary>
+        /// Độ bền hiện tại. -1 = chưa thiết lập (= đầy, theo ItemDefinition.MaxDurability). Xem DurabilityRules.
+        /// </summary>
+        public int durability = DurabilityRules.UnsetDurability;
 
         public ItemInstance() { }
 

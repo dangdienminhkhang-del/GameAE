@@ -36,6 +36,19 @@ namespace Game.UI.Boss
         public const string CloseLabel = "Đóng";
         public const string ConfirmedMessage = "Máy chủ đã ghi nhận. Tầng kế đã mở.";
 
+        public string LastAttackBonusText { get; private set; }
+
+        public void SetLastAttackBonus(string itemName)
+        {
+            LastAttackBonusText = !string.IsNullOrEmpty(itemName)
+                ? $"★ LAST ATTACK BONUS: {itemName}! ★"
+                : null;
+        }
+
+        public string ConfirmedToastMessage => !string.IsNullOrEmpty(LastAttackBonusText)
+            ? $"{ConfirmedMessage}\n{LastAttackBonusText}"
+            : ConfirmedMessage;
+
         // ── Số liệu bố cục / thời gian (hằng có tên, không magic number) ─────────────
 
         /// <summary>Dòng "Máy chủ đã ghi nhận" hiện bao lâu (giây, thời gian thực).</summary>

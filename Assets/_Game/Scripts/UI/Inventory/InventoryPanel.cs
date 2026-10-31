@@ -1,3 +1,4 @@
+using Game.UI.Common;
 using System.Collections.Generic;
 using Game.Core.Items;
 using Game.PvE.Items;
@@ -12,15 +13,22 @@ namespace Game.UI.Inventory
     /// Hiển thị trang bị (instance — Mặc/Tháo) và MỌI stack trong túi (tên + số lượng); chỉ loại tiêu hao có nút Dùng.
     /// bodyText (Body) trong scene chỉ dùng làm font source — bị ẩn lúc runtime.
     /// Phím tắt PC: I = bật/tắt, 1..9 = mặc, 0 = tháo hết.
+    /// Ô trang bị: Vũ khí, Tay phụ, Áo, Phụ kiện 1, Phụ kiện 2 (xem EquipmentSlotRules).
     /// </summary>
-    public class InventoryPanel : MonoBehaviour, IBackHandler
+    public class InventoryPanel : MonoBehaviour, IExclusivePanel, IPanelRoot
     {
         /// <summary>Túi nằm dưới Settings (40) và trên Quest (20): Back đóng theo thứ tự trên cùng trước.</summary>
         public const int Priority = 30;
 
         public int BackPriority => Priority;
         public bool IsOpen => panelRoot != null && panelRoot.activeInHierarchy;
+        public GameObject PanelRoot => panelRoot;
         public void CloseFromBack()
+        {
+            if (panelRoot != null) panelRoot.SetActive(false);
+        }
+
+        public void CloseExclusive()
         {
             if (panelRoot != null) panelRoot.SetActive(false);
         }
@@ -29,18 +37,20 @@ namespace Game.UI.Inventory
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private Text bodyText;   // font source — bị ẩn lúc runtime
 
-        private const int   RowHeight            = 96;
+        private const int   RowHeight            = 132;
         private const int   RowButtonWidth       = 200;
-        private const int   UnequipAllHeight     = 96;
-        private const float ListTopOffset        = 100f;
-        private const float ListBottomOffset     = 110f;
-        private const float RowSpacing           = 6f;
+        private const int   UnequipAllHeight     = 120;
+        private const float ListTopOffset        = 190f;
+        private const float ListBottomOffset     = 150f;
+        private const float RowSpacing           = 8f;
         /// <summary>Chu kỳ làm mới trạng thái nút Dùng (giây) khi panel mở.</summary>
         private const float ConsumableRefreshInterval = 0.5f;
 
         private const string ContainerName  = "_inventoryDynamicList";
         private const string UnequipAllName = "_inventoryUnequipAllBtn";
         private const string HeaderName     = "_inventoryHeader";
+        private const string TitleName      = "_inventoryTitle";
+        private const string CloseBtnName   = "_inventoryCloseBtn";
 
         // Pool trang bị (ItemInstance — mặc/tháo)
         private readonly List<ItemInstance> _equippable = new List<ItemInstance>();
@@ -59,11 +69,12 @@ namespace Game.UI.Inventory
         private float _consumableRefreshTimer;
         private bool  _hasConsumableStack;
 
-        // ── Lifecycle ──────────────────────────────────────────────────────
+        // ── Lifecycle ──────────────────────────────────────────────────────────
 
         private void OnEnable()
         {
             BackKeyRouterHost.Router.Register(this);
+            BackKeyRouterHost.Router.CloseExclusiveOthers(this);
             if (playerInventory != null) playerInventory.Changed += Refresh;
             HideLegacyBodyTexts();
             EnsureDynamicUI();
@@ -103,7 +114,7 @@ namespace Game.UI.Inventory
             }
         }
 
-        // ── Public API ─────────────────────────────────────────────────────
+        // ── Public API ──────────────────────────────────────────────────────────
 
         public void Toggle()
         {
@@ -111,6 +122,7 @@ namespace Game.UI.Inventory
             panelRoot.SetActive(!panelRoot.activeSelf);
             if (panelRoot.activeSelf)
             {
+                BackKeyRouterHost.Router.CloseExclusiveOthers(this);
                 HideLegacyBodyTexts();
                 EnsureDynamicUI();
                 Refresh();
@@ -127,8 +139,8 @@ namespace Game.UI.Inventory
         public void UnequipAll()
         {
             if (playerInventory == null) return;
-            playerInventory.Unequip(EquipmentSlot.Weapon);
-            playerInventory.Unequip(EquipmentSlot.Armor);
+            foreach (EquipmentSlot slot in EquipmentSlotRules.AllSlots)
+                playerInventory.Unequip(slot);
         }
 
         /// <summary>Mặc/tháo trang bị theo instanceId.</summary>
@@ -151,16 +163,20 @@ namespace Game.UI.Inventory
             playerInventory.TryUseConsumable(itemId);
         }
 
+        /// <summary>
+        /// Tháo món đang mặc: tìm Ô THỰC món đang nằm (phụ kiện có thể ở ô 1 hoặc ô 2 nên không dùng ô khai báo của definition).
+        /// </summary>
         private bool UnequipByInstanceIdInternal(string instanceId)
         {
-            ItemInstance inst = playerInventory.Inventory.FindInstance(instanceId);
-            if (inst == null) return false;
-            ItemDefinition def = playerInventory.Database != null ? playerInventory.Database.Find(inst.itemId) : null;
-            if (def == null || def.Slot == EquipmentSlot.None) return false;
-            return playerInventory.Unequip(def.Slot);
+            foreach (EquipmentSlot slot in EquipmentSlotRules.AllSlots)
+            {
+                if (playerInventory.Equipment.GetInstanceId(slot) == instanceId)
+                    return playerInventory.Unequip(slot);
+            }
+            return false;
         }
 
-        // ── Ẩn Body text cũ từ scene ──────────────────────────────────────
+        // ── Ẩn Body text cũ từ scene ────────────────────────────────────────
         private void HideLegacyBodyTexts()
         {
             if (panelRoot == null) return;
@@ -176,7 +192,7 @@ namespace Game.UI.Inventory
             }
         }
 
-        // ── Refresh ────────────────────────────────────────────────────────
+        // ── Refresh ────────────────────────────────────────────────────────────
 
         public void Refresh()
         {
@@ -188,13 +204,20 @@ namespace Game.UI.Inventory
             _stacks.Clear();
             _hasConsumableStack = false;
 
-            // Header: vũ khí + áo + bonus stats
+            // Header: các ô trang bị + bonus stats
             ItemStats bonus = playerInventory.CurrentEquipmentBonus();
-            string weaponName = Describe(playerInventory.Equipment.GetInstanceId(EquipmentSlot.Weapon));
-            string armorName  = Describe(playerInventory.Equipment.GetInstanceId(EquipmentSlot.Armor));
+            string weaponName  = Describe(playerInventory.Equipment.GetInstanceId(EquipmentSlot.Weapon));
+            string offHandName = Describe(playerInventory.Equipment.GetInstanceId(EquipmentSlot.OffHand));
+            string armorName   = Describe(playerInventory.Equipment.GetInstanceId(EquipmentSlot.Armor));
+            string acc1Name    = Describe(playerInventory.Equipment.GetInstanceId(EquipmentSlot.Accessory));
+            string acc2Name    = Describe(playerInventory.Equipment.GetInstanceId(EquipmentSlot.Accessory2));
             if (_headerText != null)
-                _headerText.text = $"Vũ khí: {weaponName}  |  Áo: {armorName}\n"
-                                 + $"ATK+{bonus.attack:0.#}  DEF+{bonus.defense:0.#}  HP+{bonus.maxHealth:0.#}";
+            {
+                _headerText.supportRichText = true;
+                _headerText.text = $"<color=#e2b63f>Vũ khí:</color> {weaponName}   <color=#e2b63f>Tay phụ:</color> {offHandName}   <color=#e2b63f>Áo:</color> {armorName}\n"
+                                 + $"<color=#e2b63f>Phụ kiện:</color> {acc1Name}  |  {acc2Name}\n"
+                                 + $"<color=#91b1d4>Tổng chỉ số:</color>  ATK +{bonus.attack:0.#}  •  DEF +{bonus.defense:0.#}  •  HP +{bonus.maxHealth:0.#}";
+            }
 
             // Thu thập trang bị (instance — Mặc/Tháo)
             foreach (ItemInstance instance in playerInventory.Inventory.Instances)
@@ -218,7 +241,7 @@ namespace Game.UI.Inventory
             _consumableRefreshTimer = 0f; // cập nhật trạng thái nút ngay trong Update kế tiếp
         }
 
-        // ── Row management ─────────────────────────────────────────────────
+        // ── Row management ────────────────────────────────────────────────────────
 
         private void RefreshAllRows()
         {
@@ -281,6 +304,35 @@ namespace Game.UI.Inventory
             }
         }
 
+        private static string DescribeItem(ItemDefinition d)
+        {
+            if (d == null) return "Vật phẩm";
+            var parts = new List<string>();
+            if (d.Type == ItemType.Weapon)
+            {
+                string label = d.Slot == EquipmentSlot.OffHand ? "Vũ khí tay phụ" : "Vũ khí";
+                parts.Add(d.Tier > 0 ? $"{label} (Bậc {d.Tier})" : label);
+            }
+            else if (d.Type == ItemType.Armor)
+                parts.Add(d.Tier > 0 ? $"Giáp (Bậc {d.Tier})" : "Giáp");
+            else if (d.Type == ItemType.Accessory)
+                parts.Add(d.Tier > 0 ? $"Phụ kiện (Bậc {d.Tier})" : "Phụ kiện");
+            else if (d.Type == ItemType.Consumable)
+                parts.Add("Tiêu hao");
+            else if (d.Type == ItemType.Material)
+                parts.Add("Nguyên liệu");
+            else
+                parts.Add("Vật phẩm");
+
+            if (d.BaseStats.attack > 0) parts.Add($"ATK +{d.BaseStats.attack:0.#}");
+            if (d.BaseStats.defense > 0) parts.Add($"DEF +{d.BaseStats.defense:0.#}");
+            if (d.BaseStats.maxHealth > 0) parts.Add($"HP +{d.BaseStats.maxHealth:0.#}");
+            if (d.HealAmount > 0) parts.Add($"Hồi {d.HealAmount:0.#} HP");
+            if (d.UseCooldownSeconds > 0f) parts.Add($"CD {d.UseCooldownSeconds:0.#}s");
+
+            return string.Join("  •  ", parts);
+        }
+
         private void BindEquipRow(GameObject row, ItemInstance instance, int displayIndex)
         {
             ItemDefinition def = playerInventory != null && playerInventory.Database != null
@@ -288,24 +340,70 @@ namespace Game.UI.Inventory
             string displayName = def != null ? def.DisplayName : instance.itemId;
             bool equipped = playerInventory != null && playerInventory.IsEquipped(instance.instanceId);
 
-            Text   label   = row.transform.Find("Label").GetComponent<Text>();
-            Button btn     = row.transform.Find("ActionBtn").GetComponent<Button>();
-            Text   btnText = btn.transform.Find("Text").GetComponent<Text>();
+            // Icon
+            Image iconImg = row.transform.Find("SlotFrame/Icon")?.GetComponent<Image>();
+            if (iconImg != null)
+            {
+                iconImg.sprite = def != null ? def.Icon : null;
+                iconImg.enabled = iconImg.sprite != null;
+                iconImg.preserveAspect = true;
+            }
 
-            label.text       = $"[{displayIndex}] {displayName}{(equipped ? "  ✓" : "")}";
-            btnText.text     = equipped ? "Tháo" : "Mặc";
-            btn.gameObject.SetActive(true); // hàng dùng lại từ pool: nút có thể từng bị ẩn
-            btn.interactable = true;
+            // Qty badge
+            Text qtyText = row.transform.Find("SlotFrame/QtyBadge")?.GetComponent<Text>();
+            if (qtyText != null) qtyText.text = "";
 
-            Image btnImg = btn.GetComponent<Image>();
-            if (btnImg != null)
-                btnImg.color = equipped
-                    ? new Color(0.85f, 0.25f, 0.25f, 0.95f)   // đỏ = Tháo
-                    : new Color(0.2f,  0.5f,  0.9f,  0.95f);  // xanh dương = Mặc
+            // Name & Desc
+            Text nameText = row.transform.Find("InfoColumn/NameText")?.GetComponent<Text>();
+            if (nameText != null)
+            {
+                nameText.supportRichText = true;
+                string equipTag = "";
+                if (equipped && playerInventory != null && playerInventory.Equipment != null)
+                {
+                    if (playerInventory.Equipment.GetInstanceId(EquipmentSlot.Weapon) == instance.instanceId)
+                        equipTag = "  <color=#4ee44e>[Tay chính ✓]</color>";
+                    else if (playerInventory.Equipment.GetInstanceId(EquipmentSlot.OffHand) == instance.instanceId)
+                        equipTag = "  <color=#55ffff>[Tay phụ (Dual) ✓]</color>";
+                    else if (playerInventory.Equipment.GetInstanceId(EquipmentSlot.Armor) == instance.instanceId)
+                        equipTag = "  <color=#4ee44e>[Áo ✓]</color>";
+                    else if (playerInventory.Equipment.GetInstanceId(EquipmentSlot.Accessory) == instance.instanceId)
+                        equipTag = "  <color=#ffd255>[Phụ kiện 1 ✓]</color>";
+                    else if (playerInventory.Equipment.GetInstanceId(EquipmentSlot.Accessory2) == instance.instanceId)
+                        equipTag = "  <color=#ffd255>[Phụ kiện 2 ✓]</color>";
+                    else
+                        equipTag = "  <color=#4ee44e>[Đang mặc ✓]</color>";
+                }
+                nameText.text = $"[{displayIndex}] {displayName}{equipTag}";
+            }
 
-            string id = instance.instanceId;
-            btn.onClick.RemoveAllListeners();
-            btn.onClick.AddListener(() => ToggleByInstanceId(id));
+            Text descText = row.transform.Find("InfoColumn/DescText")?.GetComponent<Text>();
+            if (descText != null)
+            {
+                descText.text = DescribeItem(def);
+            }
+
+            // ActionBtn
+            Button btn = row.transform.Find("ActionBtn")?.GetComponent<Button>();
+            Text btnText = btn != null ? btn.transform.Find("Text")?.GetComponent<Text>() : null;
+            if (btn != null && btnText != null)
+            {
+                btn.gameObject.SetActive(true);
+                btn.interactable = true;
+                btnText.text = equipped ? "Tháo" : "Mặc";
+
+                Image btnImg = btn.GetComponent<Image>();
+                if (btnImg != null)
+                {
+                    btnImg.color = equipped
+                        ? new Color(0.85f, 0.30f, 0.30f, 0.98f)   // Đỏ = Tháo
+                        : new Color(0.20f, 0.58f, 0.75f, 0.98f);  // Xanh dương = Mặc
+                }
+
+                string id = instance.instanceId;
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => ToggleByInstanceId(id));
+            }
         }
 
         private void BindStackRow(GameObject row, ItemStack stack)
@@ -314,27 +412,58 @@ namespace Game.UI.Inventory
                 ? playerInventory.Database.Find(stack.itemId) : null;
             string displayName = def != null ? def.DisplayName : stack.itemId;
 
-            Text   label   = row.transform.Find("Label").GetComponent<Text>();
-            Button btn     = row.transform.Find("ActionBtn").GetComponent<Button>();
-            Text   btnText = btn.transform.Find("Text").GetComponent<Text>();
+            // Icon
+            Image iconImg = row.transform.Find("SlotFrame/Icon")?.GetComponent<Image>();
+            if (iconImg != null)
+            {
+                iconImg.sprite = def != null ? def.Icon : null;
+                iconImg.enabled = iconImg.sprite != null;
+                iconImg.preserveAspect = true;
+            }
 
-            label.text = $"{displayName}  x{stack.quantity}";
+            // Qty badge
+            Text qtyText = row.transform.Find("SlotFrame/QtyBadge")?.GetComponent<Text>();
+            if (qtyText != null)
+            {
+                qtyText.text = stack.quantity > 1 ? $"x{stack.quantity}" : "";
+            }
 
-            // Chỉ vật phẩm tiêu hao mới có nút Dùng; loại khác chỉ hiện tên + số lượng (ẩn nút).
-            bool isConsumable = def != null && def.Type == ItemType.Consumable;
-            btn.onClick.RemoveAllListeners();
-            btn.gameObject.SetActive(isConsumable);
-            if (!isConsumable) return;
+            // Name & Desc
+            Text nameText = row.transform.Find("InfoColumn/NameText")?.GetComponent<Text>();
+            if (nameText != null)
+            {
+                nameText.supportRichText = true;
+                nameText.text = $"{displayName}  <color=#ffd255>x{stack.quantity}</color>";
+            }
 
-            Image btnImg = btn.GetComponent<Image>();
-            if (btnImg != null)
-                btnImg.color = new Color(0.15f, 0.65f, 0.35f, 0.95f); // xanh lá = Dùng
+            Text descText = row.transform.Find("InfoColumn/DescText")?.GetComponent<Text>();
+            if (descText != null)
+            {
+                descText.text = DescribeItem(def);
+            }
 
-            string itemId = stack.itemId;
-            btn.onClick.RemoveAllListeners();
-            btn.onClick.AddListener(() => UseConsumable(itemId));
+            // ActionBtn
+            Button btn = row.transform.Find("ActionBtn")?.GetComponent<Button>();
+            Text btnText = btn != null ? btn.transform.Find("Text")?.GetComponent<Text>() : null;
+            if (btn != null)
+            {
+                bool isConsumable = def != null && def.Type == ItemType.Consumable;
+                btn.gameObject.SetActive(isConsumable);
+                btn.onClick.RemoveAllListeners();
 
-            UpdateConsumableButton(btn, btnText, itemId);
+                if (isConsumable)
+                {
+                    Image btnImg = btn.GetComponent<Image>();
+                    if (btnImg != null)
+                        btnImg.color = new Color(0.18f, 0.68f, 0.40f, 0.98f); // Xanh lá = Dùng
+
+                    string itemId = stack.itemId;
+                    btn.onClick.AddListener(() => UseConsumable(itemId));
+
+                    if (btnText != null)
+                        UpdateConsumableButton(btn, btnText, itemId);
+                }
+            }
         }
 
         /// <summary>Cập nhật interactable + text nút Dùng theo trạng thái hiện tại.</summary>
@@ -348,14 +477,15 @@ namespace Game.UI.Inventory
 
         private GameObject CreateRow()
         {
-            Font font     = bodyText != null ? bodyText.font : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            int  fontSize = bodyText != null ? Mathf.Max(24, bodyText.fontSize) : 28;
+            Font font = (bodyText != null ? bodyText.font : null) ?? UiSkin.DefaultFont ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
 
             var row = new GameObject("Row",
                 typeof(RectTransform), typeof(HorizontalLayoutGroup),
                 typeof(LayoutElement), typeof(Image));
 
-            row.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.35f); UiSkin.Inset(row.GetComponent<Image>());
+            var rowImg = row.GetComponent<Image>();
+            rowImg.color = Color.white;
+            UiSkin.Row(rowImg);
 
             var le = row.GetComponent<LayoutElement>();
             le.minHeight       = RowHeight;
@@ -363,38 +493,115 @@ namespace Game.UI.Inventory
             le.flexibleWidth   = 1f;
 
             var hl = row.GetComponent<HorizontalLayoutGroup>();
-            hl.childControlWidth      = true;
-            hl.childControlHeight     = true;
+            hl.childControlWidth      = false;
+            hl.childControlHeight     = false;
             hl.childForceExpandWidth  = false;
             hl.childForceExpandHeight = false;
-            hl.spacing = 8f;
-            hl.padding = new RectOffset(10, 10, 6, 6);
+            hl.spacing = 14f;
+            hl.padding = new RectOffset(12, 12, 10, 10);
+            hl.childAlignment = TextAnchor.MiddleLeft;
 
-            // Label
-            var labelGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
-            labelGo.transform.SetParent(row.transform, false);
-            var lt = labelGo.GetComponent<Text>();
-            lt.font               = font;
-            lt.fontSize           = fontSize;
-            lt.alignment          = TextAnchor.MiddleLeft;
-            lt.color              = Color.white;
-            lt.raycastTarget      = false;
-            lt.horizontalOverflow = HorizontalWrapMode.Wrap;
-            lt.verticalOverflow   = VerticalWrapMode.Truncate;
-            var labelLe = labelGo.AddComponent<LayoutElement>();
-            labelLe.flexibleWidth = 1f;
-            labelLe.minWidth      = 100f;
+            // 1. SlotFrame (chứa icon + badge số lượng)
+            var slotGo = new GameObject("SlotFrame",
+                typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+            slotGo.transform.SetParent(row.transform, false);
+            var slotRt = (RectTransform)slotGo.transform;
+            slotRt.sizeDelta = new Vector2(112f, 112f);
+            var slotLe = slotGo.GetComponent<LayoutElement>();
+            slotLe.minWidth = 112f;
+            slotLe.preferredWidth = 112f;
+            slotLe.minHeight = 112f;
+            slotLe.preferredHeight = 112f;
+            var slotImg = slotGo.GetComponent<Image>();
+            slotImg.color = Color.white;
+            UiSkin.Slot(slotImg);
 
-            // ActionBtn
+            // 1.1 Icon bên trong slot
+            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconGo.transform.SetParent(slotGo.transform, false);
+            var iconRt = (RectTransform)iconGo.transform;
+            iconRt.anchorMin = Vector2.zero;
+            iconRt.anchorMax = Vector2.one;
+            iconRt.offsetMin = new Vector2(10f, 10f);
+            iconRt.offsetMax = new Vector2(-10f, -10f);
+            var iconImg = iconGo.GetComponent<Image>();
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+
+            // 1.2 QtyBadge góc dưới phải của ô
+            var qtyGo = new GameObject("QtyBadge", typeof(RectTransform), typeof(Text), typeof(Outline));
+            qtyGo.transform.SetParent(slotGo.transform, false);
+            var qtyRt = (RectTransform)qtyGo.transform;
+            qtyRt.anchorMin = new Vector2(0f, 0f);
+            qtyRt.anchorMax = new Vector2(1f, 0f);
+            qtyRt.pivot     = new Vector2(1f, 0f);
+            qtyRt.anchoredPosition = new Vector2(0f, 4f);
+            qtyRt.sizeDelta = new Vector2(0f, 26f);
+            var qtyText = qtyGo.GetComponent<Text>();
+            UiSkin.ApplyFont(qtyText, bold: true);
+            qtyText.fontSize = 22;
+            qtyText.alignment = TextAnchor.LowerRight;
+            qtyText.color = Color.white;
+            qtyText.raycastTarget = false;
+            var qtyOutline = qtyGo.GetComponent<Outline>();
+            qtyOutline.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            qtyOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            // 2. InfoColumn (cột thông tin: tên + chỉ số mô tả)
+            var infoGo = new GameObject("InfoColumn",
+                typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
+            infoGo.transform.SetParent(row.transform, false);
+            var infoLe = infoGo.GetComponent<LayoutElement>();
+            infoLe.flexibleWidth = 1f;
+            infoLe.minHeight = 112f;
+
+            var vl = infoGo.GetComponent<VerticalLayoutGroup>();
+            vl.childControlWidth = true;
+            vl.childControlHeight = false;
+            vl.childForceExpandWidth = true;
+            vl.childForceExpandHeight = false;
+            vl.spacing = 6f;
+            vl.childAlignment = TextAnchor.MiddleLeft;
+
+            // 2.1 NameText
+            var nameGo = new GameObject("NameText", typeof(RectTransform), typeof(Text));
+            nameGo.transform.SetParent(infoGo.transform, false);
+            var nameText = nameGo.GetComponent<Text>();
+            UiSkin.ApplyFont(nameText, bold: true);
+            nameText.fontSize = 32;
+            nameText.alignment = TextAnchor.MiddleLeft;
+            nameText.color = Color.white;
+            nameText.raycastTarget = false;
+            var nameLe = nameGo.AddComponent<LayoutElement>();
+            nameLe.preferredHeight = 42f;
+
+            // 2.2 DescText
+            var descGo = new GameObject("DescText", typeof(RectTransform), typeof(Text));
+            descGo.transform.SetParent(infoGo.transform, false);
+            var descText = descGo.GetComponent<Text>();
+            UiSkin.ApplyFont(descText);
+            descText.fontSize = 24;
+            descText.alignment = TextAnchor.MiddleLeft;
+            descText.color = new Color(0.60f, 0.78f, 0.95f);
+            descText.raycastTarget = false;
+            var descLe = descGo.AddComponent<LayoutElement>();
+            descLe.preferredHeight = 36f;
+
+            // 3. ActionBtn (nút Mặc / Tháo / Dùng)
             var btnGo = new GameObject("ActionBtn",
-                typeof(RectTransform), typeof(Button), typeof(Image));
+                typeof(RectTransform), typeof(Button), typeof(Image), typeof(LayoutElement));
             btnGo.transform.SetParent(row.transform, false);
-            btnGo.GetComponent<Image>().color = new Color(0.2f, 0.5f, 0.9f, 0.95f); UiSkin.Button(btnGo.GetComponent<Image>(), 2);
-            var btnLe = btnGo.AddComponent<LayoutElement>();
+            var btnImg = btnGo.GetComponent<Image>();
+            btnImg.color = new Color(0.20f, 0.58f, 0.75f, 0.98f);
+            UiSkin.Button(btnImg);
+
+            var btnRt = (RectTransform)btnGo.transform;
+            btnRt.sizeDelta = new Vector2(RowButtonWidth, 88f);
+            var btnLe = btnGo.GetComponent<LayoutElement>();
             btnLe.minWidth       = RowButtonWidth;
             btnLe.preferredWidth = RowButtonWidth;
-            btnLe.minHeight      = RowHeight - 12;
-            btnLe.flexibleHeight = 1f;
+            btnLe.minHeight      = 88f;
+            btnLe.preferredHeight = 88f;
 
             var btnColors = btnGo.GetComponent<Button>().colors;
             btnColors.normalColor      = Color.white;
@@ -403,7 +610,7 @@ namespace Game.UI.Inventory
             btnColors.disabledColor    = new Color(0.45f, 0.45f, 0.45f, 0.6f);
             btnGo.GetComponent<Button>().colors = btnColors;
 
-            // ActionBtn > Text
+            // 3.1 ActionBtn > Text
             var btnTextGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
             btnTextGo.transform.SetParent(btnGo.transform, false);
             var brt = (RectTransform)btnTextGo.transform;
@@ -412,8 +619,8 @@ namespace Game.UI.Inventory
             brt.offsetMin = Vector2.zero;
             brt.offsetMax = Vector2.zero;
             var bt = btnTextGo.GetComponent<Text>();
-            bt.font          = font;
-            bt.fontSize      = Mathf.Max(24, fontSize);
+            UiSkin.ApplyFont(bt, bold: true);
+            bt.fontSize      = 28;
             bt.alignment     = TextAnchor.MiddleCenter;
             bt.color         = Color.white;
             bt.raycastTarget = false;
@@ -422,7 +629,7 @@ namespace Game.UI.Inventory
             return row;
         }
 
-        // ── EnsureDynamicUI ────────────────────────────────────────────────
+        // ── EnsureDynamicUI ──────────────────────────────────────────────────────────
 
         private void EnsureDynamicUI()
         {
@@ -438,8 +645,13 @@ namespace Game.UI.Inventory
             _rowPool.Clear();
 
             Transform panelTf = panelRoot.transform;
-            Font font = bodyText != null ? bodyText.font
-                : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            Font font = (bodyText != null ? bodyText.font : null) ?? UiSkin.DefaultFont ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            var pImg = panelRoot.GetComponent<Image>();
+            if (pImg != null)
+            {
+                pImg.color = Color.white;
+                UiSkin.Panel(pImg);
+            }
 
             // Destroy các GO cũ do code tạo (tránh duplicate sau domain reload)
             Transform existingContainer = panelTf.Find(ContainerName);
@@ -454,24 +666,73 @@ namespace Game.UI.Inventory
             if (existingHeader != null)
                 UnityEngine.Object.DestroyImmediate(existingHeader.gameObject);
 
-            // ── Header ──────────────────────────────────────────────────────
+            Transform existingTitle = panelTf.Find(TitleName);
+            if (existingTitle != null)
+                UnityEngine.Object.DestroyImmediate(existingTitle.gameObject);
+
+            Transform existingClose = panelTf.Find(CloseBtnName);
+            if (existingClose != null)
+                UnityEngine.Object.DestroyImmediate(existingClose.gameObject);
+
+            // ── Tiêu đề bảng ────────────────────────────────────────────────────
+            var titleGo = new GameObject(TitleName, typeof(RectTransform), typeof(Text));
+            titleGo.transform.SetParent(panelTf, false);
+            var titleRt = (RectTransform)titleGo.transform;
+            titleRt.anchorMin = new Vector2(0, 1);
+            titleRt.anchorMax = new Vector2(1, 1);
+            titleRt.pivot     = new Vector2(0f, 1f);
+            titleRt.offsetMin = new Vector2(24, -60);
+            titleRt.offsetMax = new Vector2(-140, -10);
+            var titleText = titleGo.GetComponent<Text>();
+            titleText.font = font;
+            titleText.fontSize = 44;
+            titleText.fontStyle = FontStyle.Bold;
+            titleText.alignment = TextAnchor.MiddleLeft;
+            titleText.color = new Color(0.96f, 0.84f, 0.45f);
+            titleText.text = "TÚI ĐỒ";
+
+            // ── Nút Đóng (X) góc trên phải ────────────────────────────────────
+            var closeGo = new GameObject(CloseBtnName, typeof(RectTransform), typeof(Button), typeof(Image));
+            closeGo.transform.SetParent(panelTf, false);
+            var closeRt = (RectTransform)closeGo.transform;
+            CloseButtonLayout.Apply(closeRt, closeGo.GetComponent<Image>(), null);
+            closeGo.GetComponent<Image>().color = new Color(0.85f, 0.25f, 0.25f, 0.95f);
+            UiSkin.Button(closeGo.GetComponent<Image>());
+            closeGo.GetComponent<Button>().onClick.AddListener(CloseExclusive);
+
+            var closeTextGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
+            closeTextGo.transform.SetParent(closeGo.transform, false);
+            var ctRt = (RectTransform)closeTextGo.transform;
+            ctRt.anchorMin = Vector2.zero;
+            ctRt.anchorMax = Vector2.one;
+            ctRt.offsetMin = Vector2.zero;
+            ctRt.offsetMax = Vector2.zero;
+            var ct = closeTextGo.GetComponent<Text>();
+            ct.font = font;
+            ct.fontSize = CloseButtonLayout.LabelFontSize;
+            ct.fontStyle = FontStyle.Bold;
+            ct.alignment = TextAnchor.MiddleCenter;
+            ct.color = Color.white;
+            ct.text = "X";
+
+            // ── Header trạng thái trang bị ───────────────────────────────────
             var headerGo = new GameObject(HeaderName, typeof(RectTransform), typeof(Text));
             headerGo.transform.SetParent(panelTf, false);
             var headerRt = (RectTransform)headerGo.transform;
             headerRt.anchorMin = new Vector2(0, 1);
             headerRt.anchorMax = new Vector2(1, 1);
             headerRt.pivot     = new Vector2(0.5f, 1f);
-            headerRt.offsetMin = new Vector2(12, -ListTopOffset);
-            headerRt.offsetMax = new Vector2(-12, -4);
+            headerRt.offsetMin = new Vector2(24, -ListTopOffset);
+            headerRt.offsetMax = new Vector2(-24, -70);
             _headerText               = headerGo.GetComponent<Text>();
             _headerText.font          = font;
-            _headerText.fontSize      = bodyText != null ? Mathf.Max(22, bodyText.fontSize) : 22;
+            _headerText.fontSize      = 28;
             _headerText.alignment     = TextAnchor.UpperLeft;
             _headerText.color         = Color.white;
             _headerText.raycastTarget = false;
             _headerText.text          = "Vũ khí: (trống)";
 
-            // ── Scroll container ────────────────────────────────────────────
+            // ── Scroll container ────────────────────────────────────────────────────
             var containerGo = new GameObject(ContainerName, typeof(RectTransform), typeof(Image));
             containerGo.transform.SetParent(panelTf, false);
             _listContainerRt           = (RectTransform)containerGo.transform;
@@ -480,7 +741,9 @@ namespace Game.UI.Inventory
             _listContainerRt.pivot     = new Vector2(0.5f, 0.5f);
             _listContainerRt.offsetMin = new Vector2(12,  ListBottomOffset);
             _listContainerRt.offsetMax = new Vector2(-12, -ListTopOffset);
-            containerGo.GetComponent<Image>().color = new Color(0, 0, 0, 0.25f);
+            var cImg = containerGo.GetComponent<Image>();
+            cImg.color = Color.white;
+            UiSkin.Inset(cImg);
 
             // Viewport — RectMask2D không cần Image alpha=0
             var viewportGo = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
@@ -521,7 +784,7 @@ namespace Game.UI.Inventory
             _listScroll.movementType     = ScrollRect.MovementType.Clamped;
             _listScroll.scrollSensitivity = 32f;
 
-            // ── Nút Tháo hết ────────────────────────────────────────────────
+            // ── Nút Tháo hết ─────────────────────────────────────────────────────
             var unequipGo = new GameObject(UnequipAllName,
                 typeof(RectTransform), typeof(Button), typeof(Image));
             unequipGo.transform.SetParent(panelTf, false);
@@ -532,7 +795,7 @@ namespace Game.UI.Inventory
             unequipRt.pivot     = new Vector2(0.5f, 0f);
             unequipRt.offsetMin = new Vector2(12, 8);
             unequipRt.offsetMax = new Vector2(-12, 8 + UnequipAllHeight);
-            unequipGo.GetComponent<Image>().color = new Color(0.85f, 0.25f, 0.25f, 0.95f); UiSkin.Button(unequipGo.GetComponent<Image>(), 2);
+            unequipGo.GetComponent<Image>().color = new Color(0.85f, 0.25f, 0.25f, 0.95f); UiSkin.Button(unequipGo.GetComponent<Image>());
 
             var utGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
             utGo.transform.SetParent(unequipGo.transform, false);
@@ -560,7 +823,7 @@ namespace Game.UI.Inventory
             _uiBuilt = true;
         }
 
-        // ── Helpers ────────────────────────────────────────────────────────
+        // ── Helpers ────────────────────────────────────────────────────────────
 
         private string Describe(string instanceId)
         {

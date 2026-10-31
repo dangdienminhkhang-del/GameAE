@@ -38,6 +38,8 @@ namespace Game.UI.Pause
         private bool _pushed;
 
         public bool IsPaused => _pushed;
+        /// <summary>Object gốc của menu Pause (cho OutsideTapCloser xác định vùng cửa sổ).</summary>
+        public GameObject PausePanelRoot => pausePanel;
 
         private void Awake()
         {

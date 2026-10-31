@@ -18,6 +18,7 @@ namespace Game.Core.Combat
         public double CriticalMultiplier = 1.5;
         public string SourceId;
         public object Source;
+        public bool IsPeriodic;
 
         public DamageInfo(double amount)
         {

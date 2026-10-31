@@ -3,9 +3,14 @@ using UnityEngine;
 
 namespace Game.Core.Items
 {
-    public enum ItemType { Weapon = 0, Armor = 1, Consumable = 2, Material = 3 }
+    public enum ItemType { Weapon = 0, Armor = 1, Consumable = 2, Material = 3, Accessory = 4 }
 
-    public enum EquipmentSlot { None = 0, Weapon = 1, Armor = 2 }
+    /// <summary>
+    /// Ô trang bị. Weapon/Armor là bản gốc; OffHand (tay phụ, dùng cho Dual Wielding) và Accessory/Accessory2
+    /// (nhẫn, dây chuyền...) thêm sau. ItemDefinition chỉ dùng Accessory; Accessory2 là ô thứ hai mà người chơi
+    /// mặc vào khi ô đầu đã có đồ (xem EquipmentSlotRules). Giá trị số được giữ cố định vì asset đã serialize.
+    /// </summary>
+    public enum EquipmentSlot { None = 0, Weapon = 1, Armor = 2, OffHand = 3, Accessory = 4, Accessory2 = 5 }
 
     /// <summary>Chỉ số cộng thêm của item (docs/03 §3).</summary>
     [Serializable]
@@ -47,6 +52,12 @@ namespace Game.Core.Items
         [SerializeField] private ItemStats baseStats;
         [SerializeField] private EquipmentSlot equipmentSlot = EquipmentSlot.None;
 
+        [Header("Yêu cầu & độ bền (trang bị)")]
+        [Tooltip("STR (số điểm đã cộng) tối thiểu để mặc. 0 = không yêu cầu.")]
+        [SerializeField] private int requiredStrength;
+        [Tooltip("Độ bền tối đa của trang bị. 0 = không hao mòn.")]
+        [SerializeField] private int maxDurability;
+
         [Header("Tồn kho")]
         [SerializeField] private bool stackable = true;
         [SerializeField] private int maxStack = 99;
@@ -65,6 +76,8 @@ namespace Game.Core.Items
         public Sprite Icon => icon;
         public ItemStats BaseStats => baseStats;
         public EquipmentSlot Slot => equipmentSlot;
+        public int RequiredStrength => requiredStrength < 0 ? 0 : requiredStrength;
+        public int MaxDurability => maxDurability < 0 ? 0 : maxDurability;
         public bool Stackable => stackable;
         public int MaxStack => maxStack < 1 ? 1 : maxStack;
         public int SellValue => sellValue;
@@ -81,6 +94,8 @@ namespace Game.Core.Items
             maxStack = 99;
             sellValue = 1;
             equipmentSlot = EquipmentSlot.None;
+            requiredStrength = 0;
+            maxDurability = 0;
             healAmount = 0.0;
             useCooldownSeconds = 0f;
         }

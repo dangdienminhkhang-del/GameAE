@@ -13,9 +13,16 @@ using UnityEngine;
 
 namespace Game.PvE.Items
 {
+    /// <summary>Kết quả sửa trang bị ở thợ rèn.</summary>
+    public enum RepairResult { Ok, NotFound, NoDurability, AlreadyFull, NotEnoughCol }
+
+    /// <summary>Kết quả cường hóa trang bị ở thợ rèn.</summary>
+    public enum EnhanceResult { Success, Failed, FailedDowngraded, NotFound, NotUpgradable, MaxLevel, Broken, NotEnoughCol }
+
     /// <summary>
     /// Kho + trang bị của player: nhặt đồ, mặc/tháo, cộng chỉ số, lưu/tải qua ISaveService.
     /// Là nơi DUY NHẤT gọi save cho profile/inventory/equipment (docs/03 §5).
+    /// Cũng giữ độ bền, sửa chữa và cường hóa trang bị (luật ở Core/Items/DurabilityRules, UpgradeRules).
     /// </summary>
     public class PlayerInventory : MonoBehaviour
     {
@@ -33,6 +40,9 @@ namespace Game.PvE.Items
         private ISaveService _save;
         private CharacterStats _stats;
         private PlayerWallet _wallet;
+        private PlayerStatAllocation _allocation;
+        private LifeSkills.PlayerLifeSkills _lifeSkills;
+        private bool _allocationSubscribed;
         private int _instanceCounter;
 
         // ── Dùng vật phẩm tiêu hao (docs/07 §2) ──
@@ -85,6 +95,9 @@ namespace Game.PvE.Items
             _equipment.Changed += HandleChanged;
             if (_wallet == null) TryGetComponent(out _wallet);
             if (_wallet != null) _wallet.Changed += RequestSave;
+            if (_lifeSkills == null) TryGetComponent(out _lifeSkills);
+            if (_lifeSkills != null) _lifeSkills.Changed += RequestSave;
+            SubscribeAllocation();
             GameEvents.OnExperienceChanged += HandleExperienceChanged;
             GameEvents.OnPlayerDied += HandlePlayerDied;
             GameEvents.OnPlayerDeathRecorded += HandleDeathRecorded;
@@ -98,6 +111,8 @@ namespace Game.PvE.Items
             _inventory.Changed -= HandleChanged;
             _equipment.Changed -= HandleChanged;
             if (_wallet != null) _wallet.Changed -= RequestSave;
+            if (_lifeSkills != null) _lifeSkills.Changed -= RequestSave;
+            UnsubscribeAllocation();
             GameEvents.OnExperienceChanged -= HandleExperienceChanged;
             GameEvents.OnPlayerDied -= HandlePlayerDied;
             GameEvents.OnPlayerDeathRecorded -= HandleDeathRecorded;
@@ -106,11 +121,29 @@ namespace Game.PvE.Items
             GameEvents.OnHitResolved -= HandleHitResolved;
         }
 
+        /// <summary>Điểm STR/AGI đổi → cần lưu. Component do PlayerController gắn, có thể chưa tồn tại lúc OnEnable nên gọi lại ở Start.</summary>
+        private void SubscribeAllocation()
+        {
+            if (_allocation == null) TryGetComponent(out _allocation);
+            if (_allocation == null || _allocationSubscribed) return;
+            _allocation.Changed += RequestSave;
+            _allocationSubscribed = true;
+        }
+
+        private void UnsubscribeAllocation()
+        {
+            if (_allocation != null && _allocationSubscribed) _allocation.Changed -= RequestSave;
+            _allocationSubscribed = false;
+        }
+
         private async void Start()
         {
+            SubscribeAllocation();
+
             if (!loadOnStart)
             {
                 _loaded = true;
+                UpdateDualWieldState();
                 return;
             }
 
@@ -170,7 +203,7 @@ namespace Game.PvE.Items
 
         /// <summary>
         /// Player đánh trúng quái (chưa chết cũng tính) → đang giao chiến, chặn dùng bình trong vài giây.
-        /// Chỉ tính hit mà nguồn là chỉ số của CHÍNH player này.
+        /// Chỉ tính hit mà nguồn là chỉ số của CHÍNH player này. Mỗi hit cũng làm vũ khí đang cầm hao 1 độ bền.
         /// </summary>
         private void HandleHitResolved(object sender, HitResolvedArgs args)
         {
@@ -179,6 +212,8 @@ namespace Game.PvE.Items
             if (own == null || !ReferenceEquals(args.Source, own)) return;
 
             _useClock.MarkCombat(UnityEngine.Time.time);
+            WearSlot(EquipmentSlot.Weapon);
+            WearSlot(EquipmentSlot.OffHand);
         }
 
         private void HandleHealthChangedForCombat(object sender, HealthChangedArgs args)
@@ -188,7 +223,10 @@ namespace Game.PvE.Items
             if (own == null || !ReferenceEquals(sender, own)) return;
 
             if (args != null && args.Delta < 0.0)
+            {
                 _useClock.MarkCombat(UnityEngine.Time.time);
+                WearSlot(EquipmentSlot.Armor); // bị đánh → giáp hao 1 độ bền
+            }
             // HP thay đổi → lưu lại để khi vào lại game HP đúng
             RequestSave();
         }
@@ -343,7 +381,20 @@ namespace Game.PvE.Items
             ItemDefinition definition = database != null ? database.Find(instance.itemId) : null;
             if (definition == null || definition.Slot == EquipmentSlot.None) return false;
 
-            _equipment.Equip(definition.Slot, instanceId);
+            // Yêu cầu STR (SAO: đồ nặng cần đủ STR). Món đang mặc rồi thì không chặn.
+            if (_allocation == null) TryGetComponent(out _allocation);
+            int strength = _allocation != null ? _allocation.Strength : 0;
+            if (!_equipment.IsEquipped(instanceId) && !EquipRequirementRules.MeetsStrength(definition.RequiredStrength, strength))
+            {
+                GameEvents.RaiseCombatNotice(EquipRequirementRules.MissingMessage(definition.RequiredStrength, strength), new Color(1f, 0.55f, 0.35f));
+                return false;
+            }
+
+            // Phụ kiện có 2 ô: EquipmentSlotRules chọn ô trống đầu tiên (xem luật để biết trường hợp đầy ô).
+            EquipmentSlot target = EquipmentSlotRules.ResolveTarget(definition.Slot, _equipment, instanceId);
+            if (target == EquipmentSlot.None) return false;
+
+            _equipment.Equip(target, instanceId);
             return true;
         }
 
@@ -357,6 +408,42 @@ namespace Game.PvE.Items
             return _equipment.IsEquipped(instanceId);
         }
 
+        private PlayerAttack _playerAttack;
+
+        private PlayerAttack ResolveAttack()
+        {
+            if (_playerAttack == null) TryGetComponent(out _playerAttack);
+            return _playerAttack;
+        }
+
+        /// <summary>
+        /// Đồng bộ trạng thái Kỹ năng Độc Nhất Nhị Đao Lưu (Dual Wielding theo SAO) dựa trên trang bị cả 2 tay.
+        /// </summary>
+        public void UpdateDualWieldState()
+        {
+            bool hasMain = !string.IsNullOrEmpty(_equipment.GetInstanceId(EquipmentSlot.Weapon));
+            bool hasOff = !string.IsNullOrEmpty(_equipment.GetInstanceId(EquipmentSlot.OffHand));
+            bool isDual = DualWieldRules.IsDualWielding(hasMain, hasOff);
+
+            PlayerAttack attack = ResolveAttack();
+            if (attack != null)
+            {
+                bool previous = attack.IsDualWielding;
+                attack.IsDualWielding = isDual;
+                if (isDual != previous)
+                {
+                    if (isDual)
+                    {
+                        GameEvents.RaiseCombatNotice("⚔ NHỊ ĐAO LƯU (DUAL WIELDING)! ⚔", new Color(0.35f, 0.9f, 1f));
+                    }
+                    else if (previous)
+                    {
+                        GameEvents.RaiseCombatNotice("Hủy Nhị Đao Lưu", Color.gray);
+                    }
+                }
+            }
+        }
+
         public void ApplyEquipmentStats()
         {
             CharacterStats stats = ResolveStats();
@@ -365,6 +452,8 @@ namespace Game.PvE.Items
             ItemStats bonus = database.SumEquipment(_equipment, _inventory);
             stats.SetEquipmentBonus(bonus.attack, bonus.defense, bonus.maxHealth);
             GameEvents.RaiseStatsChanged(this);
+
+            UpdateDualWieldState();
         }
 
         private CharacterStats ResolveStats()
@@ -384,6 +473,111 @@ namespace Game.PvE.Items
             return database != null ? database.SumEquipment(_equipment, _inventory) : default;
         }
 
+        // ── Độ bền, sửa chữa, cường hóa (thợ rèn) ─────────────────
+
+        private ItemDefinition DefinitionOf(ItemInstance instance)
+        {
+            return instance != null && database != null ? database.Find(instance.itemId) : null;
+        }
+
+        /// <summary>Hao 1 độ bền món đang mặc ở ô này. Cảnh báo khi sắp hỏng; hỏng thì tính lại chỉ số.</summary>
+        private void WearSlot(EquipmentSlot slot)
+        {
+            string instanceId = _equipment.GetInstanceId(slot);
+            if (string.IsNullOrEmpty(instanceId)) return;
+
+            ItemInstance instance = _inventory.FindInstance(instanceId);
+            ItemDefinition definition = DefinitionOf(instance);
+            if (definition == null || !DurabilityRules.Wears(definition.MaxDurability)) return;
+            if (DurabilityRules.IsBroken(instance.durability, definition.MaxDurability)) return;
+
+            bool wasLow = DurabilityRules.IsLow(instance.durability, definition.MaxDurability);
+            instance.durability = DurabilityRules.ApplyWear(instance.durability, definition.MaxDurability, DurabilityRules.WearPerHit);
+            RequestSave();
+
+            if (DurabilityRules.IsBroken(instance.durability, definition.MaxDurability))
+            {
+                GameEvents.RaiseCombatNotice($"{definition.DisplayName} đã HỎNG! Hãy tới thợ rèn.", new Color(1f, 0.3f, 0.3f));
+                HandleChanged(); // hỏng → không còn cộng chỉ số, tính lại và làm mới UI
+            }
+            else if (!wasLow && DurabilityRules.IsLow(instance.durability, definition.MaxDurability))
+            {
+                GameEvents.RaiseCombatNotice($"{definition.DisplayName} sắp hỏng!", new Color(1f, 0.65f, 0.25f));
+            }
+        }
+
+        /// <summary>Phí sửa đầy món này (Col). 0 nếu không cần sửa / không hao mòn / không tìm thấy.</summary>
+        public int GetRepairCost(string instanceId)
+        {
+            ItemInstance instance = _inventory.FindInstance(instanceId);
+            ItemDefinition definition = DefinitionOf(instance);
+            if (definition == null) return 0;
+            return DurabilityRules.RepairCost(instance.durability, definition.MaxDurability, definition.SellValue, instance.upgradeLevel);
+        }
+
+        /// <summary>Sửa đầy độ bền, trừ Col theo phần đang thiếu.</summary>
+        public RepairResult TryRepair(string instanceId)
+        {
+            ItemInstance instance = _inventory.FindInstance(instanceId);
+            ItemDefinition definition = DefinitionOf(instance);
+            if (definition == null) return RepairResult.NotFound;
+            if (!DurabilityRules.Wears(definition.MaxDurability)) return RepairResult.NoDurability;
+            if (DurabilityRules.Missing(instance.durability, definition.MaxDurability) <= 0) return RepairResult.AlreadyFull;
+
+            int cost = GetRepairCost(instanceId);
+            if (_wallet == null || !_wallet.TrySpend(cost)) return RepairResult.NotEnoughCol;
+
+            instance.durability = definition.MaxDurability;
+            HandleChanged();
+            return RepairResult.Ok;
+        }
+
+        /// <summary>Phí một lần cường hóa (Col). 0 nếu không cường hóa được.</summary>
+        public int GetEnhanceCost(string instanceId)
+        {
+            ItemInstance instance = _inventory.FindInstance(instanceId);
+            ItemDefinition definition = DefinitionOf(instance);
+            if (definition == null || definition.Slot == EquipmentSlot.None) return 0;
+            return UpgradeRules.Cost(definition.Tier, instance.upgradeLevel);
+        }
+
+        /// <summary>Tỉ lệ thành công của lần cường hóa kế (0..1).</summary>
+        public double GetEnhanceChance(string instanceId)
+        {
+            ItemInstance instance = _inventory.FindInstance(instanceId);
+            return instance != null ? UpgradeRules.SuccessChance(instance.upgradeLevel) : 0.0;
+        }
+
+        public EnhanceResult TryEnhance(string instanceId)
+        {
+            return TryEnhance(instanceId, UnityEngine.Random.value);
+        }
+
+        /// <summary>Cường hóa một lần. roll01 truyền vào để test được; trừ Col dù thành công hay thất bại.</summary>
+        public EnhanceResult TryEnhance(string instanceId, double roll01)
+        {
+            ItemInstance instance = _inventory.FindInstance(instanceId);
+            ItemDefinition definition = DefinitionOf(instance);
+            if (definition == null) return EnhanceResult.NotFound;
+            if (definition.Slot == EquipmentSlot.None) return EnhanceResult.NotUpgradable;
+            if (!UpgradeRules.CanUpgrade(instance.upgradeLevel)) return EnhanceResult.MaxLevel;
+            if (DurabilityRules.IsBroken(instance.durability, definition.MaxDurability)) return EnhanceResult.Broken;
+
+            int cost = UpgradeRules.Cost(definition.Tier, instance.upgradeLevel);
+            if (_wallet == null || !_wallet.TrySpend(cost)) return EnhanceResult.NotEnoughCol;
+
+            UpgradeOutcome outcome = UpgradeRules.Resolve(instance.upgradeLevel, roll01, out int newLevel);
+            instance.upgradeLevel = newLevel;
+            HandleChanged();
+
+            switch (outcome)
+            {
+                case UpgradeOutcome.Success: return EnhanceResult.Success;
+                case UpgradeOutcome.FailedDowngraded: return EnhanceResult.FailedDowngraded;
+                default: return EnhanceResult.Failed;
+            }
+        }
+
         // ── Save / Load ───────────────────────────────────────────
 
         public async Task SaveAsync()
@@ -401,7 +595,11 @@ namespace Game.PvE.Items
                     level     = playerProgress.Level,
                     exp       = playerProgress.CurrentExp,
                     currentHp = health != null ? health.CurrentHealth : 0.0,
-                    col       = _wallet != null ? _wallet.Col : -1
+                    col       = _wallet != null ? _wallet.Col : -1,
+                    strPoints = _allocation != null ? _allocation.Strength : 0,
+                    agiPoints = _allocation != null ? _allocation.Agility : 0,
+                    fishingProficiency = _lifeSkills != null ? _lifeSkills.FishingProficiency : 0,
+                    cookingProficiency = _lifeSkills != null ? _lifeSkills.CookingProficiency : 0
                 }
                 : null;
 
@@ -422,6 +620,15 @@ namespace Game.PvE.Items
                     playerProgress.SetProgress(profile.level, profile.exp);
 
                 if (_wallet != null) _wallet.LoadFromSave(profile != null ? profile.col : -1);
+
+                // Điểm STR/AGI: nạp SAU khi level đã được đặt (để cắt theo tổng điểm của level). Save cũ = 0/0.
+                SubscribeAllocation();
+                if (_allocation != null && profile != null)
+                    _allocation.LoadFromSave(profile.strPoints, profile.agiPoints);
+
+                if (_lifeSkills == null) TryGetComponent(out _lifeSkills);
+                if (_lifeSkills != null && profile != null)
+                    _lifeSkills.LoadFromSave(profile.fishingProficiency, profile.cookingProficiency);
 
                 var inventoryData = await _save.LoadAsync<InventoryData>(SaveKeys.Inventory);
                 var equipmentData = await _save.LoadAsync<EquipmentData>(SaveKeys.Equipment);
@@ -461,11 +668,13 @@ namespace Game.PvE.Items
                 foreach (InstanceEntry entry in inventoryData.instances)
                 {
                     if (entry == null || string.IsNullOrEmpty(entry.instanceId)) continue;
-                    instances.Add(new ItemInstance(
+                    var loaded = new ItemInstance(
                         entry.instanceId,
                         entry.itemId,
                         new ItemStats(entry.rolledAttack, entry.rolledDefense, entry.rolledMaxHealth),
-                        entry.upgradeLevel));
+                        entry.upgradeLevel);
+                    loaded.durability = entry.durability; // -1 (save cũ) = đầy
+                    instances.Add(loaded);
                 }
             }
             _inventory.LoadFrom(stacks, instances);
@@ -475,6 +684,9 @@ namespace Game.PvE.Items
             {
                 if (!string.IsNullOrEmpty(equipmentData.weapon)) slots.Add(new KeyValuePair<EquipmentSlot, string>(EquipmentSlot.Weapon, equipmentData.weapon));
                 if (!string.IsNullOrEmpty(equipmentData.armor)) slots.Add(new KeyValuePair<EquipmentSlot, string>(EquipmentSlot.Armor, equipmentData.armor));
+                if (!string.IsNullOrEmpty(equipmentData.offHand)) slots.Add(new KeyValuePair<EquipmentSlot, string>(EquipmentSlot.OffHand, equipmentData.offHand));
+                if (!string.IsNullOrEmpty(equipmentData.accessory)) slots.Add(new KeyValuePair<EquipmentSlot, string>(EquipmentSlot.Accessory, equipmentData.accessory));
+                if (!string.IsNullOrEmpty(equipmentData.accessory2)) slots.Add(new KeyValuePair<EquipmentSlot, string>(EquipmentSlot.Accessory2, equipmentData.accessory2));
             }
             _equipment.LoadFrom(slots);
             ApplyEquipmentStats();
@@ -496,7 +708,8 @@ namespace Game.PvE.Items
                     upgradeLevel    = instance.upgradeLevel,
                     rolledAttack    = instance.rolledStats.attack,
                     rolledDefense   = instance.rolledStats.defense,
-                    rolledMaxHealth = instance.rolledStats.maxHealth
+                    rolledMaxHealth = instance.rolledStats.maxHealth,
+                    durability      = instance.durability
                 });
             }
             return data;
@@ -506,8 +719,11 @@ namespace Game.PvE.Items
         {
             return new EquipmentData
             {
-                weapon = _equipment.GetInstanceId(EquipmentSlot.Weapon),
-                armor  = _equipment.GetInstanceId(EquipmentSlot.Armor)
+                weapon     = _equipment.GetInstanceId(EquipmentSlot.Weapon),
+                armor      = _equipment.GetInstanceId(EquipmentSlot.Armor),
+                offHand    = _equipment.GetInstanceId(EquipmentSlot.OffHand),
+                accessory  = _equipment.GetInstanceId(EquipmentSlot.Accessory),
+                accessory2 = _equipment.GetInstanceId(EquipmentSlot.Accessory2)
             };
         }
     }

@@ -26,7 +26,7 @@ namespace Game.UI.Controls
         private Vector2 _currentInput;
         private Camera _uiCamera;
 
-        private Vector3 _homeLocalPosition;
+        private Vector2 _homeAnchoredPosition;
         private bool _active;
         private int _activePointerId;
         private float _deadZone = SettingsRules.DefaultDeadZone;
@@ -42,7 +42,9 @@ namespace Game.UI.Controls
         {
             _bgRect = background != null ? background.rectTransform : GetComponent<RectTransform>();
             _handleRect = handle != null ? handle.rectTransform : null;
-            _homeLocalPosition = _bgRect.localPosition;
+            // Lưu theo anchoredPosition (tính từ điểm neo), KHÔNG dùng localPosition: localPosition tính từ tâm vùng cha và vùng cha
+            // còn chưa được CanvasScaler co giãn lúc Awake, nên sẽ sai khi Canvas đổi kích thước (lỗi joystick nhảy vào giữa màn hình).
+            _homeAnchoredPosition = _bgRect.anchoredPosition;
             _currentInput = Vector2.zero;
 
             if (inputReaderComponent is IInputReader reader)
@@ -154,7 +156,7 @@ namespace Game.UI.Controls
 
         private void ResetBackgroundToHome()
         {
-            if (_bgRect != null) _bgRect.localPosition = _homeLocalPosition;
+            if (_bgRect != null) _bgRect.anchoredPosition = _homeAnchoredPosition;
         }
 
         private void ReleaseJoystick()

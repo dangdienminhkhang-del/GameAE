@@ -79,6 +79,7 @@ namespace Game.PvE.Skills
         public event EventHandler<TechniqueInputSlot> OnTechniqueFinished;
 
         public TechniqueExecutionState State => _state;
+        public WeaponTechniqueDefinition ActiveDefinition => _activeDefinition;
         public IMasteryService Mastery => _mastery;
 
         // ── Lifecycle ──────────────────────────────────────────────
@@ -198,6 +199,13 @@ namespace Game.PvE.Skills
                 return false;
             }
 
+            // Từ chối khi đang bị khóa hành động (khựng chiêu, choáng...)
+            if (playerController != null && playerController.IsActionLocked)
+            {
+                OnValidationFailed?.Invoke(this, TechniqueValidationError.CombatBusy);
+                return false;
+            }
+
             WeaponDiscipline equipped = ResolveEquippedDiscipline();
             int mastery = _mastery != null ? _mastery.GetMastery(equipped) : 0;
             WeaponTechniqueDefinition def = FindTechnique(equipped, slot);
@@ -231,6 +239,7 @@ namespace Game.PvE.Skills
             reason = TechniqueValidationError.None;
             if (_state != TechniqueExecutionState.Idle)          { reason = TechniqueValidationError.CombatBusy;        return false; }
             if (_dodgeController != null && _dodgeController.IsDodging) { reason = TechniqueValidationError.CombatBusy; return false; }
+            if (playerController != null && playerController.IsActionLocked) { reason = TechniqueValidationError.CombatBusy; return false; }
             WeaponDiscipline equipped = ResolveEquippedDiscipline();
             if (equipped == WeaponDiscipline.None)                { reason = TechniqueValidationError.NoWeaponEquipped;  return false; }
             WeaponTechniqueDefinition def = FindTechnique(equipped, slot);
@@ -413,7 +422,8 @@ namespace Game.PvE.Skills
         {
             if (_activeDefinition == null) { EndIdle(); return; }
             float elapsed = UnityEngine.Time.time - _stateEnterTime;
-            if (elapsed >= UnityEngine.Mathf.Max(0f, _activeDefinition.RecoverySeconds))
+            float recoveryDuration = PostSkillDelayRules.CalculateDelay(_activeDefinition);
+            if (elapsed >= recoveryDuration)
             {
                 TechniqueInputSlot slot = _activeDefinition.InputSlot;
                 EndIdle();

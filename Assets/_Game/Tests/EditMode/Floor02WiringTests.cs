@@ -48,7 +48,9 @@ namespace Game.Tests.EditMode
             "ZoneTracker", "ZoneCameraController", "ZoneMusicRouter",
             "EnemyProjectilePool", "ZoneSystem",
             // P9.9: hệ hướng dẫn (toast + mũi tên quest) dùng chung mọi tầng, đặt NGOÀI Floor01/Content để không bị tắt khi đổi tầng.
-            "TutorialRouter", "QuestArrowHud"
+            "TutorialRouter", "QuestArrowHud",
+            // Nền đất vẽ bằng sprite của bản đồ (docs/17): Floor01MapSystemInstaller tìm nó ở GỐC scene cùng với Grid để đo giới hạn bản đồ.
+            "World_Ground", "World_Props"
         };
 
         // ── Hỗ trợ ──────────────────────────────────────────────────────────
@@ -153,7 +155,7 @@ namespace Game.Tests.EditMode
 
         /// <summary>
         /// Tầng nhiều khu (Phase 9.7a) có mỗi khu một spawner, nên Tầng 1 không còn "đúng 1 spawner".
-        /// Tầng 2 vẫn dùng SingleSpawnerIn.
+        /// Tầng 2 mở rộng (Phase 9.8) cũng nhiều spawner như Tầng 1.
         /// </summary>
         private static EnemySpawner[] SpawnersIn(GameObject content)
         {
@@ -244,25 +246,50 @@ namespace Game.Tests.EditMode
         // ── 4. Spawner Tầng 2 ───────────────────────────────────────────────
 
         [Test]
-        public void Floor02Spawner_IsConsistentWithDefinition_AndSafeZone()
+        public void Floor02Spawners_AreConsistentWithDefinition_AndSafeZones()
         {
             var def = LoadFloor(Floor02Path);
             WithScene(Floor02ScenePath, scene =>
             {
                 var binder = BinderFor(scene, def.id);
-                var spawner = SingleSpawnerIn(binder.ContentRoot);
-                var so = new SerializedObject(spawner);
+                var spawners = SpawnersIn(binder.ContentRoot);
+                var safeZones = new List<Rect>(SafeZoneRects(binder.ContentRoot));
+                var allIds = new HashSet<string>();
+                var prefabs = new HashSet<UnityEngine.Object>();
 
-                Assert.IsFalse(so.FindProperty("spawnOnStart").boolValue,
-                    "Spawner Tầng 2 phải có spawnOnStart = TẮT (registrar sẽ gọi SpawnAll khi vào tầng).");
+                foreach (var spawner in spawners)
+                {
+                    var so = new SerializedObject(spawner);
+                    Assert.IsFalse(so.FindProperty("spawnOnStart").boolValue,
+                        $"Spawner '{spawner.name}' Tầng 2 phải có spawnOnStart = TẮT (registrar sẽ gọi SpawnAll khi vào tầng).");
+                    foreach (var id in EntryIds(spawner)) allIds.Add(id);
+                    prefabs.Add(so.FindProperty("enemyPrefab").objectReferenceValue);
 
-                // ID quái: entries ⊆ spawnEnemyIds và ngược lại.
-                var entryIds = EntryIds(spawner);
-                var allowed = new HashSet<string>(def.spawnEnemyIds);
-                CollectionAssert.AreEquivalent(allowed, entryIds,
-                    "Quái trong entries của spawner Tầng 2 phải đúng bằng spawnEnemyIds của FloorDefinition_Floor02.");
+                    var entries = so.FindProperty("entries");
+                    int maxCount = 0;
+                    float maxRadius = 0f;
+                    for (int i = 0; i < entries.arraySize; i++)
+                    {
+                        var e = entries.GetArrayElementAtIndex(i);
+                        maxCount = Mathf.Max(maxCount, e.FindPropertyRelative("count").intValue);
+                        maxRadius = Mathf.Max(maxRadius, e.FindPropertyRelative("radius").floatValue);
+                    }
+                    Assert.GreaterOrEqual(so.FindProperty("poolSizePerDefinition").intValue, maxCount,
+                        $"Spawner '{spawner.name}': poolSizePerDefinition nhỏ hơn số quái lớn nhất của một entry.");
 
-                // Mỗi ID trong spawnEnemyIds phải có asset EnemyDefinition.
+                    var centerT = so.FindProperty("spawnCenter").objectReferenceValue as Transform;
+                    Assert.IsNotNull(centerT, $"Spawner '{spawner.name}' chưa gán spawnCenter.");
+                    Rect spawnRect = new Rect(
+                        centerT.position.x - maxRadius, centerT.position.y - maxRadius, maxRadius * 2f, maxRadius * 2f);
+                    foreach (var zone in safeZones)
+                        Assert.IsFalse(spawnRect.Overlaps(zone),
+                            $"Vùng spawn {spawnRect} của '{spawner.name}' giao Safe Zone {zone}: quái sẽ xuất hiện ngay trong vùng an toàn.");
+                }
+
+                // ID quái: hợp của mọi spawner == spawnEnemyIds.
+                CollectionAssert.AreEquivalent(new HashSet<string>(def.spawnEnemyIds), allIds,
+                    "Hợp quái của mọi spawner Tầng 2 phải đúng bằng spawnEnemyIds của FloorDefinition_Floor02.");
+
                 var known = AssetDatabase.FindAssets("t:EnemyDefinition", new[] { EnemiesFolder })
                     .Select(g => AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(AssetDatabase.GUIDToAssetPath(g)))
                     .Select(a => StringOf(a, "id"))
@@ -270,51 +297,25 @@ namespace Game.Tests.EditMode
                 foreach (var id in def.spawnEnemyIds)
                     Assert.Contains(id, known, $"spawnEnemyIds của Tầng 2 có '{id}' nhưng không có asset EnemyDefinition nào mang ID này.");
 
-                // Prefab quái dùng chung với Tầng 1.
-                // Lấy prefab ngay trong scope scene host (scene sẽ đóng sau đó, component sẽ bị hủy).
-                // Tầng 1 có thể nhiều spawner (mỗi khu một cái) nhưng tất cả phải dùng chung MỘT prefab.
+                // Mọi spawner Tầng 2 dùng chung MỘT prefab, và đó cũng là prefab của Tầng 1.
+                Assert.AreEqual(1, prefabs.Count, "Mọi spawner Tầng 2 phải dùng chung một prefab quái.");
                 var hostPrefab = WithScene(HostScenePath, hs =>
                 {
                     var hostSpawners = SpawnersIn(BinderFor(hs, LoadFloor(Floor01Path).id).ContentRoot);
-                    var prefabs = hostSpawners
+                    var hostPrefabs = hostSpawners
                         .Select(s => new SerializedObject(s).FindProperty("enemyPrefab").objectReferenceValue)
                         .Distinct()
                         .ToList();
-                    Assert.AreEqual(1, prefabs.Count, "Mọi spawner Tầng 1 phải dùng chung một prefab quái.");
-                    return prefabs[0];
+                    Assert.AreEqual(1, hostPrefabs.Count, "Mọi spawner Tầng 1 phải dùng chung một prefab quái.");
+                    return hostPrefabs[0];
                 });
-                Assert.AreEqual(
-                    hostPrefab,
-                    so.FindProperty("enemyPrefab").objectReferenceValue,
-                    "Spawner Tầng 2 phải dùng chung prefab quái với Tầng 1.");
-
-                // Pool đủ cho số lượng lớn nhất.
-                var entries = so.FindProperty("entries");
-                int maxCount = 0;
-                float maxRadius = 0f;
-                for (int i = 0; i < entries.arraySize; i++)
-                {
-                    var e = entries.GetArrayElementAtIndex(i);
-                    maxCount = Mathf.Max(maxCount, e.FindPropertyRelative("count").intValue);
-                    maxRadius = Mathf.Max(maxRadius, e.FindPropertyRelative("radius").floatValue);
-                }
-                Assert.GreaterOrEqual(so.FindProperty("poolSizePerDefinition").intValue, maxCount,
-                    "poolSizePerDefinition nhỏ hơn số quái lớn nhất của một entry.");
-
-                // Vùng spawn không giao Safe Zone.
-                var centerT = so.FindProperty("spawnCenter").objectReferenceValue as Transform;
-                Assert.IsNotNull(centerT, "Spawner Tầng 2 chưa gán spawnCenter.");
-                Rect spawnRect = new Rect(
-                    centerT.position.x - maxRadius, centerT.position.y - maxRadius, maxRadius * 2f, maxRadius * 2f);
-                foreach (var zone in SafeZoneRects(binder.ContentRoot))
-                    Assert.IsFalse(spawnRect.Overlaps(zone),
-                        $"Vùng spawn {spawnRect} giao Safe Zone {zone}: quái sẽ xuất hiện ngay trong vùng an toàn.");
+                Assert.AreEqual(hostPrefab, prefabs.First(), "Spawner Tầng 2 phải dùng chung prefab quái với Tầng 1.");
                 return true;
             });
         }
 
         [Test]
-        public void Floor02Registrar_IsSeparateFromContent_AndPointsToFloor02Spawner()
+        public void Floor02Registrar_IsSeparateFromContent_AndPointsToEverySpawner()
         {
             var def = LoadFloor(Floor02Path);
             WithScene(Floor02ScenePath, scene =>
@@ -326,11 +327,61 @@ namespace Game.Tests.EditMode
                 Assert.IsFalse(registrar.transform.IsChildOf(binder.ContentRoot.transform),
                     "FloorSpawnRegistrar phải nằm NGOÀI Content (Content đang tắt thì registrar vẫn phải gọi được).");
 
-                var target = new SerializedObject(registrar).FindProperty("enemySpawner").objectReferenceValue
-                    as EnemySpawner;
-                Assert.IsNotNull(target, "FloorSpawnRegistrar Tầng 2 chưa gán enemySpawner.");
-                Assert.AreSame(SingleSpawnerIn(binder.ContentRoot), target,
-                    "FloorSpawnRegistrar Tầng 2 phải trỏ tới spawner của Tầng 2.");
+                var rso = new SerializedObject(registrar);
+                var registered = new HashSet<EnemySpawner>();
+                var main = rso.FindProperty("enemySpawner").objectReferenceValue as EnemySpawner;
+                Assert.IsNotNull(main, "FloorSpawnRegistrar Tầng 2 chưa gán enemySpawner.");
+                registered.Add(main);
+                var it = rso.GetIterator();
+                for (bool enter = true; it.NextVisible(enter); enter = false)
+                {
+                    if (!it.isArray || it.propertyType == SerializedPropertyType.String) continue;
+                    for (int i = 0; i < it.arraySize; i++)
+                        if (it.GetArrayElementAtIndex(i).objectReferenceValue is EnemySpawner extra) registered.Add(extra);
+                }
+
+                var all = SpawnersIn(binder.ContentRoot);
+                Assert.AreEqual(all.Length, registered.Count,
+                    "FloorSpawnRegistrar Tầng 2 phải đăng ký đúng mọi spawner trong Content (không thiếu, không thừa).");
+                foreach (var s in all)
+                    Assert.IsTrue(registered.Contains(s), $"Spawner '{s.name}' chưa được FloorSpawnRegistrar đăng ký.");
+                return true;
+            });
+        }
+
+        [Test]
+        public void Floor02_IsALargeWorld_AndEverySpawnerIsStreamed()
+        {
+            var def = LoadFloor(Floor02Path);
+            WithScene(Floor02ScenePath, scene =>
+            {
+                var binder = BinderFor(scene, def.id);
+                var content = binder.ContentRoot;
+
+                // Quy mô: bản cũ chỉ ~1.200 ô sàn. Mục tiêu thiết kế là lớn gấp nhiều lần.
+                UnityEngine.Tilemaps.Tilemap floor = null;
+                foreach (var tm in content.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true))
+                    if (tm.name == "Floor") floor = tm;
+                Assert.IsNotNull(floor, "Thiếu tilemap 'Floor' trong Content Tầng 2.");
+                floor.CompressBounds();
+                int tiles = 0;
+                foreach (var pos in floor.cellBounds.allPositionsWithin) if (floor.HasTile(pos)) tiles++;
+                Assert.GreaterOrEqual(tiles, 12000, "Tầng 2 phải là thế giới lớn (>= 12.000 ô sàn).");
+
+                // Mọi spawner phải nằm trong một nhóm của FloorZoneStreamer (để quái ở xa được tắt).
+                var streamer = content.GetComponentInChildren<Game.PvE.Zones.FloorZoneStreamer>(true);
+                Assert.IsNotNull(streamer, "Thiếu FloorZoneStreamer trong Content Tầng 2.");
+                var groups = new SerializedObject(streamer).FindProperty("groups");
+                var roots = new List<Transform>();
+                for (int i = 0; i < groups.arraySize; i++)
+                {
+                    var go = groups.GetArrayElementAtIndex(i).FindPropertyRelative("root").objectReferenceValue as GameObject;
+                    Assert.IsNotNull(go, $"FloorZoneStreamer nhóm {i} chưa gán root.");
+                    roots.Add(go.transform);
+                }
+                foreach (var s in SpawnersIn(content))
+                    Assert.IsTrue(roots.Exists(r => s.transform.IsChildOf(r)),
+                        $"Spawner '{s.name}' không nằm trong nhóm stream nào: quái sẽ chạy AI cả khi người chơi ở rất xa.");
                 return true;
             });
         }
@@ -547,6 +598,43 @@ namespace Game.Tests.EditMode
                 return bosses.Count;
             });
             Assert.AreEqual(1, count, "Scene Tầng 2 phải có đúng một boss.");
+        }
+
+        [Test]
+        public void Floor02_HasMapSystem_AndEveryBeaconSitsOnASafeZone()
+        {
+            var def = LoadFloor(Floor02Path);
+            WithScene(Floor02ScenePath, scene =>
+            {
+                var binder = BinderFor(scene, def.id);
+                var content = binder.ContentRoot;
+
+                var info = content.GetComponentInChildren<Game.PvE.Exploration.FloorMapInfo>(true);
+                Assert.IsNotNull(info, "Content Tầng 2 thiếu FloorMapInfo (Sổ Hải Đồ).");
+                Assert.AreEqual(def.id, info.FloorId, "FloorMapInfo phải mang id của FloorDefinition Tầng 2.");
+                Assert.IsNotNull(info.FloorTilemap, "FloorMapInfo chưa gán tilemap sàn.");
+                Assert.IsNotNull(content.GetComponentInChildren<Game.PvE.Exploration.MapExplorer>(true), "Thiếu MapExplorer.");
+                Assert.IsNotNull(content.GetComponentInChildren<Game.PvE.Exploration.FastTravelController>(true), "Thiếu FastTravelController.");
+                Assert.IsNotNull(content.GetComponentInChildren<Game.UI.Map.MapHudController>(true), "Thiếu MapHudController (UI bản đồ).");
+
+                // Bản đồ phải phủ điểm vào và boss, nếu không người chơi đi tới đó mà bản đồ không vẽ được.
+                var boss = UnityEngine.Object.FindObjectsByType<Game.PvE.Boss.BossController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                foreach (var b in boss)
+                    if (b.gameObject.scene == scene)
+                        Assert.IsTrue(info.WorldBounds.Contains(b.transform.position), "Boss nằm ngoài giới hạn bản đồ.");
+
+                var ids = new HashSet<string>();
+                var beacons = content.GetComponentsInChildren<Game.PvE.Exploration.BeaconWaypoint>(true);
+                Assert.GreaterOrEqual(beacons.Length, 6, "Tầng 2 phải có >= 6 Đèn Hiệu (Trạm Van, Ngã Tư và 4 trạm nghỉ).");
+                foreach (var beacon in beacons)
+                {
+                    Assert.IsTrue(ids.Add(beacon.BeaconId), $"Trùng BeaconId '{beacon.BeaconId}'.");
+                    Assert.AreEqual(def.id, beacon.FloorId, $"Đèn Hiệu '{beacon.name}' khai sai tầng.");
+                    Assert.IsNotNull(beacon.GetComponent<Game.PvE.SafeZone.SafeZoneTrigger>(), $"Đèn Hiệu '{beacon.name}' phải nằm trên một Safe Zone.");
+                    Assert.IsTrue(info.WorldBounds.Contains(beacon.ArrivalPoint), $"Điểm đến của '{beacon.name}' nằm ngoài bản đồ.");
+                }
+                return true;
+            });
         }
     }
 }

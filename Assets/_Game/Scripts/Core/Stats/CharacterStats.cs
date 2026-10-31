@@ -4,11 +4,14 @@ using UnityEngine;
 namespace Game.Core.Stats
 {
     /// <summary>
-    /// Chỉ số nhân vật = Base (theo Level) + Equipment bonus (docs/02 §6).
+    /// Chỉ số nhân vật = Base (theo Level) + Equipment bonus + Điểm chỉ số STR/AGI (docs/02 §6).
     /// Override MaxHealth (khi cần) luôn thắng công thức.
     /// </summary>
     public class CharacterStats : ICombatStats
     {
+        private const double BaseMoveSpeed = 4.0;
+        private const double BaseCriticalChance = 0.10;
+
         public int Level { get; private set; }
         public double MaxHealth { get; private set; }
         public double Attack { get; private set; }
@@ -17,12 +20,18 @@ namespace Game.Core.Stats
         public double CriticalChance { get; private set; }
         public double CriticalDamage { get; private set; }
 
+        /// <summary>Phần trăm (dạng phân số) tốc chạy cộng thêm từ AGI, ví dụ 0.1 = +10%. PlayerController nhân vào vận tốc thật.</summary>
+        public double MoveSpeedBonusFraction => _allocMoveSpeedFraction;
+
         private double _baseMaxHealth;
         private double _baseAttack;
         private double _baseDefense;
         private double _bonusMaxHealth;
         private double _bonusAttack;
         private double _bonusDefense;
+        private double _allocAttack;
+        private double _allocMoveSpeedFraction;
+        private double _allocCritChance;
         private double? _maxHealthOverride;
 
         public CharacterStats(int level = 1)
@@ -36,8 +45,6 @@ namespace Game.Core.Stats
             _baseMaxHealth = BaseMaxHealthForLevel(Level);
             _baseAttack = 10 + (Level - 1) * 2;
             _baseDefense = 5 + (Level - 1) * 1;
-            MoveSpeed = 4.0;
-            CriticalChance = 0.10;
             CriticalDamage = 1.5;
             Recompute();
         }
@@ -55,6 +62,17 @@ namespace Game.Core.Stats
             _bonusAttack = attack;
             _bonusDefense = defense;
             _bonusMaxHealth = maxHealth;
+            Recompute();
+        }
+
+        /// <summary>
+        /// Chỉ số cộng thêm từ điểm STR/AGI (xem <see cref="StatAllocation"/>). Giữ nguyên khi đổi level.
+        /// </summary>
+        public void SetAllocationBonus(double attack, double moveSpeedFraction, double critChance)
+        {
+            _allocAttack = attack;
+            _allocMoveSpeedFraction = moveSpeedFraction;
+            _allocCritChance = critChance;
             Recompute();
         }
 
@@ -84,8 +102,10 @@ namespace Game.Core.Stats
         private void Recompute()
         {
             MaxHealth = _maxHealthOverride ?? (_baseMaxHealth + _bonusMaxHealth);
-            Attack = _baseAttack + _bonusAttack;
+            Attack = _baseAttack + _bonusAttack + _allocAttack;
             Defense = _baseDefense + _bonusDefense;
+            MoveSpeed = BaseMoveSpeed * (1.0 + _allocMoveSpeedFraction);
+            CriticalChance = BaseCriticalChance + _allocCritChance;
         }
     }
 }

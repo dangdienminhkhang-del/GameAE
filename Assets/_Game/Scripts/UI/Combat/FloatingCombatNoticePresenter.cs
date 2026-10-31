@@ -139,14 +139,12 @@ namespace Game.UI.Combat
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(400f, 100f);
 
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-
             for (int i = 0; i < PoolSize; i++)
             {
                 GameObject obj = new GameObject($"Notice_{i}", typeof(RectTransform), typeof(Text));
                 obj.transform.SetParent(_container, false);
                 Text txt = obj.GetComponent<Text>();
-                txt.font = font;
+                UiSkin.ApplyFont(txt, bold: true);
                 txt.fontSize = 32;
                 txt.fontStyle = FontStyle.Bold;
                 txt.alignment = TextAnchor.MiddleCenter;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Game.Core.Combat;
 using UnityEngine;
 
 namespace Game.Core.Items
@@ -64,7 +65,10 @@ namespace Game.Core.Items
             _built  = true;
         }
 
-        /// <summary>Tổng chỉ số của tất cả trang bị đang mặc.</summary>
+        /// <summary>
+        /// Tổng chỉ số của tất cả trang bị đang mặc. Mỗi món = (gốc + chỉ số ngẫu nhiên) + cộng từ cường hóa;
+        /// món HỎNG (độ bền 0) không cộng gì cho tới khi sửa. Tay phụ đóng góp 60% công theo DualWieldRules.
+        /// </summary>
         public ItemStats SumEquipment(Equipment equipment, Inventory inventory)
         {
             if (equipment == null || inventory == null) return default;
@@ -78,7 +82,17 @@ namespace Game.Core.Items
                 ItemDefinition definition = Find(instance.itemId);
                 if (definition == null) continue;
 
-                total += definition.BaseStats + instance.rolledStats;
+                // Hỏng → không cộng chỉ số (SAO: vũ khí gần vỡ phải sửa ở thợ rèn).
+                if (DurabilityRules.IsBroken(instance.durability, definition.MaxDurability)) continue;
+
+                ItemStats stats = definition.BaseStats + instance.rolledStats;
+                stats += UpgradeRules.BonusStats(stats, instance.upgradeLevel);
+                if (pair.Key == EquipmentSlot.OffHand)
+                {
+                    // Tay phụ (Dual Wielding): đóng góp 60% sát thương tấn công theo DualWieldRules (chuẩn SAO)
+                    stats.attack *= DualWieldRules.OffHandAttackContribution;
+                }
+                total += stats;
             }
             return total;
         }

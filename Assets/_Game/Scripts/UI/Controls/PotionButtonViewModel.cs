@@ -8,7 +8,7 @@ namespace Game.UI.Controls
     /// </summary>
     public readonly struct PotionButtonViewModel
     {
-        public const float DimAlpha = 0.4f;
+        public const float DimAlpha = 0.75f;
         /// <summary>Sáng (dùng được) hay mờ.</summary>
         public readonly bool Available;
         public readonly float Alpha;

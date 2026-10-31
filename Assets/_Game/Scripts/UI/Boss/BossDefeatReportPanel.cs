@@ -56,6 +56,13 @@ namespace Game.UI.Boss
 
         private static BossDefeatReportPanel s_instance;
 
+        public static BossDefeatReportPanel Instance => s_instance;
+
+        public void SetLastAttackBonus(string itemName)
+        {
+            _model.SetLastAttackBonus(itemName);
+        }
+
         /// <summary>
         /// Trạng thái hiện tại của bảng báo boss, CHỈ ĐỌC (Hidden khi bảng chưa có mặt). Hệ hướng dẫn (Phase 9.9) dùng để không chen toast
         /// khi bảng còn mở và để biết bảng đã đóng sau khi máy chủ xác nhận. Không đổi chữ, bố cục hay luồng báo server.
@@ -87,6 +94,7 @@ namespace Game.UI.Boss
         private Font _font;
         private GameObject _card;
         private GameObject _toast;
+        private Text _toastText;
         private Button _retryButton;
         private Text _retryLabel;
 
@@ -124,6 +132,7 @@ namespace Game.UI.Boss
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.sceneUnloaded += OnSceneUnloaded;
+            Game.Core.Events.GameEvents.OnBossDefeated += HandleBossDefeated;
             ScanForBosses();
         }
 
@@ -131,7 +140,16 @@ namespace Game.UI.Boss
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneUnloaded -= OnSceneUnloaded;
+            Game.Core.Events.GameEvents.OnBossDefeated -= HandleBossDefeated;
             UnregisterAll();
+        }
+
+        private void HandleBossDefeated(object sender, Game.Core.Events.BossDefeatedArgs args)
+        {
+            if (args != null && args.IsLastAttack && !string.IsNullOrEmpty(args.LastAttackItemName))
+            {
+                _model.SetLastAttackBonus(args.LastAttackItemName);
+            }
         }
 
         private void OnDestroy()
@@ -318,6 +336,13 @@ namespace Game.UI.Boss
 
             _card.SetActive(_model.IsPanelVisible);
             _toast.SetActive(_model.IsConfirmedToastVisible);
+            if (_toast.activeSelf && _toastText != null)
+            {
+                _toastText.text = _model.ConfirmedToastMessage;
+                var toastRt = (RectTransform)_toast.transform;
+                float height = !string.IsNullOrEmpty(_model.LastAttackBonusText) ? 140f : ToastHeight;
+                toastRt.sizeDelta = new Vector2(ToastWidth, height);
+            }
             _retryButton.interactable = _model.IsRetryInteractable;
             _retryLabel.text = _model.RetryButtonText;
         }
@@ -392,8 +417,8 @@ namespace Game.UI.Boss
             background.color = ToastColor; UiSkin.Button(background, 2);
             background.raycastTarget = false; // dòng thông báo không được chặn thao tác chơi
 
-            Text text = CreateText("Text", _toast.transform, BossDefeatReportPanelModel.ConfirmedMessage, ToastFontSize, TextAnchor.MiddleCenter);
-            var textRt = (RectTransform)text.transform;
+            _toastText = CreateText("Text", _toast.transform, BossDefeatReportPanelModel.ConfirmedMessage, ToastFontSize, TextAnchor.MiddleCenter);
+            var textRt = (RectTransform)_toastText.transform;
             textRt.anchorMin = Vector2.zero;
             textRt.anchorMax = Vector2.one;
             textRt.offsetMin = new Vector2(CardPadding / 2f, 0f);

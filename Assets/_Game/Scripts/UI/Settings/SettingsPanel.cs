@@ -12,7 +12,7 @@ namespace Game.UI.Settings
     /// TUYỆT ĐỐI không có nút Reset Guest, xóa tài khoản hay đăng xuất ở đây (AGENTS.md luật 10).
     /// Nút Back đóng panel này trước (priority cao nhất trong <see cref="BackKeyRouter"/>).
     /// </summary>
-    public class SettingsPanel : MonoBehaviour, IBackHandler
+    public class SettingsPanel : MonoBehaviour, IBackHandler, IPanelRoot
     {
         /// <summary>Settings nằm trên cùng: Back đóng nó trước Túi, Quest, Chọn Tầng.</summary>
         public const int Priority = 40;
@@ -45,6 +45,7 @@ namespace Game.UI.Settings
 
         public int BackPriority => Priority;
         public bool IsOpen => panelRoot != null && panelRoot.activeSelf;
+        public GameObject PanelRoot => panelRoot;
 
         private void Awake()
         {

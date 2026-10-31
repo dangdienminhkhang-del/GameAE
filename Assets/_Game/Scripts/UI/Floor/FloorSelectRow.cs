@@ -11,9 +11,15 @@ namespace Game.UI.Floor
     /// Một dòng trong danh sách chọn tầng.
     /// UI chỉ hiển thị + gọi callback — không tự load scene.
     /// Lưu ý tạm dùng UnityEngine.UI.Text thay TMP_Text (cần asmdef Game.UI reference Unity.TextMeshPro).
+    /// Trạng thái có màu riêng (xanh = sẵn sàng, vàng = đã qua, xám = chưa mở) để nhìn qua là biết.
     /// </summary>
     public class FloorSelectRow : MonoBehaviour
     {
+        private static readonly Color StatusReady = new Color(0.50f, 0.92f, 0.60f);
+        private static readonly Color StatusCleared = new Color(0.96f, 0.82f, 0.42f);
+        private static readonly Color StatusLocked = new Color(0.62f, 0.64f, 0.70f);
+        private static readonly Color RangeColor = new Color(0.72f, 0.80f, 0.92f);
+
         [SerializeField] private Text floorNameLabel;
         [SerializeField] private Text statusLabel;
         [SerializeField] private Text levelRangeLabel;
@@ -25,8 +31,40 @@ namespace Game.UI.Floor
 
         private void Awake()
         {
+            var rowImg = GetComponent<Image>();
+            if (rowImg != null && UiSkin.Row(rowImg))
+            {
+                // Sprite hàng đã có màu thép riêng → để màu gần trắng, không nhuộm tối như trước.
+                rowImg.color = new Color(1f, 1f, 1f, 0.96f);
+            }
+
             if (selectButton != null)
+            {
                 selectButton.onClick.AddListener(HandleClick);
+                var btnImg = selectButton.GetComponent<Image>();
+                if (btnImg != null)
+                {
+                    btnImg.color = new Color(0.20f, 0.58f, 0.86f, 1f);
+                    UiSkin.Button(btnImg, 2);
+                }
+
+                ColorBlock cb = selectButton.colors;
+                cb.highlightedColor = new Color(1.08f, 1.08f, 1.08f, 1f);
+                cb.pressedColor = new Color(0.78f, 0.78f, 0.78f, 1f);
+                cb.disabledColor = new Color(0.55f, 0.55f, 0.60f, 0.8f);
+                selectButton.colors = cb;
+
+                Text btnText = selectButton.GetComponentInChildren<Text>();
+                if (btnText != null) UiSkin.ApplyFont(btnText, true);
+            }
+
+            if (floorNameLabel != null) UiSkin.ApplyFont(floorNameLabel, true);
+            if (levelRangeLabel != null)
+            {
+                UiSkin.ApplyFont(levelRangeLabel);
+                levelRangeLabel.color = RangeColor;
+            }
+            if (statusLabel != null) UiSkin.ApplyFont(statusLabel, true);
         }
 
         private void OnDestroy()
@@ -49,6 +87,7 @@ namespace Game.UI.Floor
                 levelRangeLabel.text = $"Lv {def.recommendedLevelMin}–{def.recommendedLevelMax}";
 
             if (statusLabel != null)
+            {
                 statusLabel.text = entry.Status switch
                 {
                     FloorStatus.Available => "Sẵn sàng",
@@ -56,6 +95,13 @@ namespace Game.UI.Floor
                     FloorStatus.Locked    => "Chưa mở",
                     _                     => string.Empty
                 };
+                statusLabel.color = entry.Status switch
+                {
+                    FloorStatus.Available => StatusReady,
+                    FloorStatus.Cleared   => StatusCleared,
+                    _                     => StatusLocked
+                };
+            }
 
             bool locked = !entry.IsPlayable;
             if (selectButton != null) selectButton.interactable = !locked;

@@ -41,6 +41,8 @@ namespace Game.PvE.Boss
         private float _stateTimer;
         private bool _isEnraged;
         private bool _isDefeatedProcessed;
+        private DamageInfo _lastLethalDamage;
+        public DamageInfo LastLethalDamage => _lastLethalDamage;
 
         // Pressure Window
         private static readonly Color PressureTelegraphColor = new Color(0.75f, 0.2f, 1f, 1f); // tím đậm: khác vàng (đòn thường), xanh nhạt (punish), hồng (enrage)
@@ -128,12 +130,15 @@ namespace Game.PvE.Boss
         public BossDefinition Definition => definition;
         public bool IsDead => _health <= 0.0;
         public double CurrentHealth => _health;
-        public double MaxHealth => definition != null ? definition.MaxHealth : 100.0;
-        public double Attack => definition != null ? (definition.Attack * (_isEnraged ? 1.2 : 1.0)) : 10.0;
+        public double MaxHealth => (definition != null ? definition.MaxHealth : 100.0) * BossHealthBarRules.BossHealthMultiplier;
+        public double Attack => definition != null ? (definition.Attack * (_isEnraged ? BossHealthBarRules.DefaultEnrageAttackMultiplier : 1.0)) : 10.0;
         public double Defense => definition != null ? definition.Defense : 0.0;
         public double CriticalChance => 0.0;
         public double CriticalDamage => 1.0;
         public bool IsEnraged => _isEnraged;
+
+        /// <summary>Boss bị khóa hành động (bị Choáng / Tê Liệt do kỹ năng hoặc hiệu ứng đặc biệt).</summary>
+        public bool IsActionLocked { get; set; }
 
         /// <summary>Boss đang trong trạng thái báo đòn hoặc lao tấn công (Telegraph / Pressure).</summary>
         public bool IsTelegraphing => _machine != null && (_machine.Current is TelegraphState || _machine.Current is PressureTelegraphState || _machine.Current is PressureDashState);
@@ -168,6 +173,12 @@ namespace Game.PvE.Boss
 
         private void Update()
         {
+            if (IsActionLocked)
+            {
+                if (_rigidbody != null) _rigidbody.linearVelocity = Vector2.zero;
+                return;
+            }
+
             if (_attackTimer > 0f) _attackTimer -= Time.deltaTime;
             // Nháy chạy bằng thời gian THẬT để dừng hình không kéo dài nháy.
             if (_tint != null) _tint.Tick(UnityEngine.Time.unscaledDeltaTime);
@@ -308,6 +319,7 @@ namespace Game.PvE.Boss
             _isEnraged = false;
             _isDefeatedProcessed = false;
             _normalAttacksSincePressure = 0;
+            _lastLethalDamage = null;
             HealthChanged?.Invoke(_health, MaxHealth, 0.0);
         }
 
@@ -332,7 +344,7 @@ namespace Game.PvE.Boss
         {
             if (definition == null || _rigidbody == null) return;
             Vector2 direction = (destination - (Vector2)transform.position).normalized;
-            float speed = definition.MoveSpeed * (_isEnraged ? 1.25f : 1.0f);
+            float speed = definition.MoveSpeed * (_isEnraged ? BossHealthBarRules.DefaultEnrageSpeedMultiplier : 1.0f);
             _rigidbody.linearVelocity = direction * speed;
             if (spriteRenderer != null && Mathf.Abs(direction.x) > 0.01f)
             {
@@ -366,7 +378,7 @@ namespace Game.PvE.Boss
 
         private float CurrentAttackCooldown()
         {
-            return definition.AttackCooldownSeconds * (_isEnraged ? 0.7f : 1.0f);
+            return definition.AttackCooldownSeconds * (_isEnraged ? BossHealthBarRules.DefaultEnrageCooldownMultiplier : 1.0f);
         }
 
         // ── IDamageable ──────────────────────────────────────────────────────────
@@ -378,12 +390,19 @@ namespace Game.PvE.Boss
             double healthBefore = _health;
             _health = Math.Max(0.0, _health - damage.Amount);
 
-            // Kiểm tra ngưỡng Enrage
-            if (!_isEnraged && definition != null && (_health / MaxHealth) <= definition.EnrageHpThreshold)
+            // Kiểm tra ngưỡng Enrage (khi vào thanh máu cuối theo chuẩn SAO hoặc theo ngưỡng enrageHpThreshold nếu 1 thanh)
+            int totalBars = definition != null ? definition.HealthBarCount : BossHealthBarRules.DefaultBarCount;
+            BossHealthBarRules.BarState barState = BossHealthBarRules.Calculate(_health, MaxHealth, totalBars);
+            bool shouldEnrage = totalBars > 1 
+                ? barState.IsFinalBar 
+                : (definition != null && (_health / MaxHealth) <= definition.EnrageHpThreshold);
+
+            if (!_isEnraged && shouldEnrage)
             {
                 _isEnraged = true;
                 SetTint(EnragedColor, TintKind.Enrage);
-                if (logBossEvents) Debug.Log($"[Boss:{definition.DisplayName}] KÍCH HOẠT CUỒNG NỘ (Enrage)!", this);
+                GameEvents.RaiseCombatNotice($"⚠ {definition?.DisplayName ?? "BOSS"} CUỒNG NỘ! ⚠", new Color(1f, 0.25f, 0.25f));
+                if (logBossEvents) Debug.Log($"[Boss:{definition?.DisplayName}] KÍCH HOẠT CUỒNG NỘ (Enrage - Thanh máu cuối)!", this);
             }
 
             if (logBossEvents) Debug.Log($"[Boss:{definition?.DisplayName}] Nhận {damage.Amount:0.#} dmg → Còn {_health:0.#}/{MaxHealth}", this);
@@ -397,6 +416,7 @@ namespace Game.PvE.Boss
 
             if (IsDead)
             {
+                if (healthBefore > 0.0) _lastLethalDamage = damage;
                 _machine.ChangeTo<DeadState>();
             }
         }
@@ -563,13 +583,20 @@ namespace Game.PvE.Boss
             if (_tint != null) _tint.SetDead(CombatFeelConfig.Active.BossDeadTint, false);
 
             // 1. Domain Events (phát ngay, không chờ World State)
+            bool isPlayerLastAttack = LastAttackRules.IsPlayerLastAttack(_lastLethalDamage);
+            string laItemId = (isPlayerLastAttack && definition != null && definition.LastAttackRewardItem != null) ? definition.LastAttackRewardItem.Id : null;
+            string laItemName = (isPlayerLastAttack && definition != null && definition.LastAttackRewardItem != null) ? definition.LastAttackRewardItem.DisplayName : null;
+
             GameEvents.RaiseEnemyDefeated(this);
             if (definition != null)
             {
                 GameEvents.RaiseBossDefeated(this, new BossDefeatedArgs
                 {
                     BossId = definition.Id,
-                    FloorId = definition.FloorId
+                    FloorId = definition.FloorId,
+                    IsLastAttack = isPlayerLastAttack,
+                    LastAttackItemId = laItemId,
+                    LastAttackItemName = laItemName
                 });
             }
 
@@ -599,7 +626,8 @@ namespace Game.PvE.Boss
                     defeated,
                     _deathService != null && _deathService.IsPlayerDead,
                     _playerInventory != null ? new Func<Game.Core.Items.ItemDefinition, int, int>(GrantItem) : null,
-                    knownRematch: isRematch);
+                    knownRematch: isRematch,
+                    lethalDamage: _lastLethalDamage);
             }
             catch (Exception error)
             {
@@ -607,6 +635,12 @@ namespace Game.PvE.Boss
                 // event failure cho UI chỉ thuộc trường hợp report trả lỗi có retry được.
                 Debug.LogError($"[BossController] Lỗi xử lý boss chết: {error}", this);
                 return;
+            }
+
+            if (result != null && result.LastAttackBonusClaimed && result.LastAttackItem != null)
+            {
+                GameEvents.RaiseCombatNotice($"★ LAST ATTACK BONUS: {result.LastAttackItem.DisplayName}! ★", new Color(1f, 0.85f, 0.2f));
+                if (logBossEvents) Debug.Log($"[Boss:{defeated.DisplayName}] Last Attack Bonus trao cho người chơi: {result.LastAttackItem.DisplayName} x{result.LastAttackQuantity}!", this);
             }
 
             if (result.ReportStatus == BossDefeatReportStatus.Confirmed)

@@ -13,6 +13,8 @@ namespace Game.Core.World
         public const string Death = "death";
         public const string Quests = "quests";
         public const string RewardClaims = "rewardClaims";
+        public const string Map = "map";
+        public const string Beacons = "beacons";
 
         /// <summary>
         /// Mọi key của MỘT nhân vật. Reset tài khoản Guest phải xóa hết để nhân vật mới
@@ -20,7 +22,7 @@ namespace Game.Core.World
         /// </summary>
         public static readonly string[] All =
         {
-            Profile, Progress, Inventory, Equipment, Death, Quests, RewardClaims
+            Profile, Progress, Inventory, Equipment, Death, Quests, RewardClaims, Map, Beacons
         };
     }
 
@@ -55,6 +57,14 @@ namespace Game.Core.World
         public double currentHp = 0;
         /// <summary>Số Col trong ví khi lưu. -1 = chưa có dữ liệu (save cũ) → dùng Col khởi điểm.</summary>
         public int col = -1;
+        /// <summary>Số điểm đã cộng vào STR. Save cũ không có field này → 0 (xem StatAllocation).</summary>
+        public int strPoints = 0;
+        /// <summary>Số điểm đã cộng vào AGI. Save cũ không có field này → 0.</summary>
+        public int agiPoints = 0;
+        /// <summary>Điểm kỹ năng đời sống: Câu cá (Fishing Proficiency theo SAO). Mặc định 0.</summary>
+        public int fishingProficiency = 0;
+        /// <summary>Điểm kỹ năng đời sống: Nấu ăn (Cooking Proficiency theo SAO). Mặc định 0.</summary>
+        public int cookingProficiency = 0;
     }
 
     [Serializable]
@@ -73,6 +83,8 @@ namespace Game.Core.World
         public double rolledAttack;
         public double rolledDefense;
         public double rolledMaxHealth;
+        /// <summary>Độ bền hiện tại. -1 = chưa thiết lập = đầy (save cũ không có field này). Xem DurabilityRules.</summary>
+        public int durability = -1;
     }
 
     [Serializable]
@@ -87,6 +99,12 @@ namespace Game.Core.World
     {
         public string weapon;
         public string armor;
+        /// <summary>Tay phụ (Dual Wielding). Save cũ không có → null = trống.</summary>
+        public string offHand;
+        /// <summary>Phụ kiện ô 1. Save cũ không có → null = trống.</summary>
+        public string accessory;
+        /// <summary>Phụ kiện ô 2. Save cũ không có → null = trống.</summary>
+        public string accessory2;
     }
 
     [Serializable]

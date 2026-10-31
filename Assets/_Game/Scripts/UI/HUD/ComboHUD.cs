@@ -165,8 +165,6 @@ namespace Game.UI.HUD
             rt.anchoredPosition = new Vector2(-40f, 0f);
             rt.sizeDelta = new Vector2(160f, 90f);
 
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-
             // Text Combo
             GameObject comboObj = new GameObject("Text_Combo", typeof(RectTransform), typeof(Text));
             comboObj.transform.SetParent(container.transform, false);
@@ -176,7 +174,7 @@ namespace Game.UI.HUD
             comboRt.offsetMin = Vector2.zero;
             comboRt.offsetMax = Vector2.zero;
             comboCountText = comboObj.GetComponent<Text>();
-            comboCountText.font = font;
+            UiSkin.ApplyFont(comboCountText, bold: true);
             comboCountText.fontSize = 32;
             comboCountText.fontStyle = FontStyle.Bold;
             comboCountText.alignment = TextAnchor.MiddleRight;
@@ -191,8 +189,8 @@ namespace Game.UI.HUD
             rankRt.offsetMin = Vector2.zero;
             rankRt.offsetMax = Vector2.zero;
             rankBadgeText = rankObj.GetComponent<Text>();
-            rankBadgeText.font = font;
-            rankBadgeText.fontSize = 20;
+            UiSkin.ApplyFont(rankBadgeText, bold: true);
+            rankBadgeText.fontSize = 24;
             rankBadgeText.fontStyle = FontStyle.Bold;
             rankBadgeText.alignment = TextAnchor.MiddleRight;
             rankBadgeText.color = ColorS;

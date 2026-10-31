@@ -11,9 +11,19 @@ namespace Game.UI.HUD
     /// <summary>
     /// HUD CHỈ hiển thị. Mọi phép tính EXP/level nằm ở PlayerProgress (PvE) —
     /// HUD nghe OnExperienceChanged để vẽ thanh EXP + text level.
+    /// Thanh máu theo phong cách SAO: xanh lá khi đầy, vàng khi dưới nửa, đỏ khi nguy kịch.
     /// </summary>
     public class PlayerHUD : MonoBehaviour
     {
+        // Màu thanh máu kiểu SAO (xanh lá -> vàng -> đỏ).
+        private static readonly Color HpGreen = new Color(0.42f, 0.88f, 0.28f, 1f);
+        private static readonly Color HpYellow = new Color(0.98f, 0.80f, 0.16f, 1f);
+        private static readonly Color HpRed = new Color(0.92f, 0.22f, 0.16f, 1f);
+
+        // Tốc độ thanh chạy tới giá trị mới (càng lớn càng nhanh).
+        private const float BarSmoothSpeed = 9f;
+        private const float SnapEpsilon = 0.0005f;
+
         [Header("Bars")]
         [SerializeField] private Image hpBarFill;
         [SerializeField] private Image expBarFill;
@@ -35,6 +45,14 @@ namespace Game.UI.HUD
 
         private int _currentLevel = 1;
 
+        private float _hpTarget = 1f;
+        private float _hpShown = 1f;
+        private bool _hpInitialized;
+
+        private float _expTarget;
+        private float _expShown;
+        private bool _expInitialized;
+
         private void Start()
         {
             EnsureAdvancedCombatHUD();
@@ -44,25 +62,26 @@ namespace Game.UI.HUD
         {
             Canvas canvas = GetComponentInParent<Canvas>();
             if (canvas == null) return;
+            Transform parent = canvas.transform.Find("SafeAreaRoot") ?? canvas.transform;
 
             if (FindFirstObjectByType<ComboHUD>() == null)
             {
                 GameObject comboObj = new GameObject("ComboHUD_Auto", typeof(RectTransform));
-                comboObj.transform.SetParent(canvas.transform, false);
+                comboObj.transform.SetParent(parent, false);
                 comboObj.AddComponent<ComboHUD>();
             }
 
             if (FindFirstObjectByType<Controls.OnScreenUltimateButton>() == null)
             {
                 GameObject ultObj = new GameObject("UltimateButton_Auto", typeof(RectTransform));
-                ultObj.transform.SetParent(canvas.transform, false);
+                ultObj.transform.SetParent(parent, false);
                 ultObj.AddComponent<Controls.OnScreenUltimateButton>();
             }
 
             if (FindFirstObjectByType<Combat.FloatingCombatNoticePresenter>() == null)
             {
                 GameObject noticeObj = new GameObject("FloatingNotice_Auto", typeof(RectTransform));
-                noticeObj.transform.SetParent(canvas.transform, false);
+                noticeObj.transform.SetParent(parent, false);
                 noticeObj.AddComponent<Combat.FloatingCombatNoticePresenter>();
             }
         }
@@ -78,6 +97,23 @@ namespace Game.UI.HUD
         {
             GameEvents.OnHealthChanged -= HandleHealthChanged;
             GameEvents.OnExperienceChanged -= HandleExperienceChanged;
+        }
+
+        private void Update()
+        {
+            float k = 1f - Mathf.Exp(-BarSmoothSpeed * UnityEngine.Time.unscaledDeltaTime);
+
+            if (hpBarFill != null && !Mathf.Approximately(_hpShown, _hpTarget))
+            {
+                _hpShown = Mathf.Abs(_hpTarget - _hpShown) < SnapEpsilon ? _hpTarget : Mathf.Lerp(_hpShown, _hpTarget, k);
+                ApplyHpBar();
+            }
+
+            if (expBarFill != null && !Mathf.Approximately(_expShown, _expTarget))
+            {
+                _expShown = Mathf.Abs(_expTarget - _expShown) < SnapEpsilon ? _expTarget : Mathf.Lerp(_expShown, _expTarget, k);
+                expBarFill.fillAmount = _expShown;
+            }
         }
 
         /// <summary>Do PvEBootstrap gọi — UI không tự đi tìm player.</summary>
@@ -96,11 +132,15 @@ namespace Game.UI.HUD
         {
             if (healthSource != null && !ReferenceEquals(sender, healthSource)) return;
 
-            float ratio = e.Max > 0.0 ? (float)(e.Current / e.Max) : 0f;
+            float ratio = e.Max > 0.0 ? Mathf.Clamp01((float)(e.Current / e.Max)) : 0f;
 
-            if (hpBarFill != null)
+            _hpTarget = ratio;
+            if (!_hpInitialized)
             {
-                hpBarFill.fillAmount = Mathf.Clamp01(ratio);
+                // Lần đầu: gán thẳng, không chạy hiệu ứng từ 100%.
+                _hpInitialized = true;
+                _hpShown = ratio;
+                ApplyHpBar();
             }
 
             if (lowHealthWarning != null)
@@ -117,12 +157,38 @@ namespace Game.UI.HUD
 
         private void HandleExperienceChanged(object sender, ExperienceChangedArgs e)
         {
+            bool leveledUp = e.Level != _currentLevel;
             _currentLevel = e.Level;
             RefreshLevelText();
 
             if (expBarFill == null) return;
-            float ratio = e.Required > 0 ? (float)e.Current / e.Required : 0f;
-            expBarFill.fillAmount = Mathf.Clamp01(ratio);
+            float ratio = e.Required > 0 ? Mathf.Clamp01((float)e.Current / e.Required) : 0f;
+
+            _expTarget = ratio;
+            // Lần đầu, lên cấp hoặc EXP bị trừ: gán thẳng để thanh không chạy lùi.
+            if (!_expInitialized || leveledUp || ratio < _expShown)
+            {
+                _expInitialized = true;
+                _expShown = ratio;
+                expBarFill.fillAmount = ratio;
+            }
+        }
+
+        private void ApplyHpBar()
+        {
+            if (hpBarFill == null) return;
+            hpBarFill.fillAmount = _hpShown;
+            hpBarFill.color = EvaluateHpColor(_hpShown);
+        }
+
+        /// <summary>Xanh lá (&gt;50%) -> vàng (20–50%) -> đỏ (&lt;20%), chuyển màu mượt quanh các ngưỡng.</summary>
+        private static Color EvaluateHpColor(float ratio)
+        {
+            if (ratio >= 0.55f) return HpGreen;
+            if (ratio >= 0.45f) return Color.Lerp(HpYellow, HpGreen, (ratio - 0.45f) / 0.10f);
+            if (ratio >= 0.25f) return HpYellow;
+            if (ratio >= 0.15f) return Color.Lerp(HpRed, HpYellow, (ratio - 0.15f) / 0.10f);
+            return HpRed;
         }
 
         private void RefreshLevelText()

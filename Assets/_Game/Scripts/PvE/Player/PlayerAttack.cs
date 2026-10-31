@@ -73,8 +73,14 @@ namespace Game.PvE.Player
         }
 
         public AttackDefinition Definition => attackDefinition;
-        public bool IsReady => _cooldown != null && _cooldown.IsReady;
+        public bool IsReady => _cooldown != null && _cooldown.IsReady && (playerController == null || !playerController.IsActionLocked);
         public int CurrentComboStep => _currentComboStep;
+
+        /// <summary>
+        /// Kỹ năng Độc Nhất Nhị Đao Lưu (Dual Wielding / Dual Blades theo SAO):
+        /// Cầm 2 kiếm tăng 25% tốc đánh và tăng sát thương combo 3 nhịp.
+        /// </summary>
+        public bool IsDualWielding { get; set; }
 
         public static float ExternalDamageMultiplier { get; set; } = 1.0f;
 
@@ -109,6 +115,24 @@ namespace Game.PvE.Player
         {
             if (playerController == null) TryGetComponent(out playerController);
             _cooldown = new CooldownSystem(this);
+        }
+
+        private void Start()
+        {
+            SyncDualWieldFromInventory();
+        }
+
+        /// <summary>
+        /// Đồng bộ trạng thái Nhị Đao Lưu từ trang bị nếu có PlayerInventory.
+        /// </summary>
+        public void SyncDualWieldFromInventory()
+        {
+            if (TryGetComponent(out Items.PlayerInventory inv) && inv.Equipment != null)
+            {
+                bool hasMain = !string.IsNullOrEmpty(inv.Equipment.GetInstanceId(Game.Core.Items.EquipmentSlot.Weapon));
+                bool hasOff = !string.IsNullOrEmpty(inv.Equipment.GetInstanceId(Game.Core.Items.EquipmentSlot.OffHand));
+                IsDualWielding = DualWieldRules.IsDualWielding(hasMain, hasOff);
+            }
         }
 
         private void OnEnable()
@@ -176,21 +200,21 @@ namespace Game.PvE.Player
                 switch (_currentComboStep)
                 {
                     case 0:
-                        stepMultiplier = 1.0;
-                        stepCooldown = comboStep1Cooldown;
-                        ApplyForwardLunge(comboForwardLunge * 0.4f);
+                        stepMultiplier = IsDualWielding ? DualWieldRules.GetComboMultiplier(0, true) : 1.0;
+                        stepCooldown = DualWieldRules.CalculateAttackCooldown(comboStep1Cooldown, IsDualWielding);
+                        ApplyForwardLunge(comboForwardLunge * (IsDualWielding ? 0.6f : 0.4f));
                         break;
                     case 1:
-                        stepMultiplier = combo2DamageMultiplier;
-                        stepCooldown = comboStep2Cooldown;
-                        ApplyForwardLunge(comboForwardLunge * 0.8f);
+                        stepMultiplier = IsDualWielding ? DualWieldRules.GetComboMultiplier(1, true) : combo2DamageMultiplier;
+                        stepCooldown = DualWieldRules.CalculateAttackCooldown(comboStep2Cooldown, IsDualWielding);
+                        ApplyForwardLunge(comboForwardLunge * (IsDualWielding ? 1.0f : 0.8f));
                         break;
                     case 2:
-                        stepMultiplier = combo3DamageMultiplier;
-                        stepCooldown = comboStep3Cooldown;
-                        hitboxRadius *= combo3RadiusMultiplier;
-                        ApplyForwardLunge(comboForwardLunge * 1.2f);
-                        Camera.CameraFollow.RequestShake(0.16f, 0.18f);
+                        stepMultiplier = IsDualWielding ? DualWieldRules.GetComboMultiplier(2, true) : combo3DamageMultiplier;
+                        stepCooldown = DualWieldRules.CalculateAttackCooldown(comboStep3Cooldown, IsDualWielding);
+                        hitboxRadius *= combo3RadiusMultiplier * (IsDualWielding ? 1.15f : 1.0f);
+                        ApplyForwardLunge(comboForwardLunge * (IsDualWielding ? 1.5f : 1.2f));
+                        Camera.CameraFollow.RequestShake(IsDualWielding ? 0.22f : 0.16f, IsDualWielding ? 0.25f : 0.18f);
                         break;
                 }
             }

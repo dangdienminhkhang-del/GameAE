@@ -41,7 +41,7 @@ namespace Game.PvE.Dodge
         public event EventHandler OnDodgeBlocked;
 
         public bool IsDodging          => _state == DodgeState.Dodging || _state == DodgeState.Recovery;
-        public bool IsReady            => _state == DodgeState.Idle && _cooldown != null && _cooldown.IsReady;
+        public bool IsReady            => _state == DodgeState.Idle && _cooldown != null && _cooldown.IsReady && (playerController == null || !playerController.IsActionLocked);
         public float CooldownRemaining => _cooldown != null ? _cooldown.Remaining : 0f;
         public float CooldownTotal     => definition != null ? definition.CooldownSeconds : 0f;
 

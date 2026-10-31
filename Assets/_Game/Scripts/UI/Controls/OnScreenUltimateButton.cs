@@ -91,7 +91,7 @@ namespace Game.UI.Controls
                 if (_bgImage != null)
                 {
                     // Khi chưa đầy nộ: hiển thị mờ dịu mắt, không chói lóa
-                    _bgImage.color = new Color(0.6f, 0.65f, 0.7f, 0.55f);
+                    _bgImage.color = new Color(0.5f, 0.5f, 0.5f, 0.75f);
                 }
             }
         }
@@ -113,13 +113,13 @@ namespace Game.UI.Controls
                 {
                     labelText.text = "NỘ!";
                     labelText.color = new Color(1f, 0.95f, 0.4f, 1f);
-                    labelText.fontSize = 13;
+                    labelText.fontSize = 28;
                 }
                 else if (ratio > 0.05f)
                 {
                     labelText.text = $"{Mathf.FloorToInt(_controller.CurrentAdrenaline)}%";
                     labelText.color = new Color(0.85f, 0.9f, 1f, 0.85f);
-                    labelText.fontSize = 11;
+                    labelText.fontSize = 24;
                 }
                 else
                 {
@@ -141,29 +141,51 @@ namespace Game.UI.Controls
             }
         }
 
-        private void BuildRuntimeUI()
+                private void BuildRuntimeUI()
         {
             RectTransform rt = GetComponent<RectTransform>();
             if (rt == null) rt = gameObject.AddComponent<RectTransform>();
 
-            // Đặt cân đối phía trên vòng cung kỹ năng (không che khuất bình thuốc hay joystick)
+            // Đặt cân đối trong cụm chiến đấu (Gói U2: >= 140x140, cách góc <= 620px)
             rt.anchorMin = new Vector2(1f, 0f);
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(-205f, 215f);
-            rt.sizeDelta = new Vector2(48f, 48f);
+            rt.anchoredPosition = new Vector2(-465f, 290f);
+            rt.sizeDelta = new Vector2(144f, 144f);
 
             button = gameObject.AddComponent<Button>();
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+            colors.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+            colors.selectedColor = Color.white;
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.75f);
+            button.colors = colors;
+
             _bgImage = gameObject.AddComponent<Image>();
 
-            // Nạp sprite icon Tuyệt Kỹ hình tròn pixel-art
-            Sprite ultSprite = Resources.Load<Sprite>("UISkin/Icon_Ultimate") ?? Resources.Load<Sprite>("UISkin/UI_Button");
-            if (ultSprite != null)
+            // Nạp khung vòng hành động ActionRing_M cho Ultimate (kích thước 144)
+            Sprite ringSprite = Resources.Load<Sprite>("UISkin/UI_ActionRing_M") ?? Resources.Load<Sprite>("UISkin/UI_Button");
+            if (ringSprite != null)
             {
-                _bgImage.sprite = ultSprite;
+                _bgImage.sprite = ringSprite;
             }
-            _bgImage.color = new Color(0.6f, 0.65f, 0.7f, 0.55f);
+            _bgImage.color = new Color(0.5f, 0.5f, 0.5f, 0.75f);
             glowGraphic = _bgImage;
+
+            // Icon con Tuyệt Kỹ nằm TRÊN vòng, kích thước 96x96
+            GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconObj.transform.SetParent(transform, false);
+            RectTransform iconRt = iconObj.GetComponent<RectTransform>();
+            iconRt.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRt.pivot = new Vector2(0.5f, 0.5f);
+            iconRt.anchoredPosition = Vector2.zero;
+            iconRt.sizeDelta = new Vector2(96f, 96f);
+            Image iconImg = iconObj.GetComponent<Image>();
+            iconImg.sprite = Resources.Load<Sprite>("UISkin/Icon_Ultimate");
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
 
             // Vòng tiến độ xoay tròn bao quanh nút (Circular Progress Ring)
             GameObject fillObj = new GameObject("FillRing", typeof(RectTransform), typeof(Image));
@@ -171,14 +193,14 @@ namespace Game.UI.Controls
             RectTransform fillRt = fillObj.GetComponent<RectTransform>();
             fillRt.anchorMin = Vector2.zero;
             fillRt.anchorMax = Vector2.one;
-            fillRt.offsetMin = new Vector2(-3f, -3f);
-            fillRt.offsetMax = new Vector2(3f, 3f);
+            fillRt.offsetMin = Vector2.zero;
+            fillRt.offsetMax = Vector2.zero;
             fillImage = fillObj.GetComponent<Image>();
 
-            Sprite ringSprite = Resources.Load<Sprite>("UISkin/Icon_UltimateRing");
-            if (ringSprite != null)
+            Sprite fillSprite = Resources.Load<Sprite>("UISkin/Icon_UltimateRing") ?? Resources.Load<Sprite>("UISkin/UI_Cooldown");
+            if (fillSprite != null)
             {
-                fillImage.sprite = ringSprite;
+                fillImage.sprite = fillSprite;
             }
             fillImage.type = Image.Type.Filled;
             fillImage.fillMethod = Image.FillMethod.Radial360;
@@ -189,17 +211,17 @@ namespace Game.UI.Controls
             fillImage.raycastTarget = false;
             fillImage.enabled = false;
 
-            // Nhãn % nộ khí nhỏ gọn đặt phía dưới nút
+            // Nhãn % nộ khí rõ nét đặt trên nút
             GameObject textObj = new GameObject("Label", typeof(RectTransform), typeof(Text));
             textObj.transform.SetParent(transform, false);
             RectTransform textRt = textObj.GetComponent<RectTransform>();
-            textRt.anchorMin = new Vector2(0f, -0.4f);
-            textRt.anchorMax = new Vector2(1f, 0.1f);
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
             textRt.offsetMin = Vector2.zero;
             textRt.offsetMax = Vector2.zero;
             labelText = textObj.GetComponent<Text>();
-            labelText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            labelText.fontSize = 11;
+            UiSkin.ApplyFont(labelText, bold: true);
+            labelText.fontSize = 24;
             labelText.fontStyle = FontStyle.Bold;
             labelText.alignment = TextAnchor.MiddleCenter;
             labelText.color = new Color(0.85f, 0.9f, 1f, 0.85f);

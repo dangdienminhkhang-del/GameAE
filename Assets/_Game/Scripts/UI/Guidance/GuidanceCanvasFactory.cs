@@ -1,3 +1,4 @@
+using Game.UI.Common;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ namespace Game.UI.Guidance
     {
         public const int ToastSortingOrder = 900;
         public const int ArrowSortingOrder = 800;
-        public static readonly Vector2 ReferenceResolution = new Vector2(1920f, 1080f);
+        public static readonly Vector2 ReferenceResolution = UiLayoutConstants.ReferenceResolution;
 
         public static Canvas Create(Transform parent, string name, int sortingOrder)
         {
@@ -24,9 +25,9 @@ namespace Game.UI.Guidance
 
             var scaler = go.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = ReferenceResolution;
+            scaler.referenceResolution = UiLayoutConstants.ReferenceResolution;
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = UiLayoutConstants.MatchWidthOrHeight;
 
             // Không có GraphicRaycaster: hướng dẫn không bao giờ nhận hay chặn cảm ứng.
             return canvas;
