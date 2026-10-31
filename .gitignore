@@ -86,3 +86,21 @@ __pycache__/
 
 # Local logs
 *.log
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local logs
+*.log
+
+# Unity scene backups
+Assets/ScenesBackup/
+
+# UI backups
+_UIBackup_before_redraw/
+
+# Local probe logs
+AgentScripts/probe_log.txt
+
+# Screenshots
+Screenshots/
